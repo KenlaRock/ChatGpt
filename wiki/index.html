@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Story Wiki</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #111111;
+      --accent: #22d3ee;
+      --sidebar-bg: #f0f0f0;
+    }
+    body.dark {
+      --bg: #111111;
+      --fg: #f0f0f0;
+      --sidebar-bg: #222222;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background: var(--sidebar-bg);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    #container {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+    nav {
+      width: 250px;
+      overflow-y: auto;
+      background: var(--sidebar-bg);
+      padding: 1rem;
+    }
+    nav ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    nav a {
+      color: inherit;
+      text-decoration: none;
+      display: block;
+      padding: 0.25rem 0;
+    }
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+    }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <button id="theme-toggle">Tema</button>
+    <label>Reveal
+      <select id="reveal-select">
+        <option value="1">R1</option>
+        <option value="2">R2</option>
+        <option value="3">R3</option>
+        <option value="4">R4</option>
+      </select>
+    </label>
+    <input id="search" type="search" placeholder="Sök" />
+    <button id="export">Exportera</button>
+  </header>
+  <div id="container">
+    <nav id="sidebar"></nav>
+    <main id="content">
+<h1>Wiki Content Export (v1.1.0)</h1>
+<h2>Features</h2>
+<ul>
+<li>Sidebar/Tree: yes</li>
+<li>Search: yes</li>
+<li>Theme Toggle: yes</li>
+<li>Reveal Controls: yes</li>
+<li>Export (PDF/HTML): yes</li>
+<li>Mindmap/SVG: yes</li>
+<li>QA/Manifest: yes</li>
+</ul>
+<h2>Hem / Introduktion</h2>
+<h3>Välkommen</h3>
+<p>Single‑file · Ingen build · Offline‑vänlig
+Detta är en
+körbar HTML‑wiki
+med
+tema‑växling
+,
+snygga animationer
+, WCAG AA och tangentbordsstöd. Kopiera detta dokument och byt/duplicera</p>
+<article data-title="...">
+för fler sidor.
+<article data-title="...">
+
+<h3>Funktioner</h3>
+<p>Autogenererad sidopanel (trädhierarki upp till nivå 4)
+Smidig expand/kolaps + markerad aktiv sida
+Sökning i
+sidtitlar
+(tryck
+/
+)
+Tema‑toggle (mörk/ljust) sparas lokalt
+Reveal‑nivå (R1→R4) för lore hygiene
+Exportknapp som laddar ner aktuell HTML</p>
+<h3>Språkpolicy</h3>
+<p>Lore = engelska
+(profetic voice).
+Process = svenska
+(tekniskt, tydligt).</p>
+<h2>Reveal Map (R1→R4)</h2>
+<h3>Reveal Map</h3>
+<p>Lore hygiene
+Use the
+Reveal level
+selector to control what is visible:
+R1
+keeps early mysteries intact.
+R3
+–
+R4
+unlocks
+The Cipher
+references.
+Void Glyph
+must never co‑exist with
+The Cipher
+within the same view.</p>
+<h3>Rules</h3>
+<p>Cipher
+allowed only in
+R3–R4
+.
+Void Glyph
+never shown together with Cipher.
+Follow the tone: Vega = ethereal clarity → prophetic wrath; Icarus = fatalist → self‑sacrifice.</p>
+<h2>Lore Bible / Reader’s Cut</h2>
+<h3>Core Narrative — Reader’s Cut</h3>
+<p>Lore · EN
+In the hush before the first omen, a child remembers fire as if it were a language.
+The world misremembers Icarus, but the wound does not. A girl walks out of the crater without a name and wears the sky like a borrowed voice.</p>
+<h3>Promise</h3>
+<p>The story promises a clash between memory and erasure. Symbols are stolen from history and hidden in a hall of last marks.</p>
+<h3>Tone</h3>
+<p>Prophetic, cinematic, restrained. Exposition remains withheld until it burns.</p>
+<h2>Scener / Kronologi</h2>
+<h3>Kronologisk Scensekvens</h3>
+<p>Process · SV</p>
+<h3>Prolog</h3>
+<p>Illustrerat intro – Ikarosmyten.
+Röst: “...or did he?” Stil: animatic, chiaroscuro, 35mm. Symbolik: myten presenteras som möjlig lögn.</p>
+<h3 data-reveal="R1">Nedslag (R1)</h3>
+<p>Scen 2:
+Stjärnan faller över byn. Kameran: låg vinkel, långsam push-in. Ljus: kall cyan mot mörk himmel.
+Scen 3:
+Kraterns rök. Barnet reser sig. Ljud: lågfrekvent drön + aska som viskar.
+Scen 4:
+Barnet vandrar förbi åskådare. Ingen symbolik exponeras.</p>
+<h3 data-reveal="R2">Mellanakt (R2)</h3>
+<p>Scen 7:
+Fält av rost. Vega rör saker som minns mer än människor.
+Scen 9:
+Icarus observerar på avstånd (ögonens glöd överger skuggor). Ingen Cipher ännu.</p>
+<h3 data-reveal="R3">Uppvaknande (R3)</h3>
+<p>Scen 12:
+Vega ser världen som vektorer. Cyanen blir riktning, inte färg.
+Scen 14:
+Första
+tillåtna
+antydan av
+Cipher
+i miljön (bakgrundsdetalj, ej fokus).</p>
+<h3 data-reveal="R3">Konfrontation (R3→R4)</h3>
+<p>Scen 18:
+Hall of Last Marks. Väggar: förvisade insignier. Icarus bär ett trasigt V.
+Scen 19:
+Växling: Vega talar som stjärna (hot till Icarus). Kamera: låg vinkel, statisk ram, andningspauser.</p>
+<h3 data-reveal="R4">Klimax (R4)</h3>
+<p>Scen 24:
+Valet. En symbol tas ur världen, och ett helt minnesnät faller.</p>
+<h3>Filmisk notation</h3>
+<p>Kamera: 35mm | shallow DOF | low angle. Dutch tilt endast i kris.
+Ljus: cyan rim (Vega), ember bounce (Icarus).
+Ljud/VO: återhållen bas; röster med andningsrum.</p>
+<h3>S01 — Starwell &amp; Scar</h3>
+<p>Vega in the starwell; the scar is visible, its
+origin hidden
+.</p>
+<h3>S50 — Monologue of Death</h3>
+<p>Icarus ritualistically erases the glyphs; each erasure resonates the Void.</p>
+<h3>S90 — The Binding</h3>
+<p>The two are bound by the Cipher; first allowable evidence appears here.</p>
+<h3>0717 — Sacrifice &amp; Sibling Bond</h3>
+<p>Icarus’ sacrifice; the true nature of the bond fully revealed.</p>
+<h2>Symboler / Glyph‑lexikon</h2>
+<h3>Symbollexikon</h3>
+<h3>Scar</h3>
+<p>Visible wound that refuses closure. A reminder, not a memory.</p>
+<h3>Brand</h3>
+<p>Ownership declared by fire; allegiance cut into matter.</p>
+<h3>Sigil</h3>
+<p>Permission symbol; opens a door only once.</p>
+<h3>Void Glyph</h3>
+<p>Abyssal sign. If Cipher is present in view, Void must be suppressed.</p>
+<h3>The Cipher</h3>
+<p>A convergent mark of meaning and lie.
+R3+
+only.</p>
+<h2>Karaktärer</h2>
+<h3>Characters</h3>
+<h3>Icarus</h3>
+<p>Wound:
+skuld över ett falskt arv (myten som kedja).
+Want:
+kontrollera historien genom att ta dess märken.
+Need:
+släppa kontrollen; låta sanningen göra honom mindre.
+Visual:
+ember‑ton, trasigt V, ögon som bär glöd i skugga.
+Voice DNA:
+lågmäld, exakt, som någon som mäter sitt eget slut.</p>
+<h3>Vega</h3>
+<p>Wound:
+ingen bakgrund att försvara—därav renhet, inte oskuld.
+Want:
+bli hel; förstå varför världen saknar ett tecken.
+Need:
+acceptera att hon själv är tecknet.
+Visual:
+cyan rim, damm i luften som stjärnrester; senare “Cyan Star”.
+Voice DNA:
+eterisk klarhet → profetisk vrede.</p>
+<h2>Visuell &amp; Filmisk Grammatik</h2>
+<h3>Visual &amp; Cinematic Grammar</h3>
+<p>Kamera: 35mm, shallow DOF, low‑angle variants (Dutch tilt reserved for crisis).
+Ljus: chiaroscuro; cyan rim for Vega; ember bounce for Icarus.
+Färg: Cyan (#22d3ee) vs Amber (#f59e0b) — avoid simultaneous hard clash unless narratively earned.</p>
+<h3>Översikt &amp; principer</h3>
+<p>Grammatik som styr bild, ljus, färg och ljud per narrativ båge. Tokens följer vårt designsystem (Vega Cyan rim, Icarus Ember highlight) och ska hålla WCAG‑AA.</p>
+<h3>Intent‑matris (per arc &amp; reveal)</h3>
+<h2>Promptbibliotek</h2>
+<h3>Promptbibliotek</h3>
+<h3>SeaArt · FLUX (still)</h3>
+<p>model: FLUX Pro
+camera: 35mm | low angle | shallow DOF
+lighting: chiaroscuro | cyan rim (Vega) | ember bounce (Icarus)
+style: mythpunk realism | cinematic
+lore_hygiene: no Cipher before R3 | never with Void</p>
+<h3>Runway · Gen‑4 (video)</h3>
+<p>subject: girl rises from crater (no symbol overlays)
+move: slow push‑in | dust motes
+grade: teal‑orange subtle | film grain 20%
+safety: no Cipher until R3</p>
+<h3>Regler &amp; hygien</h3>
+<p>Ingen
+Cipher
+före
+R3
+.
+Cipher
+Void
+får aldrig vara i samma vy som
+Cipher
+.
+WCAG‑AA: varna om kontrast faller under 4.5:1.
+Respektera Reduce Motion i alla klipp.</p>
+<h3>Shortcuts (klicka för att kopiera)</h3>
+<p>vega:rimlight
+— Vega cyan rim, soft falloff.
+icarus:ember
+— Icarus ember key, warm edge.
+void:echo
+— low‑end resonance, negative space.
+cipher:reveal
+— dual gradients; interlock motif.
+Kopieras till urklipp; Cipher‑shortcut visas först i R3.</p>
+<h3>Still‑prompts</h3>
+<p>cinematic portrait, 35mm look, low angle, vega:rimlight, icarus:ember, dark scene design, high contrast, wcag-aa compliant
+cinematic portrait, 35mm look, low angle, vega:rimlight, icarus:ember, dark scene design, high contrast, wcag-aa compliant
+wide shot, negative space, void:echo, cyan rim light on Vega, warm ember highlight on Icarus, no cipher motifs
+wide shot, negative space, void:echo, cyan rim light on Vega, warm ember highlight on Icarus, no cipher motifs
+two subjects, binding motif, subtle interlock shapes, cipher:reveal, balanced cyan/ember palette, stable camera
+two subjects, binding motif, subtle interlock shapes, cipher:reveal, balanced cyan/ember palette, stable camera</p>
+<h3>Video‑prompts</h3>
+<p>slow dolly-in, 35mm, grounded movement, vega:rimlight, reduce-motion safe, subtle breathing SFX
+slow dolly-in, 35mm, grounded movement, vega:rimlight, reduce-motion safe, subtle breathing SFX
+two-shot stabilization, cipher:reveal accents, color balance cyan/ember, no rapid cuts
+two-shot stabilization, cipher:reveal accents, color balance cyan/ember, no rapid cuts</p>
+<h2>Process &amp; Web</h2>
+<h3>Metaprocess &amp; Web</h3>
+<p>Exportflöde: HTML (single‑file) → ZIP → (valfritt) PDF snapshots
+WCAG AA: kontrast, fokus, landmarks, reducerad rörelse
+CI‑check: nodräkning, maxdjup ≤4, orphans=0, conflicts</p>
+<h3>WCAG‑AA (Minimum)</h3>
+<p>Kontrast ≥ 4.5:1 på text/ikoner.
+Tydliga fokusstilar; fokusfälla i modaler; ESC/backdrop stänger och return‑focus.
+Reduce‑motion respekteras (ingen parallax; dur 120–200ms; stagger ≤40ms).
+ARIA‑landmarks och sök (’/’ → role=search/listbox).</p>
+<h3>CI/QA‑mått</h3>
+<p>Mindmap maxdjup ≤4; orphans = 0.
+Dubblett‑ID = 0; brutna ankare = 0.
+Reveal‑brott = 0 (Cipher &lt; R3; Void + Cipher i samma vy).
+Locale‑policy OK (lore=en, process=sv).
+Kör QA nu</p>
+<h3>Exportprotokoll</h3>
+<p>Kör QA → om fel: åtgärda tills 0.
+Beräkna SHA‑256 på dokumentet (för manifest.hash.doc).
+Exportera ZIP (index.html + manifest.json).</p>
+<h3>Print‑preflight</h3>
+<p>Välj reveal‑nivå för utskrift och frys animationer:
+Preflight kör QA, uppdaterar cover/TOC och sätter
+reduce‑motion
+för själva utskriften.</p>
+<h2>Reader’s Cut / Core Narrative</h2>
+<h3>Core Narrative — Reader’s Cut</h3>
+<p>Lore · EN
+In the hush before the first omen, a child remembers fire as if it were a language. The world misremembers Icarus; the wound does not. A cyan star falls. A nameless girl walks out of a crater and wears the sky like a borrowed voice.</p>
+<h3>Premise</h3>
+<p>Icarus, now the
+Kaiser of Insignias
+, has learned to steal symbols from history and hide them in a hall of last marks. When a star becomes a girl—
+Vega
+—the hoarded past starts to burn through the present. The story is a duel between memory and erasure.</p>
+<h3>Promise</h3>
+<p>Revelations arrive in controlled stages (R1→R4); mystery is preserved until it matters.
+Symbols behave like physics: they have cost, inertia and fallout.
+The ending will wound with purpose: sacrifice measured against genesis.</p>
+<h3>Tone &amp; Aesthetic</h3>
+<p>Prophetic restraint; cinematic minimalism; chiaroscuro lighting.
+Vega = ethereal clarity → prophetic wrath. Icarus = fatalist → self‑sacrifice.</p>
+<h3>Arcs</h3>
+<p>Isolation
+— The world refuses what it cannot name.
+Confrontation
+— Wounds are read as maps.
+Awakening
+— The sky remembers its body.
+Duality
+— Two halves of one system drift into orbit.
+Climax
+— The chamber of last marks opens; a choice erases a century.</p>
+<h3>Reveal Hygiene</h3>
+<p>Cipher
+allowed only in
+R3–R4
+.
+Void Glyph
+must never coexist with Cipher in the same view.</p>
+<h2>Mindmap / Tree (SVG)</h2>
+<h3>Mindmap — Story Wiki (SVG)</h3>
+<p>IA · Maxdjup ≤4 · Orphans=0
+Tips: Mindmapen är klickbar (hoppar till respektive sektion). Strukturen hålls till maxdjup ≤4 och orphans=0.</p>
+    </main>
+  </div>
+  <script>
+    // Build sidebar
+    const content = document.getElementById('content');
+    const sidebar = document.getElementById('sidebar');
+    function buildSidebar() {
+      const headings = content.querySelectorAll('h1, h2, h3, h4');
+      const ul = document.createElement('ul');
+      headings.forEach(h => {
+        const id = h.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        if (!h.id) h.id = id;
+        const li = document.createElement('li');
+        li.style.marginLeft = (parseInt(h.tagName[1]) - 1) * 10 + 'px';
+        const a = document.createElement('a');
+        a.href = '#' + h.id;
+        a.textContent = h.textContent;
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
+      sidebar.appendChild(ul);
+    }
+    buildSidebar();
+
+    // Search in sidebar
+    const search = document.getElementById('search');
+    search.addEventListener('input', () => {
+      const term = search.value.toLowerCase();
+      sidebar.querySelectorAll('a').forEach(a => {
+        a.parentElement.hidden = !a.textContent.toLowerCase().includes(term);
+      });
+    });
+
+    // Theme toggle
+    const toggle = document.getElementById('theme-toggle');
+    const body = document.body;
+    const theme = localStorage.getItem('theme');
+    if (theme === 'dark') body.classList.add('dark');
+    toggle.addEventListener('click', () => {
+      body.classList.toggle('dark');
+      localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
+    });
+
+    // Reveal control
+    const revealSelect = document.getElementById('reveal-select');
+    function applyReveal() {
+      const level = parseInt(revealSelect.value, 10);
+      content.querySelectorAll('[data-reveal]').forEach(el => {
+        const r = parseInt(el.getAttribute('data-reveal').replace('R',''), 10);
+        const hide = r > level;
+        el.hidden = hide;
+        let sib = el.nextElementSibling;
+        while (sib && !/^H[1-4]$/.test(sib.tagName)) {
+          sib.hidden = hide;
+          sib = sib.nextElementSibling;
+        }
+      });
+    }
+    revealSelect.addEventListener('change', applyReveal);
+    applyReveal();
+
+    // Export current HTML
+    document.getElementById('export').addEventListener('click', () => {
+      const blob = new Blob([document.documentElement.outerHTML], {type: 'text/html'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'wiki.html';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>
