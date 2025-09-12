@@ -391,6 +391,22 @@ Tips: Mindmapen är klickbar (hoppar till respektive sektion). Strukturen hålls
   ]
 };
 
+function sanitizeHtml(html) {
+  const template = document.createElement('template');
+  template.innerHTML = html;
+  template.content
+    .querySelectorAll('script, iframe, object, embed')
+    .forEach(el => el.remove());
+  template.content.querySelectorAll('*').forEach(el => {
+    [...el.attributes].forEach(attr => {
+      if (attr.name.startsWith('on')) {
+        el.removeAttribute(attr.name);
+      }
+    });
+  });
+  return template.innerHTML;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const container = document.getElementById('app');
   data.articles.forEach(article => {
@@ -407,7 +423,7 @@ document.addEventListener('DOMContentLoaded', () => {
       h3.textContent = section.h2;
       secEl.appendChild(h3);
       const content = document.createElement('div');
-      content.innerHTML = section.html;
+      content.innerHTML = sanitizeHtml(section.html);
       secEl.appendChild(content);
       artEl.appendChild(secEl);
     });
