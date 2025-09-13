@@ -2,6 +2,8 @@ name: netlify-deploy
 on:
   push:
     branches: [ main, File-Viewer-App ]
+permissions:
+  contents: read
 jobs:
   deploy:
     runs-on: ubuntu-latest
