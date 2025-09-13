@@ -18,6 +18,7 @@ npm install
 ## Netlify
 Pushes to `main` or `File-Viewer-App` deploy via GitHub Actions.
 Set `NETLIFY_AUTH_TOKEN` in repository secrets for deployment.
+The build environment is pinned to Node.js 20 in `netlify.toml`.
 
 ## Contributing
 1. Fork and clone the repo.
