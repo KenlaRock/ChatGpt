@@ -16,7 +16,6 @@ npm install
 - `npm test` – run unit tests with Jest
 - `npm run build` – generate deployment artifacts in `dist/`:
   - `app.html` – single-file SPA
-  - `app.js` and `app.css`
   - `README.md`, `CHANGELOG.md`, `QA-rapport.md`
   - `app.zip` containing the above
 
