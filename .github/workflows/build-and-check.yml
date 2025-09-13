@@ -4,9 +4,14 @@ on:
     branches: [ main, File-Viewer-App ]
   pull_request:
     branches: [ main ]
+permissions:
+  contents: read
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
