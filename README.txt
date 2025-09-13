@@ -1,1 +1,0 @@
-Samples for quick testing. Includes UTF-8/ÅÄÖ content.

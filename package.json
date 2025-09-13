@@ -4,6 +4,9 @@
   "private": true,
   "scripts": {
     "build": "echo 'no build step defined'",
-    "test": "echo 'no tests specified'"
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }
