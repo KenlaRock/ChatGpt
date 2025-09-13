@@ -15,9 +15,9 @@ npm install
 ## Scripts
 - `npm test` – run unit tests with Jest
 - `npm run build` – generate deployment artifacts in `dist/`:
-  - `app.html` – single-file SPA
-  - `README.md`, `CHANGELOG.md`, `QA-rapport.md`
-  - `app.zip` containing the above
+  - `dist/app.html` – single-file SPA
+  - `dist/README.md`, `dist/CHANGELOG.md`, `dist/QA-rapport.md`
+  - `dist/app.zip` containing the above
 
 ## Netlify
 Pushes to `main` or `File-Viewer-App` deploy via GitHub Actions.
