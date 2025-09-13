@@ -7,6 +7,7 @@
 - Integrerat undo/redo‑stack (≥200 steg) och IndexedDB‑baserade snapshots i slutversionen.
 - Sammanfört alla förbättringar från M4: prestanda‑/minnesvakt, export‑spärr vid valideringsfel, mindmap med pan/zoom, förbättrad a11y och stabiliserad UI.
 - Uppdaterat README, QA‑rapport och övrig dokumentation för slutleveransen.
+- README kompletterad med Netlify‑statusbadge och detaljerad lista över build‑artefakter.
 
 ## 2025-09-11 23:50:00 — M4 (QA & härdning)
 - Lagt till prestanda‑ och minnesvakt som varnar vid mycket stora dataset och stoppar export tills Force export bekräftas.

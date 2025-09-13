@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "rm -rf dist && mkdir dist && cp app.html app.js app.css README.md CHANGELOG.md QA-rapport.md dist/",
+    "build": "rm -rf dist && mkdir dist && cp app.html app.js app.css README.md CHANGELOG.md QA-rapport.md dist/ && cd dist && zip -q app.zip app.html app.js app.css README.md CHANGELOG.md QA-rapport.md && cd ..",
     "test": "jest"
   },
   "devDependencies": {

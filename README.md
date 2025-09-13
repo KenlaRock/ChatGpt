@@ -1,5 +1,5 @@
 # Data Viewer & Converter v2.2
-[![Netlify Status](https://api.netlify.com/api/v1/badges/679b85e1-7631-44b3-a3af-72d258120832/deploy-status)](https://app.netlify.com/projects/conceptvangard/deploys)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/679b85e1-7631-44b3-a3af-72d258120832/deploy-status)](https://app.netlify.com/sites/conceptvangard/deploys)
 
 Single-file web app for viewing and converting data between JSON, XML, YAML, CSV, Markdown and HTML.
 
@@ -14,7 +14,11 @@ npm install
 
 ## Scripts
 - `npm test` – run unit tests with Jest
-- `npm run build` – generate `dist/app.html` and supporting files in `dist/` for deployment
+- `npm run build` – generate deployment artifacts in `dist/`:
+  - `app.html` – single-file SPA
+  - `app.js` and `app.css`
+  - `README.md`, `CHANGELOG.md`, `QA-rapport.md`
+  - `app.zip` containing the above
 
 ## Netlify
 Pushes to `main` or `File-Viewer-App` deploy via GitHub Actions.
