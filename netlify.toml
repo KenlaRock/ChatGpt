@@ -1,12 +1,13 @@
-[[redirects]]
-  from = "/old-path"
-  to = "/new-path"
-  status = 301
-  force = false
-  query = {path = ":path"} # apply this rule for /old-path?path=example
-  conditions = {Language = ["en","es"], Country = ["US"]}
+[build]
+  publish = "dist"
+  command = "echo static-build"
+
+[[headers]]
+  for = "/app.html"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self' blob: data:; img-src 'self' blob: data:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; script-src 'self' 'unsafe-inline' blob:; worker-src 'self' blob:; connect-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'self'"
 
 [[redirects]]
-  from = "/news"
-  to = "/blog"
-  status = 301
+  from = "/*"
+  to = "/app.html"
+  status = 200
