@@ -13,7 +13,7 @@ npm install
 
 ## Scripts
 - `npm test` – run unit tests with Jest
-- `npm run build` – placeholder build step
+- `npm run build` – generate `dist/` with app assets for deploy
 
 ## Netlify
 Pushes to `main` or `File-Viewer-App` deploy via GitHub Actions.
