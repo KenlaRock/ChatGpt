@@ -509,8 +509,16 @@ qs('#btnPaste').onclick = async () => {
   if (manual) handleText(manual);
 };
 qs('#btnSample').onclick= ()=>{ const sample={name:'Signe', score:99.5, tags:['alpha','beta'], nested:{key:'värde', flag:true}}; handleText(JSON.stringify(sample,null,2)); };
-['dragenter','dragover'].forEach(ev=> qs('#dropHost').addEventListener(ev, e=>{ e.preventDefault(); highlight(true); }));
-['dragleave','drop'].forEach(ev=> qs('#dropHost').addEventListener(ev, e=>{ e.preventDefault(); if(ev.type==='drop'){ return; } highlight(false); }));
+['dragenter','dragover'].forEach(ev =>
+  qs('#dropHost').addEventListener(ev, e => {
+    e.preventDefault();
+    highlight(true);
+  }));
+qs('#dropHost').addEventListener('dragleave', e => {
+  e.preventDefault();
+  highlight(false);
+});
+qs('#dropHost').addEventListener('drop', handleDrop);
 qsa('.preset').forEach(b=> b.onclick=()=> applyPreset(b.dataset.preset));
 qs('#btnValidate').onclick=()=>{ let schemaText = qs('#schemaBox').value.trim(); if(!schemaText){ qs('#valBadge').textContent='Inget schema'; return; } try{ const schema=JSON.parse(schemaText); const errs = validateAgainst(schema, state.parsed); if(errs.length){ qs('#valBadge').textContent=errs.length+' fel'; qs('#valBadge').style.color='#ffd166'; qs('#badgeStatus').textContent='Valideringsfel: '+errs[0]; } else { qs('#valBadge').textContent='OK'; qs('#valBadge').style.color='#58d68d'; } }catch(e){ qs('#valBadge').textContent='Ogiltigt schema'; qs('#badgeStatus').textContent='Schema-parse-fel'; } };
 qs('#btnUndo').onclick=undo; qs('#btnRedo').onclick=redo;
