@@ -206,9 +206,7 @@ function renderSnapList(items){ const host=qs('#snapList'); host.innerHTML=''; i
 // Parsing Worker
 const parserWorkerCode = `self.onmessage = async (e)=>{ const { text } = e.data; const ret={ ok:true, format:'text', info:{}, data:null, raw:text }; function tryJSON(){ try{ const o=JSON.parse(text); ret.format='json'; ret.data=o; ret.info.mode='JSON'; return true; }catch{ return false; } } function tryXML(){ try{ const p=new DOMParser(); const doc=p.parseFromString(text,'application/xml'); if(doc.getElementsByTagName('parsererror').length) return false; const toObj=(node)=>{ const o={ name: node.nodeName }; if(node.attributes && node.attributes.length){ o.attrs={}; for(const a of node.attributes) o.attrs[a.name]=a.value; } const kids=[...node.childNodes].filter(n=>n.nodeType===1); const texts=[...node.childNodes].filter(n=>n.nodeType===3).map(n=>n.nodeValue.trim()).filter(Boolean); if(texts.length) o.text=texts.join(' '); if(kids.length) o.children=kids.map(toObj); return o; }; ret.format='xml'; ret.info.mode='XML'; ret.data=toObj(doc.documentElement); return true; }catch{ return false; } } function tryCSV(){ try{ const lines=text.split(/
 ?
-/).filter(l=>l.trim().length>0); if(lines.length<1) return false; const sep=(lines[0].includes(';')&&!lines[0].includes(','))?';':','; const hdr=lines[0].split(sep).map(s=>s.trim()); const rows=lines.slice(1).map(l=>{ const cols=l.split(sep); const o={}; hdr.forEach((h,i)=> o[h]=cols[i]!==undefined?cols[i].trim():'' ); return o; }); if(hdr.length===1 && rows.length===0) return false; ret.format='csv'; ret.info.mode='CSV('+sep+')'; ret.data=rows; return true; }catch{ return false; } } function tryYAML(){ const looks=/^\s*\w[\w-]*\s*:\s*.+/m.test(text); if(!looks) return false; const obj={}; const lines=text.split(/
-?
-/); for(const line of lines){ const m=line.match(/^\s*([\w-]+)\s*:\s*(.+)$/); if(m){ let v=m[2].trim(); if(/^\d+(\.\d+)?$/.test(v)) v=+v; else if(v==='true'||v==='false') v=(v==='true'); obj[m[1]]=v; } } ret.format='yaml'; ret.info.mode='YAML (basic parser)'; ret.data=obj; return true; } if(tryJSON()||tryXML()||tryCSV()||tryYAML()){ self.postMessage(ret); } else { ret.data=text; ret.info.mode='TEXT'; self.postMessage(ret); } };`;
+/).filter(l=>l.trim().length>0); if(lines.length<1) return false; const sep=(lines[0].includes(';')&&!lines[0].includes(','))?';':','; const hdr=lines[0].split(sep).map(s=>s.trim()); const rows=lines.slice(1).map(l=>{ const cols=l.split(sep); const o={}; hdr.forEach((h,i)=> o[h]=cols[i]!==undefined?cols[i].trim():'' ); return o; }); if(hdr.length===1 && rows.length===0) return false; ret.format='csv'; ret.info.mode='CSV('+sep+')'; ret.data=rows; return true; }catch{ return false; } } function tryYAML(){ const looks=/^\s*\w[\w-]*\s*:/m.test(text); if(!looks) return false; const obj={}; const lines=text.split(/\r?\n/); let currentKey=null; for(const line of lines){ if(/^\s*-\s*/.test(line)){ if(currentKey && !Array.isArray(obj[currentKey])) obj[currentKey]=[]; let v=line.replace(/^\s*-\s*/,'').trim(); if(/^\d+(\.\d+)?$/.test(v)) v=+v; else if(v==='true'||v==='false') v=(v==='true'); obj[currentKey].push(v); } else { const m=line.match(/^\s*([\w-]+)\s*:\s*(.*)$/); if(m){ currentKey=m[1]; let v=m[2].trim(); if(v==='') obj[currentKey]=''; else { if(/^\d+(\.\d+)?$/.test(v)) v=+v; else if(v==='true'||v==='false') v=(v==='true'); obj[currentKey]=v; } } } } ret.format='yaml'; ret.info.mode='YAML (basic parser)'; ret.data=obj; return true; } if(tryJSON()||tryXML()||tryCSV()||tryYAML()){ self.postMessage(ret); } else { ret.data=text; ret.info.mode='TEXT'; self.postMessage(ret); } };`;
 let parserWorker = null;
 try {
   parserWorker = new Worker(URL.createObjectURL(new Blob([parserWorkerCode], { type: 'application/javascript' })));
@@ -274,17 +272,30 @@ function parseInMainThread(text) {
     return false;
   }
   function tryYAML() {
-    const looks = /^\s*\w[\w-]*\s*:\s*.+/m.test(text);
+    const looks = /^\s*\w[\w-]*\s*:/m.test(text);
     if (!looks) return false;
     const obj = {};
     const lines = text.split(/\r?\n/);
+    let currentKey = null;
     for (const line of lines) {
-      const m = line.match(/^\s*([\w-]+)\s*:\s*(.+)$/);
-      if (m) {
-        let v = m[2].trim();
+      if (/^\s*-\s*/.test(line)) {
+        if (currentKey && !Array.isArray(obj[currentKey])) obj[currentKey] = [];
+        let v = line.replace(/^\s*-\s*/, '').trim();
         if (/^\d+(\.\d+)?$/.test(v)) v = +v;
         else if (v === 'true' || v === 'false') v = (v === 'true');
-        obj[m[1]] = v;
+        obj[currentKey].push(v);
+      } else {
+        const m = line.match(/^\s*([\w-]+)\s*:\s*(.*)$/);
+        if (m) {
+          currentKey = m[1];
+          let v = m[2].trim();
+          if (v === '') obj[currentKey] = '';
+          else {
+            if (/^\d+(\.\d+)?$/.test(v)) v = +v;
+            else if (v === 'true' || v === 'false') v = (v === 'true');
+            obj[currentKey] = v;
+          }
+        }
       }
     }
     ret.format = 'yaml';
