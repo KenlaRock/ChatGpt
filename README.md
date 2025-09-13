@@ -1,14 +1,28 @@
-@codex
+# Data Viewer & Converter v2.2
 
-# New Webapp - Master Assets
+Single-file web app for viewing and converting data between JSON, XML, YAML, CSV, Markdown and HTML.
 
-This directory is reserved for the upcoming web application.
+## Prerequisites
+- Node.js 20+
 
+## Setup
+Install dependencies for tests:
+```sh
+npm install
+```
 
-Todo:
+## Scripts
+- `npm test` – run unit tests with Jest
+- `npm run build` – placeholder build step
 
-Run a functional test and look for errors and bugs.
+## Netlify
+Pushes to `main` or `File-Viewer-App` deploy via GitHub Actions.
+Set `NETLIFY_AUTH_TOKEN` in repository secrets for deployment.
 
-Use the sample files for testing the app's import/export functions as well as all the other functions within the app.
+## Contributing
+1. Fork and clone the repo.
+2. Create a branch from `main` and make your changes.
+3. Run `npm test` and open a pull request.
 
-Analyze for issues with the layout, design, positioning, sizing, incompleteness and missing contents.
+## Samples
+Sample files (`small.json`, `medium.csv`, `medium.xml`) are available for manual testing.

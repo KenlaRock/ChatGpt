@@ -1,0 +1,27 @@
+name: netlify-deploy
+on:
+  push:
+    branches: [ main, File-Viewer-App ]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure dist
+        run: |
+          mkdir -p dist
+          if [ ! -f dist/app.html ]; then echo '<!doctype html><meta charset="utf-8"><title>stub</title>' > dist/app.html; fi
+      - name: Deploy preview
+        if: github.ref != 'refs/heads/main'
+        uses: South-Paw/action-netlify-cli@v2
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        with:
+          args: deploy --json --dir ./dist --message "preview [${{ github.sha }}]" --site 66a4ee6c-ce0b-4d08-ae98-adf7c519c274
+      - name: Deploy production
+        if: github.ref == 'refs/heads/main'
+        uses: South-Paw/action-netlify-cli@v2
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        with:
+          args: deploy --json --prod --dir ./dist --message "prod [${{ github.sha }}]" --site 66a4ee6c-ce0b-4d08-ae98-adf7c519c274
