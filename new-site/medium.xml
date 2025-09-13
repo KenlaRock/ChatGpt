@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <meta lang="sv" version="1.0"/>
+  <greeting>Hej världen — ÅÄÖ!</greeting>
+  <items>
+    <item id="1" name="alpha" value="10"/>
+    <item id="2" name="beta" value="20"/>
+  </items>
+</root>
