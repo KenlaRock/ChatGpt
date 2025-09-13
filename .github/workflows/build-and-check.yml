@@ -12,13 +12,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Ensure dist exists
-        run: |
-          mkdir -p dist
-          if [ ! -f dist/app.html ]; then echo '<!doctype html><meta charset="utf-8"><title>stub</title>' > dist/app.html; fi
-          [ -f dist/README.md ] || echo '# README' > dist/README.md
-          [ -f dist/CHANGELOG.md ] || echo '# CHANGELOG' > dist/CHANGELOG.md
-          [ -f dist/QA-rapport.md ] || echo '# QA' > dist/QA-rapport.md
+      - name: Build app
+        run: npm run build
       - name: Lint markers & compute SHA256
         run: |
           node -e "

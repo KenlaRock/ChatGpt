@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "echo 'no build step defined'",
+    "build": "rm -rf dist && mkdir dist && cp app.html app.js app.css README.md CHANGELOG.md QA-rapport.md dist/",
     "test": "jest"
   },
   "devDependencies": {
