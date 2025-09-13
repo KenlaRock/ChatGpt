@@ -958,8 +958,12 @@
 <p>Detta är en export av dina importerade dokument.</p>
 <script id="snapshot" type="application/json">${stateJson.replace(/</g, '\\u003c')}</script>
 <script>const state = JSON.parse(document.getElementById('snapshot').textContent);
-document.write('<h2>Dokument</h2>');
-document.write('<pre>'+JSON.stringify(state.docs, null, 2)+'</pre>');
+const heading = document.createElement('h2');
+heading.textContent = 'Dokument';
+document.body.appendChild(heading);
+const pre = document.createElement('pre');
+pre.textContent = JSON.stringify(state.docs, null, 2);
+document.body.appendChild(pre);
 </script>
 </body></html>`;
       return new Blob([html], { type: 'text/html;charset=utf-8' });
