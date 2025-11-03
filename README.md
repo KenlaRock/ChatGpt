@@ -11,6 +11,7 @@ This repository stores the Storyboard web application deliverables alongside sup
 | Path | Purpose |
 | --- | --- |
 | `apps/storyboard/dist/` | Published Storyboard SPA bundle (HTML + docs). Target for functional validation and packaging tasks. |
+| `index.html` | Standalone optimized storyboard workspace with offline storage/export fallbacks for rapid iteration. |
 | `archive/storyboard-legacy/` | Frozen legacy implementation retained for reference. No changes unless a specific migration task requires it. |
 | `config/` | Deployment configuration such as `netlify.toml`. |
 | `data/` | Sample datasets (`medium.csv`, `medium.xml`, `small.json`) used during validation and demos. |
@@ -18,7 +19,7 @@ This repository stores the Storyboard web application deliverables alongside sup
 | `tests/` | Automated regression tests (currently Jest). |
 
 ## Workflow expectations
-1. **Storyboard first.** Treat improvements to `apps/storyboard/dist` as the default priority. Validate UI behaviour, export routines, and packaging scripts whenever updates are made.
+1. **Storyboard first.** Treat improvements to `apps/storyboard/dist` as the default priority. Validate UI behaviour, export routines, and packaging scripts whenever updates are made. The standalone `index.html` mirrors these workflows for lightweight smoke testing.
 2. **Respect folder ownership.** Use the directory guide above when creating new files so that documentation, data, and deployment artefacts remain separated.
 3. **Document outcomes.** Update `docs/` with changelog entries or QA notes that result from functional changes.
 4. **Preserve archives.** Do not move or edit files within `archive/` unless the work is explicitly scoped to legacy maintenance.

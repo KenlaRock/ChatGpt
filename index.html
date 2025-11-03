@@ -1,0 +1,1934 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+    <title>Storyboard – Musikvideo Pro</title>
+    <meta name="theme-color" content="#0b0d10">
+    <script src="/_sdk/data_sdk.js" defer></script>
+    <script src="/_sdk/element_sdk.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
+    <style>
+      :root {
+        --bg: #0b0d10;
+        --panel: #12161b;
+        --muted: #1a2128;
+        --line: #23303a;
+        --text: #e6eef6;
+        --sub: #a6b3bf;
+        --accent: #e63946;
+        --success: #16a34a;
+        --warn: #f59e0b;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        min-height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+        transition: background 0.2s ease, transform 0.2s ease;
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .app {
+        display: grid;
+        min-height: 100vh;
+        grid-template-rows: auto 1fr auto;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.9rem 1.2rem;
+        background: linear-gradient(180deg, #11161b 0%, #0b0d10 100%);
+        border-bottom: 1px solid var(--line);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      header h1 {
+        font-size: 1.05rem;
+        letter-spacing: 0.3px;
+      }
+
+      .tag {
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        font-size: 0.75rem;
+        color: var(--sub);
+      }
+
+      .nav {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+      }
+
+      .nav button {
+        border-radius: 0.8rem;
+        border: 1px solid var(--line);
+        background: var(--muted);
+        color: var(--text);
+        padding: 0.45rem 0.75rem;
+        font-size: 0.85rem;
+      }
+
+      .nav button:hover,
+      .nav button:focus-visible {
+        background: #1a2129;
+        transform: translateY(-1px);
+      }
+
+      .nav button[aria-current="page"] {
+        outline: 2px solid var(--accent);
+      }
+
+      .export-menu {
+        position: absolute;
+        top: calc(100% + 4px);
+        right: 0;
+        background: var(--panel);
+        border-radius: 0.9rem;
+        border: 1px solid var(--line);
+        overflow: hidden;
+        display: none;
+      }
+
+      .export-menu button {
+        display: block;
+        width: 100%;
+        border: none;
+        background: transparent;
+        color: var(--text);
+        padding: 0.6rem 0.9rem;
+        text-align: left;
+        font-size: 0.85rem;
+      }
+
+      .export-menu button:hover,
+      .export-menu button:focus-visible {
+        background: #1a2129;
+      }
+
+      main {
+        padding: 1rem;
+        display: grid;
+        grid-template-columns: 320px 1fr 340px;
+        gap: 0.85rem;
+      }
+
+      @media (max-width: 1100px) {
+        main {
+          grid-template-columns: 260px 1fr 280px;
+        }
+      }
+
+      @media (max-width: 920px) {
+        main {
+          grid-template-columns: 1fr;
+        }
+        .details-column {
+          order: 3;
+        }
+      }
+
+      @media (max-width: 720px) {
+        header {
+          flex-wrap: wrap;
+        }
+        .nav {
+          width: 100%;
+          justify-content: space-between;
+        }
+        main {
+          padding: 0.9rem 0.8rem 5rem;
+        }
+        .floating-actions {
+          display: block;
+        }
+      }
+
+      .col {
+        background: var(--panel);
+        border-radius: 1rem;
+        border: 1px solid var(--line);
+        overflow: hidden;
+        min-height: 200px;
+        box-shadow: 0 24px 40px rgba(0, 0, 0, 0.35);
+      }
+
+      .col h2,
+      .col h3 {
+        padding: 0.85rem 1.1rem;
+        border-bottom: 1px solid var(--line);
+        font-size: 0.85rem;
+        color: var(--sub);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        letter-spacing: 0.2px;
+      }
+
+      .col .body {
+        padding: 0.85rem;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.6rem;
+        margin-bottom: 0.8rem;
+      }
+
+      .stat-card {
+        background: var(--muted);
+        border-radius: 0.9rem;
+        border: 1px solid var(--line);
+        padding: 0.6rem;
+        text-align: center;
+      }
+
+      .stat-card .value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--accent);
+      }
+
+      .stat-card .label {
+        font-size: 0.7rem;
+        color: var(--sub);
+        margin-top: 0.2rem;
+      }
+
+      .search-box {
+        width: 100%;
+        padding: 0.55rem 0.75rem;
+        border-radius: 0.75rem;
+        border: 1px solid var(--line);
+        background: #0f1419;
+        color: var(--text);
+        margin-bottom: 0.75rem;
+        font-size: 0.85rem;
+      }
+
+      .btn-primary {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        padding: 0.65rem 1rem;
+        border-radius: 0.9rem;
+        border: 1px solid var(--accent);
+        background: var(--accent);
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.85rem;
+      }
+
+      .btn-primary:hover,
+      .btn-primary:focus-visible {
+        background: #d73340;
+      }
+
+      .limit-warning {
+        background: rgba(245, 158, 11, 0.2);
+        border: 1px solid rgba(245, 158, 11, 0.5);
+        color: var(--warn);
+        border-radius: 0.75rem;
+        padding: 0.55rem 0.7rem;
+        font-size: 0.75rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 0.6rem;
+        align-items: center;
+        padding: 0.65rem;
+        border-radius: 0.9rem;
+        border: 1px solid var(--line);
+        background: rgba(16, 21, 26, 0.9);
+        cursor: pointer;
+        transition: transform 0.2s ease, background 0.2s ease;
+      }
+
+      .row:hover {
+        transform: translateY(-1px);
+        background: #1a2028;
+      }
+
+      .row.active {
+        outline: 2px solid var(--accent);
+        background: rgba(230, 57, 70, 0.1);
+      }
+
+      .scene-thumb {
+        width: 44px;
+        height: 34px;
+        border-radius: 0.6rem;
+        background: #0f1419;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        color: var(--sub);
+        overflow: hidden;
+      }
+
+      .scene-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .scene-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        min-width: 0;
+      }
+
+      .scene-title {
+        font-size: 0.85rem;
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .scene-meta {
+        font-size: 0.7rem;
+        color: var(--sub);
+      }
+
+      .scene-badges {
+        display: flex;
+        gap: 0.3rem;
+        flex-wrap: wrap;
+        margin-top: 0.3rem;
+      }
+
+      .badge {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.45rem;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: var(--muted);
+        color: var(--sub);
+      }
+
+      .row .actions {
+        display: flex;
+        gap: 0.35rem;
+      }
+
+      .row .actions button {
+        border-radius: 0.6rem;
+        border: 1px solid var(--line);
+        background: none;
+        color: var(--sub);
+        font-size: 0.7rem;
+        padding: 0.3rem 0.5rem;
+      }
+
+      .row .actions button.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: white;
+      }
+
+      .inline-edit {
+        width: 100%;
+        background: var(--muted);
+        border: 1px solid var(--line);
+        border-radius: 0.65rem;
+        padding: 0.35rem 0.5rem;
+        color: var(--text);
+        font-size: 0.75rem;
+        margin-bottom: 0.4rem;
+      }
+
+      .inline-actions {
+        display: flex;
+        gap: 0.4rem;
+      }
+
+      .inline-actions button {
+        flex: 1;
+        border-radius: 0.6rem;
+        border: 1px solid var(--line);
+        padding: 0.35rem 0.5rem;
+        font-size: 0.75rem;
+      }
+
+      .inline-actions .save-btn {
+        background: var(--success);
+        border-color: var(--success);
+        color: #041407;
+      }
+
+      .canvas-wrapper {
+        border-radius: 0.9rem;
+        border: 1px solid var(--line);
+        background: rgba(16, 21, 26, 0.85);
+        padding: 0.7rem;
+      }
+
+      canvas {
+        width: 100%;
+        max-width: 620px;
+        border-radius: 0.8rem;
+        border: 1px solid var(--line);
+        background: #0f1419;
+        display: block;
+        touch-action: none;
+      }
+
+      .toolbar {
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.6rem;
+      }
+
+      .toolbar button,
+      .toolbar input[type="color"],
+      .toolbar input[type="range"] {
+        border-radius: 0.7rem;
+        border: 1px solid var(--line);
+        background: var(--muted);
+        color: var(--text);
+        padding: 0.35rem 0.65rem;
+        font-size: 0.75rem;
+      }
+
+      .toolbar button.active {
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+
+      .zoom-controls {
+        display: flex;
+        gap: 0.3rem;
+        justify-content: flex-end;
+        margin-top: 0.5rem;
+      }
+
+      .zoom-controls button {
+        border-radius: 0.55rem;
+        border: 1px solid var(--line);
+        background: var(--muted);
+        color: var(--text);
+        padding: 0.25rem 0.5rem;
+        font-size: 0.7rem;
+      }
+
+      .details-form label {
+        display: block;
+        font-size: 0.75rem;
+        color: var(--sub);
+        margin-bottom: 0.25rem;
+      }
+
+      .details-form input,
+      .details-form select,
+      .details-form textarea {
+        width: 100%;
+        border-radius: 0.8rem;
+        border: 1px solid var(--line);
+        background: #0f1419;
+        color: var(--text);
+        padding: 0.5rem 0.65rem;
+        margin-bottom: 0.7rem;
+        font-size: 0.8rem;
+      }
+
+      .photo-upload {
+        border: 2px dashed var(--line);
+        border-radius: 0.9rem;
+        padding: 0.7rem;
+        text-align: center;
+        margin-bottom: 0.7rem;
+        color: var(--sub);
+        font-size: 0.75rem;
+      }
+
+      .photo-upload.dragover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .photo-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+        gap: 0.5rem;
+        margin-bottom: 0.8rem;
+      }
+
+      .photo-card {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: 0.7rem;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        background: #0f1419;
+      }
+
+      .photo-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .photo-card button {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        border: none;
+        border-radius: 50%;
+        background: rgba(230, 57, 70, 0.9);
+        color: #fff;
+        width: 22px;
+        height: 22px;
+        font-size: 0.7rem;
+      }
+
+      .timeline-track {
+        display: flex;
+        gap: 0.6rem;
+        overflow-x: auto;
+        padding: 0.6rem 0.2rem;
+      }
+
+      .timeline-scene {
+        width: 150px;
+        flex-shrink: 0;
+        border-radius: 0.8rem;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        overflow: hidden;
+        cursor: grab;
+      }
+
+      .timeline-scene.dragging {
+        transform: rotate(3deg) scale(1.05);
+      }
+
+      .timeline-thumb {
+        height: 80px;
+        background: #0f1419;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        color: var(--sub);
+        font-size: 0.9rem;
+      }
+
+      .timeline-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .template-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 0.6rem;
+      }
+
+      .template-card {
+        border-radius: 0.9rem;
+        border: 1px solid var(--line);
+        background: var(--muted);
+        padding: 0.7rem;
+        text-align: center;
+        cursor: pointer;
+        transition: transform 0.2s ease, background 0.2s ease;
+      }
+
+      .template-card:hover,
+      .template-card:focus-visible {
+        background: #1a2129;
+        transform: translateY(-2px);
+      }
+
+      .empty-state {
+        padding: 2rem 1rem;
+        text-align: center;
+        color: var(--sub);
+        font-size: 0.85rem;
+      }
+
+      footer {
+        padding: 1rem;
+        text-align: center;
+        font-size: 0.75rem;
+        color: var(--sub);
+        border-top: 1px solid var(--line);
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 1.2rem;
+        right: 1.2rem;
+        padding: 0.8rem 1rem;
+        border-radius: 0.9rem;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        box-shadow: 0 18px 36px rgba(0, 0, 0, 0.4);
+        animation: toast-in 0.3s ease;
+        font-size: 0.8rem;
+        z-index: 999;
+      }
+
+      .toast.success {
+        border-color: var(--success);
+      }
+
+      .toast.error {
+        border-color: var(--accent);
+      }
+
+      @keyframes toast-in {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .floating-actions {
+        display: none;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 0.85rem;
+        background: linear-gradient(180deg, rgba(11, 13, 16, 0) 0%, rgba(11, 13, 16, 0.95) 70%);
+        z-index: 20;
+      }
+
+      .floating-actions .btn-primary {
+        max-width: 480px;
+        margin: 0 auto;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <h1 id="app-title">Storyboard – Musikvideo Pro</h1>
+        <span class="tag" id="subtitle-tag">Professional Edition</span>
+        <nav class="nav" aria-label="Huvudnavigation">
+          <button id="nav-scenes" aria-current="page">Scener</button>
+          <button id="nav-timeline">Tidslinje</button>
+          <button id="nav-templates">Mallar</button>
+          <button id="show-shortcuts" title="Kortkommandon">⌨️</button>
+          <div class="export" style="position: relative;">
+            <button id="export-btn" title="Exportera storyboard">📤 Export</button>
+            <div class="export-menu" id="export-menu" role="menu">
+              <button id="export-pdf" role="menuitem">📄 PDF Rapport</button>
+              <button id="export-json" role="menuitem">📋 JSON Data</button>
+              <button id="export-txt" role="menuitem">📝 Textfil</button>
+            </div>
+          </div>
+        </nav>
+      </header>
+      <main id="main-content" aria-live="polite"></main>
+      <footer>
+        Planera musikvideons scener, ritningar och referenser på ett ställe.
+      </footer>
+    </div>
+    <div class="floating-actions" id="floating-actions">
+      <button class="btn-primary" id="floating-save">💾 Spara ändringar</button>
+    </div>
+    <script>
+      const defaultConfig = {
+        app_title: "Storyboard – Musikvideo Pro",
+        subtitle_text: "Professional Edition",
+        project_bpm: "120",
+        background_color: "#0b0d10",
+        surface_color: "#12161b",
+        text_color: "#e6eef6",
+        primary_action_color: "#e63946",
+        secondary_action_color: "#22c55e"
+      };
+
+      const STORAGE_KEY = "storyboard_pro_scenes";
+      const SETTINGS_KEY = "storyboard_pro_settings";
+
+      let currentView = "scenes";
+      let selectedScene = null;
+      let editingScene = null;
+      let allScenes = [];
+      let drawingContext = null;
+      let isDrawing = false;
+      let currentTool = "pen";
+      let currentColor = "#e6eef6";
+      let currentLineWidth = 3;
+      let undoStack = [];
+      let redoStack = [];
+      let searchQuery = "";
+      let projectBPM = 120;
+      let exportMenuOpen = false;
+
+      if (!window.elementSdk) {
+        window.elementSdk = {
+          config: { ...defaultConfig },
+          init({ defaultConfig: defaults, onConfigChange }) {
+            this.config = { ...defaults };
+            onConfigChange(this.config);
+          },
+          setConfig(update) {
+            this.config = { ...this.config, ...update };
+            if (typeof onConfigChange === "function") {
+              onConfigChange(this.config);
+            }
+          }
+        };
+      }
+
+      if (!window.dataSdk) {
+        window.dataSdk = createLocalDataSdk();
+      }
+
+      function createLocalDataSdk() {
+        let scenes = loadScenesFromStorage();
+        const listeners = new Set();
+
+        function persist() {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(scenes));
+        }
+
+        function notify() {
+          const ordered = scenes.slice().sort((a, b) => (a.order || 0) - (b.order || 0));
+          listeners.forEach((listener) => listener(ordered));
+        }
+
+        return {
+          async init(handler) {
+            listeners.add(handler.onDataChanged.bind(handler));
+            notify();
+            return { isOk: true };
+          },
+          async create(scene) {
+            const entry = {
+              ...scene,
+              __backendId: scene.__backendId || crypto.randomUUID()
+            };
+            scenes.push(entry);
+            persist();
+            notify();
+            return { isOk: true, data: entry };
+          },
+          async update(scene) {
+            const index = scenes.findIndex((item) => item.__backendId === scene.__backendId);
+            if (index === -1) {
+              return { isOk: false, error: "Scene not found" };
+            }
+            scenes[index] = { ...scenes[index], ...scene };
+            persist();
+            notify();
+            return { isOk: true, data: scenes[index] };
+          },
+          async delete(scene) {
+            const index = scenes.findIndex((item) => item.__backendId === scene.__backendId);
+            if (index === -1) {
+              return { isOk: false, error: "Scene not found" };
+            }
+            scenes.splice(index, 1);
+            scenes = scenes.map((item, order) => ({ ...item, order }));
+            persist();
+            notify();
+            return { isOk: true };
+          }
+        };
+      }
+
+      function loadScenesFromStorage() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return [];
+          const parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed)) return [];
+          return parsed.map((scene, index) => ({
+            ...scene,
+            __backendId: scene.__backendId || crypto.randomUUID(),
+            order: typeof scene.order === "number" ? scene.order : index
+          }));
+        } catch (error) {
+          console.error("Kunde inte läsa sparade scener", error);
+          return [];
+        }
+      }
+
+      async function onConfigChange(config) {
+        document.getElementById("app-title").textContent = config.app_title || defaultConfig.app_title;
+        document.getElementById("subtitle-tag").textContent = config.subtitle_text || defaultConfig.subtitle_text;
+
+        if (config.project_bpm) {
+          projectBPM = parseInt(config.project_bpm, 10) || projectBPM;
+          const settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
+          settings.project_bpm = projectBPM;
+          localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+        }
+
+        document.documentElement.style.setProperty("--bg", config.background_color || defaultConfig.background_color);
+        document.documentElement.style.setProperty("--panel", config.surface_color || defaultConfig.surface_color);
+        document.documentElement.style.setProperty("--text", config.text_color || defaultConfig.text_color);
+        document.documentElement.style.setProperty("--accent", config.primary_action_color || defaultConfig.primary_action_color);
+        document.documentElement.style.setProperty("--success", config.secondary_action_color || defaultConfig.secondary_action_color);
+      }
+
+      function mapToCapabilities(config) {
+        return {
+          recolorables: ["background_color", "surface_color", "text_color", "primary_action_color", "secondary_action_color"].map((key) => ({
+            get: () => config[key] || defaultConfig[key],
+            set: (value) => updateConfig(key, value)
+          })),
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        };
+      }
+
+      function updateConfig(key, value) {
+        if (window.elementSdk && typeof window.elementSdk.setConfig === "function") {
+          window.elementSdk.setConfig({ [key]: value });
+        }
+      }
+
+      function mapToEditPanelValues(config) {
+        return new Map([
+          ["app_title", config.app_title || defaultConfig.app_title],
+          ["subtitle_text", config.subtitle_text || defaultConfig.subtitle_text],
+          ["project_bpm", config.project_bpm || defaultConfig.project_bpm]
+        ]);
+      }
+
+      async function initializeApp() {
+        if (window.elementSdk && typeof window.elementSdk.init === "function") {
+          window.elementSdk.init({
+            defaultConfig,
+            onConfigChange,
+            mapToCapabilities,
+            mapToEditPanelValues
+          });
+        } else {
+          onConfigChange(defaultConfig);
+        }
+
+        const storedSettings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
+        if (storedSettings.project_bpm) {
+          projectBPM = parseInt(storedSettings.project_bpm, 10) || projectBPM;
+        }
+
+        if (window.dataSdk && typeof window.dataSdk.init === "function") {
+          const result = await window.dataSdk.init({
+            onDataChanged(data) {
+              allScenes = data.slice();
+              if (selectedScene) {
+                const updated = allScenes.find((scene) => scene.__backendId === selectedScene.__backendId);
+                selectedScene = updated || null;
+              }
+              if (!selectedScene && allScenes.length > 0) {
+                selectedScene = allScenes[0];
+              }
+              renderCurrentView();
+              updateFloatingActions();
+            }
+          });
+          if (!result.isOk) {
+            showToast("Kunde inte initiera datalagring", "error");
+          }
+        }
+
+        setupNavigation();
+        setupShortcuts();
+        setupExportMenu();
+        setupFloatingSave();
+        renderCurrentView();
+      }
+
+      function setupNavigation() {
+        document.getElementById("nav-scenes").addEventListener("click", () => switchView("scenes"));
+        document.getElementById("nav-timeline").addEventListener("click", () => switchView("timeline"));
+        document.getElementById("nav-templates").addEventListener("click", () => switchView("templates"));
+        document.getElementById("show-shortcuts").addEventListener("click", showKeyboardShortcuts);
+      }
+
+      function setupShortcuts() {
+        document.addEventListener("keydown", (event) => {
+          if (event.target.matches("input, textarea")) return;
+
+          if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "n") {
+            event.preventDefault();
+            handleAddScene();
+          }
+
+          if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
+            event.preventDefault();
+            const form = document.getElementById("scene-form");
+            if (form) form.requestSubmit();
+          }
+
+          if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "f") {
+            event.preventDefault();
+            toggleFullscreen();
+          }
+
+          if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") {
+            event.preventDefault();
+            if (event.shiftKey) redoCanvas();
+            else undoCanvas();
+          }
+
+          if (event.key === "?") {
+            showKeyboardShortcuts();
+          }
+        });
+      }
+
+      function setupExportMenu() {
+        const exportBtn = document.getElementById("export-btn");
+        const exportMenu = document.getElementById("export-menu");
+
+        exportBtn.addEventListener("click", (event) => {
+          event.stopPropagation();
+          exportMenuOpen = !exportMenuOpen;
+          exportMenu.style.display = exportMenuOpen ? "block" : "none";
+        });
+
+        document.addEventListener("click", () => {
+          if (exportMenuOpen) {
+            exportMenuOpen = false;
+            exportMenu.style.display = "none";
+          }
+        });
+
+        document.getElementById("export-pdf").addEventListener("click", exportToPDF);
+        document.getElementById("export-json").addEventListener("click", exportToJSON);
+        document.getElementById("export-txt").addEventListener("click", exportToText);
+      }
+
+      function setupFloatingSave() {
+        document.getElementById("floating-save").addEventListener("click", () => {
+          const form = document.getElementById("scene-form");
+          if (form) form.requestSubmit();
+        });
+      }
+
+      function updateFloatingActions() {
+        const floating = document.getElementById("floating-actions");
+        if (window.innerWidth <= 720 && selectedScene) {
+          floating.style.display = "block";
+        } else {
+          floating.style.display = "none";
+        }
+      }
+
+      window.addEventListener("resize", updateFloatingActions);
+
+      function switchView(view) {
+        currentView = view;
+        document.querySelectorAll(".nav button").forEach((btn) => btn.removeAttribute("aria-current"));
+        document.getElementById(`nav-${view}`).setAttribute("aria-current", "page");
+        renderCurrentView();
+      }
+
+      function renderCurrentView() {
+        const container = document.getElementById("main-content");
+        if (currentView === "scenes") {
+          renderScenesView(container);
+        } else if (currentView === "timeline") {
+          renderTimelineView(container);
+        } else {
+          renderTemplatesView(container);
+        }
+      }
+
+      function renderScenesView(container) {
+        const filtered = allScenes.filter((scene) => {
+          if (!searchQuery) return true;
+          const q = searchQuery.toLowerCase();
+          return [scene.description, scene.sceneType, scene.notes]
+            .filter(Boolean)
+            .some((value) => value.toLowerCase().includes(q));
+        });
+
+        const stats = calculateStats();
+
+        container.innerHTML = `
+          <section class="col" aria-labelledby="scenes-heading">
+            <h2 id="scenes-heading">
+              Scener (${allScenes.length}/999)
+              <button class="row-action" id="refresh-scenes" title="Uppdatera">🔄</button>
+            </h2>
+            <div class="body">
+              ${allScenes.length >= 999 ? '<div class="limit-warning">Maxgräns nådd – ta bort scener för att fortsätta.</div>' : ''}
+              <div class="stats-grid">
+                <div class="stat-card"><div class="value">${stats.totalScenes}</div><div class="label">Scener</div></div>
+                <div class="stat-card"><div class="value">${stats.withDrawings}</div><div class="label">Med ritning</div></div>
+                <div class="stat-card"><div class="value">${stats.bmpSynced}</div><div class="label">BPM-synkade</div></div>
+                <div class="stat-card"><div class="value">${stats.avgDuration}s</div><div class="label">Snitt längd</div></div>
+              </div>
+              <label for="search-scenes" class="sr-only">Sök scener</label>
+              <input id="search-scenes" class="search-box" placeholder="🔍 Sök scener..." value="${searchQuery}" autocomplete="off">
+              <button class="btn-primary" id="add-scene-btn" ${allScenes.length >= 999 ? 'disabled' : ''}>+ Ny scen</button>
+              <div class="list" id="scenes-list" role="list">
+                ${filtered.length === 0 ? '<div class="empty-state">Inga scener matchar sökningen.</div>' : filtered.map(renderSceneRow).join('')}
+              </div>
+            </div>
+          </section>
+          <section class="col" aria-labelledby="canvas-heading">
+            <h2 id="canvas-heading">Snabbskiss</h2>
+            <div class="body">
+              <div class="toolbar" role="toolbar" aria-label="Ritverktyg">
+                <button id="tool-pen" class="${currentTool === 'pen' ? 'active' : ''}">✏️ Penna</button>
+                <button id="tool-eraser" class="${currentTool === 'eraser' ? 'active' : ''}">🧹 Sudd</button>
+                <button id="tool-text" class="${currentTool === 'text' ? 'active' : ''}">📝 Text</button>
+                <button id="tool-clear">🗑️ Rensa</button>
+                <button id="tool-undo" title="Ångra (Ctrl+Z)">↶</button>
+                <button id="tool-redo" title="Gör om (Ctrl+Shift+Z)">↷</button>
+                <input type="color" id="color-picker" value="${currentColor}" title="Välj färg">
+                <input type="range" id="line-width" min="1" max="18" value="${currentLineWidth}" title="Pennbredd">
+                <button id="fullscreen-btn" title="Fullskärm (Ctrl+F)">⛶</button>
+              </div>
+              <div class="canvas-wrapper">
+                <canvas id="drawing-canvas" width="640" height="420" aria-label="Rityta"></canvas>
+                <div class="zoom-controls">
+                  <button id="zoom-out">−</button>
+                  <span id="zoom-level">100%</span>
+                  <button id="zoom-in">+</button>
+                  <button id="zoom-reset">⌂</button>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section class="col details-column" aria-labelledby="details-heading">
+            <h2 id="details-heading">Scendetaljer</h2>
+            <div class="body" id="details-panel">
+              ${selectedScene ? renderSceneDetails(selectedScene) : '<div class="empty-state">Välj en scen för att se detaljer.</div>'}
+            </div>
+          </section>
+        `;
+
+        document.getElementById("add-scene-btn").addEventListener("click", handleAddScene);
+        document.getElementById("search-scenes").addEventListener("input", (event) => {
+          searchQuery = event.target.value;
+          renderCurrentView();
+        });
+        document.getElementById("refresh-scenes").addEventListener("click", () => {
+          showToast("Listan uppdaterad", "info");
+          renderCurrentView();
+        });
+
+        document.querySelectorAll(".row").forEach((row) => {
+          row.addEventListener("click", (event) => {
+            if (event.target.closest("button")) return;
+            const scene = allScenes.find((item) => item.__backendId === row.dataset.id);
+            selectedScene = scene || null;
+            editingScene = null;
+            renderCurrentView();
+          });
+        });
+
+        document.querySelectorAll(".edit-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const scene = allScenes.find((item) => item.__backendId === btn.dataset.id);
+            selectedScene = scene || null;
+            editingScene = null;
+            renderCurrentView();
+          });
+        });
+
+        document.querySelectorAll(".quick-edit-btn").forEach((btn) => {
+          btn.addEventListener("click", (event) => {
+            event.stopPropagation();
+            editingScene = allScenes.find((item) => item.__backendId === btn.dataset.id) || null;
+            selectedScene = null;
+            renderCurrentView();
+          });
+        });
+
+        document.querySelectorAll(".duplicate-btn").forEach((btn) => {
+          btn.addEventListener("click", (event) => {
+            event.stopPropagation();
+            handleDuplicateScene(btn.dataset.id);
+          });
+        });
+
+        document.querySelectorAll(".delete-btn").forEach((btn) => {
+          btn.addEventListener("click", (event) => {
+            event.stopPropagation();
+            handleDeleteScene(btn.dataset.id);
+          });
+        });
+
+        setupDrawingCanvas();
+        if (selectedScene && selectedScene.drawing) {
+          loadDrawing(selectedScene.drawing);
+        }
+      }
+
+      function renderSceneRow(scene) {
+        const isEditing = editingScene && editingScene.__backendId === scene.__backendId;
+        const isSelected = selectedScene && selectedScene.__backendId === scene.__backendId;
+
+        if (isEditing) {
+          return `
+            <div class="row editing" data-id="${scene.__backendId}" role="listitem">
+              <div class="scene-thumb">${scene.thumbnail ? `<img src="${scene.thumbnail}" alt="Miniatyr">` : '🎬'}</div>
+              <div>
+                <input id="edit-duration" class="inline-edit" value="${scene.duration || ''}" placeholder="0:00-0:15">
+                <select id="edit-scene-type" class="inline-edit">
+                  ${['Intro', 'Vers', 'Refräng', 'Brygga', 'Outro', 'Övrigt'].map((type) => `<option value="${type}" ${scene.sceneType === type ? 'selected' : ''}>${type}</option>`).join('')}
+                </select>
+                <input id="edit-description" class="inline-edit" value="${scene.description || ''}" placeholder="Beskrivning">
+                <div class="inline-actions">
+                  <button class="save-btn" type="button" onclick="saveInlineEdit()">💾 Spara</button>
+                  <button class="cancel-btn" type="button" onclick="cancelInlineEdit()">Avbryt</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="row ${isSelected ? 'active' : ''}" data-id="${scene.__backendId}" role="listitem">
+            <div class="scene-thumb">${scene.thumbnail ? `<img src="${scene.thumbnail}" alt="Miniatyr">` : '🎬'}</div>
+            <div class="scene-info">
+              <div class="scene-title">${scene.duration || '0:00-0:00'} • ${scene.sceneType || 'Okänd'}</div>
+              <div class="scene-meta">${scene.description || 'Ingen beskrivning'}</div>
+              <div class="scene-badges">
+                ${scene.bmpSync ? '<span class="badge">♪ BPM</span>' : ''}
+                ${scene.photos && scene.photos.length ? `<span class="badge">📸 ${scene.photos.length}</span>` : ''}
+                ${scene.drawing ? '<span class="badge">🎨 Ritning</span>' : ''}
+              </div>
+            </div>
+            <div class="actions">
+              <button class="quick-edit-btn" data-id="${scene.__backendId}">✏️</button>
+              <button class="duplicate-btn" data-id="${scene.__backendId}">📋</button>
+              <button class="edit-btn primary" data-id="${scene.__backendId}">Redigera</button>
+              <button class="delete-btn" data-id="${scene.__backendId}">Ta bort</button>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderSceneDetails(scene) {
+        return `
+          <form id="scene-form" class="details-form">
+            <label for="duration">Tidsstämpel</label>
+            <input id="duration" value="${scene.duration || ''}" placeholder="0:00-0:15">
+            <label for="scene-type">Scentyp</label>
+            <select id="scene-type">
+              ${['Intro', 'Vers', 'Refräng', 'Brygga', 'Outro', 'Övrigt'].map((type) => `<option value="${type}" ${scene.sceneType === type ? 'selected' : ''}>${type}</option>`).join('')}
+            </select>
+            <label for="description">Beskrivning</label>
+            <input id="description" value="${scene.description || ''}" placeholder="Kort beskrivning">
+            <label for="camera-movement">Kamera</label>
+            <select id="camera-movement">
+              ${['Statisk', 'Pan Vänster', 'Pan Höger', 'Zoom In', 'Zoom Out', 'Handhållen'].map((move) => `<option value="${move}" ${scene.cameraMovement === move ? 'selected' : ''}>${move}</option>`).join('')}
+            </select>
+            <label for="lighting">Ljussättning</label>
+            <select id="lighting">
+              ${['Naturlig', 'Dramatisk', 'Mjuk', 'Kontrastrik', 'Scenljus', 'Fade'].map((light) => `<option value="${light}" ${scene.lighting === light ? 'selected' : ''}>${light}</option>`).join('')}
+            </select>
+            <label for="costume">Kostym/Makeup</label>
+            <input id="costume" value="${scene.costume || ''}" placeholder="Detaljer">
+            <label><input type="checkbox" id="bmp-sync" ${scene.bmpSync ? 'checked' : ''}> Synka med BPM (${projectBPM})</label>
+            <label for="notes">Anteckningar</label>
+            <textarea id="notes" rows="4">${scene.notes || ''}</textarea>
+            <div class="photo-upload" id="photo-upload" tabindex="0">
+              📤 Klicka eller dra foton hit (PNG, JPG, GIF, WebP)
+              <input type="file" id="photo-input" accept="image/*" multiple hidden>
+            </div>
+            ${scene.photos && scene.photos.length ? `<div class="photo-grid">${scene.photos.map((photo, index) => `<div class="photo-card" data-index="${index}"><img src="${photo.data}" alt="${photo.name}"><button type="button" onclick="removePhoto(${index})">×</button></div>`).join('')}</div>` : ''}
+            <button class="btn-primary" id="save-scene-btn">💾 Spara ändringar</button>
+          </form>
+        `;
+      }
+
+      function renderTimelineView(container) {
+        container.innerHTML = `
+          <section class="col" style="grid-column: 1 / -1;">
+            <h2>Tidslinje</h2>
+            <div class="body">
+              ${allScenes.length === 0 ? '<div class="empty-state">Lägg till scener för att se tidslinjen.</div>' : `<div class="timeline-track" id="timeline-track">${allScenes.map((scene, index) => `<article class="timeline-scene" draggable="true" data-id="${scene.__backendId}" data-order="${index}"><div class="timeline-thumb">${scene.thumbnail ? `<img src="${scene.thumbnail}" alt="Scen ${index + 1}">` : '🎬'}<span style="position:absolute;top:4px;left:6px;background:rgba(0,0,0,0.65);padding:0.15rem 0.4rem;border-radius:0.6rem;font-size:0.7rem;">${index + 1}</span>${scene.bmpSync ? '<span style="position:absolute;top:4px;right:6px;background:var(--success);padding:0.15rem 0.4rem;border-radius:0.6rem;font-size:0.7rem;">♪</span>' : ''}</div><div style="padding:0.55rem;"><strong style="font-size:0.8rem;">${scene.duration}</strong><div style="font-size:0.7rem;color:var(--sub);">${scene.sceneType}</div><div style="font-size:0.7rem;margin-top:0.25rem;">${scene.description || 'Ingen beskrivning'}</div></div></article>`).join('')}</div>`}
+            </div>
+          </section>
+        `;
+        setupTimelineDrag();
+      }
+
+      function renderTemplatesView(container) {
+        const templates = [
+          { name: "Intro Shot", icon: "🎬", type: "Intro", description: "Öppningsscen", camera: "Statisk", lighting: "Dramatisk" },
+          { name: "Close-up", icon: "👤", type: "Vers", description: "Närbild artist", camera: "Zoom In", lighting: "Mjuk" },
+          { name: "Performance", icon: "🎤", type: "Refräng", description: "Scenframträdande", camera: "Handhållen", lighting: "Scenljus" },
+          { name: "Wide Shot", icon: "🌅", type: "Brygga", description: "Miljöbild", camera: "Pan Höger", lighting: "Naturlig" },
+          { name: "Outro", icon: "🎭", type: "Outro", description: "Avslutande scen", camera: "Zoom Out", lighting: "Fade" }
+        ];
+
+        container.innerHTML = `
+          <section class="col" style="grid-column: 1 / -1;">
+            <h2>Mallar</h2>
+            <div class="body">
+              <p style="color: var(--sub); margin-bottom: 0.8rem;">Skapa scener snabbare med färdiga mallar.</p>
+              <div class="template-grid">
+                ${templates.map((template) => `<article class="template-card" data-template="${encodeURIComponent(JSON.stringify(template))}"><div style="font-size:1.8rem;">${template.icon}</div><div style="font-weight:600;margin-top:0.4rem;">${template.name}</div><p style="font-size:0.75rem;color:var(--sub);margin-top:0.3rem;">${template.description}</p></article>`).join('')}
+              </div>
+            </div>
+          </section>
+        `;
+
+        document.querySelectorAll(".template-card").forEach((card) => {
+          card.addEventListener("click", () => {
+            const template = JSON.parse(decodeURIComponent(card.dataset.template));
+            createSceneFromTemplate(template);
+          });
+        });
+      }
+
+      function calculateStats() {
+        const total = allScenes.length;
+        const withDrawings = allScenes.filter((scene) => Boolean(scene.drawing)).length;
+        const bmpSynced = allScenes.filter((scene) => scene.bmpSync).length;
+        const durations = allScenes.map((scene) => {
+          const match = /(?:(\d+):)?(\d+)/.exec(scene.duration || "");
+          if (!match) return 15;
+          const minutes = match[1] ? parseInt(match[1], 10) : 0;
+          const seconds = parseInt(match[2], 10) || 0;
+          return minutes * 60 + seconds;
+        });
+        const avgDuration = durations.length ? Math.round(durations.reduce((sum, value) => sum + value, 0) / durations.length) : 0;
+        return { totalScenes: total, withDrawings, bmpSynced, avgDuration };
+      }
+
+      async function handleAddScene() {
+        if (allScenes.length >= 999) {
+          showToast("Maxgräns för scener uppnådd", "error");
+          return;
+        }
+        const scene = {
+          id: `scene_${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          duration: "0:00-0:15",
+          sceneType: "Intro",
+          description: "",
+          notes: "",
+          drawing: "",
+          order: allScenes.length,
+          cameraMovement: "Statisk",
+          lighting: "Naturlig",
+          costume: "",
+          bmpSync: false,
+          photos: []
+        };
+        const result = await window.dataSdk.create(scene);
+        if (result.isOk) {
+          selectedScene = result.data;
+          showToast("Ny scen skapad", "success");
+        } else {
+          showToast("Kunde inte skapa scen", "error");
+        }
+      }
+
+      async function handleDuplicateScene(id) {
+        const original = allScenes.find((scene) => scene.__backendId === id);
+        if (!original) return;
+        const duplicate = {
+          ...original,
+          __backendId: undefined,
+          id: `scene_${Date.now()}`,
+          description: `${original.description || 'Scen'} (Kopia)`,
+          order: allScenes.length,
+          timestamp: new Date().toISOString()
+        };
+        const result = await window.dataSdk.create(duplicate);
+        showToast(result.isOk ? "Scen duplicerad" : "Kunde inte duplicera scen", result.isOk ? "success" : "error");
+      }
+
+      async function handleDeleteScene(id) {
+        const scene = allScenes.find((item) => item.__backendId === id);
+        if (!scene) return;
+        if (!confirm(`Ta bort scen ${scene.description || ''}?`)) return;
+        const result = await window.dataSdk.delete(scene);
+        if (result.isOk) {
+          if (selectedScene && selectedScene.__backendId === id) {
+            selectedScene = null;
+          }
+          showToast("Scen borttagen", "success");
+        } else {
+          showToast("Kunde inte ta bort scen", "error");
+        }
+      }
+
+      async function createSceneFromTemplate(template) {
+        const scene = {
+          id: `scene_${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          duration: "0:00-0:15",
+          sceneType: template.type,
+          description: template.description,
+          notes: `Mall: ${template.name}`,
+          drawing: "",
+          order: allScenes.length,
+          cameraMovement: template.camera || "Statisk",
+          lighting: template.lighting || "Naturlig",
+          costume: "",
+          bmpSync: false,
+          photos: []
+        };
+        const result = await window.dataSdk.create(scene);
+        if (result.isOk) {
+          selectedScene = result.data;
+          switchView("scenes");
+          showToast(`Scen skapad från mall: ${template.name}`, "success");
+        } else {
+          showToast("Kunde inte skapa scen", "error");
+        }
+      }
+
+      async function saveInlineEdit() {
+        if (!editingScene) return;
+        const duration = document.getElementById("edit-duration").value;
+        const sceneType = document.getElementById("edit-scene-type").value;
+        const description = document.getElementById("edit-description").value;
+        const updated = { ...editingScene, duration, sceneType, description };
+        const result = await window.dataSdk.update(updated);
+        if (result.isOk) {
+          editingScene = null;
+          showToast("Snabbredigering sparad", "success");
+        } else {
+          showToast("Kunde inte spara ändringar", "error");
+        }
+      }
+
+      function cancelInlineEdit() {
+        editingScene = null;
+        renderCurrentView();
+      }
+
+      async function handleSceneFormSubmit(event) {
+        event.preventDefault();
+        if (!selectedScene) {
+          showToast("Ingen scen vald", "error");
+          return;
+        }
+        const canvas = document.getElementById("drawing-canvas");
+        const drawingData = canvas ? canvas.toDataURL() : selectedScene.drawing;
+        const thumbnail = generateThumbnail(canvas);
+
+        const updatedScene = {
+          ...selectedScene,
+          duration: document.getElementById("duration").value,
+          sceneType: document.getElementById("scene-type").value,
+          description: document.getElementById("description").value,
+          notes: document.getElementById("notes").value,
+          cameraMovement: document.getElementById("camera-movement").value,
+          lighting: document.getElementById("lighting").value,
+          costume: document.getElementById("costume").value,
+          bmpSync: document.getElementById("bmp-sync").checked,
+          drawing: drawingData,
+          thumbnail,
+          photos: selectedScene.photos || []
+        };
+
+        const result = await window.dataSdk.update(updatedScene);
+        if (result.isOk) {
+          selectedScene = result.data;
+          showToast("Scen sparad", "success");
+        } else {
+          showToast("Kunde inte spara scen", "error");
+        }
+      }
+
+      function setupDrawingCanvas() {
+        const canvas = document.getElementById("drawing-canvas");
+        if (!canvas) return;
+        drawingContext = canvas.getContext("2d");
+        drawingContext.lineCap = "round";
+        drawingContext.lineJoin = "round";
+        drawingContext.fillStyle = "#0f1419";
+        drawingContext.fillRect(0, 0, canvas.width, canvas.height);
+
+        canvas.addEventListener("mousedown", startDrawing);
+        canvas.addEventListener("mousemove", draw);
+        canvas.addEventListener("mouseup", stopDrawing);
+        canvas.addEventListener("mouseleave", stopDrawing);
+        canvas.addEventListener("touchstart", startDrawing);
+        canvas.addEventListener("touchmove", draw);
+        canvas.addEventListener("touchend", stopDrawing);
+
+        document.getElementById("tool-pen").onclick = () => setTool("pen");
+        document.getElementById("tool-eraser").onclick = () => setTool("eraser");
+        document.getElementById("tool-text").onclick = () => setTool("text");
+        document.getElementById("tool-clear").onclick = () => {
+          drawingContext.fillStyle = "#0f1419";
+          drawingContext.fillRect(0, 0, canvas.width, canvas.height);
+          saveCanvasState();
+          showToast("Ritytan rensad", "info");
+        };
+        document.getElementById("tool-undo").onclick = undoCanvas;
+        document.getElementById("tool-redo").onclick = redoCanvas;
+        document.getElementById("color-picker").addEventListener("change", (event) => (currentColor = event.target.value));
+        document.getElementById("line-width").addEventListener("input", (event) => (currentLineWidth = parseInt(event.target.value, 10)));
+        document.getElementById("fullscreen-btn").onclick = toggleFullscreen;
+        document.getElementById("zoom-in").onclick = () => adjustZoom(1.2);
+        document.getElementById("zoom-out").onclick = () => adjustZoom(1 / 1.2);
+        document.getElementById("zoom-reset").onclick = () => setZoom(1);
+
+        saveCanvasState();
+      }
+
+      function setTool(tool) {
+        currentTool = tool;
+        document.querySelectorAll(".toolbar button").forEach((btn) => btn.classList.remove("active"));
+        document.getElementById(`tool-${tool}`).classList.add("active");
+      }
+
+      function getCanvasCoordinates(canvas, event) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+        const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+        return {
+          x: (clientX - rect.left) * scaleX,
+          y: (clientY - rect.top) * scaleY
+        };
+      }
+
+      let lastPoint = null;
+
+      function startDrawing(event) {
+        const canvas = event.currentTarget;
+        if (currentTool === "text") {
+          addTextToCanvas(canvas, event);
+          return;
+        }
+        isDrawing = true;
+        lastPoint = getCanvasCoordinates(canvas, event);
+        event.preventDefault();
+      }
+
+      function draw(event) {
+        if (!isDrawing || currentTool === "text") return;
+        event.preventDefault();
+        const canvas = event.currentTarget;
+        const point = getCanvasCoordinates(canvas, event);
+        drawingContext.beginPath();
+        drawingContext.moveTo(lastPoint.x, lastPoint.y);
+        drawingContext.lineTo(point.x, point.y);
+        if (currentTool === "pen") {
+          drawingContext.globalCompositeOperation = "source-over";
+          drawingContext.strokeStyle = currentColor;
+          drawingContext.lineWidth = currentLineWidth;
+        } else if (currentTool === "eraser") {
+          drawingContext.globalCompositeOperation = "destination-out";
+          drawingContext.lineWidth = currentLineWidth * 1.8;
+        }
+        drawingContext.stroke();
+        lastPoint = point;
+      }
+
+      function stopDrawing(event) {
+        if (!isDrawing) return;
+        isDrawing = false;
+        drawingContext.globalCompositeOperation = "source-over";
+        saveCanvasState();
+        if (selectedScene) {
+          autoSaveDrawing();
+        }
+      }
+
+      function addTextToCanvas(canvas, event) {
+        const point = getCanvasCoordinates(canvas, event);
+        const input = document.createElement("input");
+        input.type = "text";
+        input.placeholder = "Text";
+        input.style.position = "fixed";
+        input.style.left = `${event.clientX}px`;
+        input.style.top = `${event.clientY}px`;
+        input.style.zIndex = "1000";
+        input.style.padding = "0.2rem 0.4rem";
+        input.style.border = "1px solid var(--line)";
+        input.style.borderRadius = "0.5rem";
+        input.style.background = "#1a2128";
+        input.style.color = "var(--text)";
+        document.body.appendChild(input);
+        input.focus();
+
+        function commit() {
+          const text = input.value.trim();
+          if (text) {
+            drawingContext.fillStyle = currentColor;
+            drawingContext.font = `${Math.max(14, currentLineWidth * 4)}px Inter, sans-serif`;
+            drawingContext.fillText(text, point.x, point.y);
+            saveCanvasState();
+            autoSaveDrawing();
+          }
+          document.body.removeChild(input);
+        }
+
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            commit();
+          } else if (e.key === "Escape") {
+            document.body.removeChild(input);
+          }
+        });
+
+        input.addEventListener("blur", () => {
+          setTimeout(() => {
+            if (document.body.contains(input)) {
+              commit();
+            }
+          }, 100);
+        });
+      }
+
+      function saveCanvasState() {
+        const canvas = document.getElementById("drawing-canvas");
+        if (!canvas) return;
+        undoStack.push(canvas.toDataURL());
+        if (undoStack.length > 25) undoStack.shift();
+        redoStack = [];
+      }
+
+      function undoCanvas() {
+        if (undoStack.length <= 1) {
+          showToast("Inget att ångra", "info");
+          return;
+        }
+        const canvas = document.getElementById("drawing-canvas");
+        redoStack.push(undoStack.pop());
+        loadDrawing(undoStack[undoStack.length - 1]);
+      }
+
+      function redoCanvas() {
+        if (!redoStack.length) {
+          showToast("Inget att göra om", "info");
+          return;
+        }
+        const canvas = document.getElementById("drawing-canvas");
+        const state = redoStack.pop();
+        undoStack.push(state);
+        loadDrawing(state);
+      }
+
+      function loadDrawing(dataUrl) {
+        const canvas = document.getElementById("drawing-canvas");
+        if (!canvas || !dataUrl) return;
+        const img = new Image();
+        img.onload = () => {
+          drawingContext.clearRect(0, 0, canvas.width, canvas.height);
+          drawingContext.drawImage(img, 0, 0);
+        };
+        img.src = dataUrl;
+      }
+
+      function generateThumbnail(canvas) {
+        if (!canvas) return "";
+        const thumb = document.createElement("canvas");
+        thumb.width = 160;
+        thumb.height = 90;
+        thumb.getContext("2d").drawImage(canvas, 0, 0, thumb.width, thumb.height);
+        return thumb.toDataURL();
+      }
+
+      async function autoSaveDrawing() {
+        if (!selectedScene) return;
+        const canvas = document.getElementById("drawing-canvas");
+        const drawingData = canvas ? canvas.toDataURL() : "";
+        const thumbnail = generateThumbnail(canvas);
+        const updated = { ...selectedScene, drawing: drawingData, thumbnail };
+        await window.dataSdk.update(updated);
+      }
+
+      let currentZoom = 1;
+
+      function adjustZoom(factor) {
+        setZoom(Math.min(Math.max(currentZoom * factor, 0.3), 4));
+      }
+
+      function setZoom(value) {
+        currentZoom = value;
+        const canvas = document.getElementById("drawing-canvas");
+        canvas.style.transform = `scale(${currentZoom})`;
+        document.getElementById("zoom-level").textContent = `${Math.round(currentZoom * 100)}%`;
+      }
+
+      function toggleFullscreen() {
+        const canvas = document.getElementById("drawing-canvas");
+        if (!canvas) return;
+        if (!document.fullscreenElement) {
+          canvas.requestFullscreen?.();
+        } else {
+          document.exitFullscreen?.();
+        }
+      }
+
+      function setupTimelineDrag() {
+        const track = document.getElementById("timeline-track");
+        if (!track) return;
+
+        let dragged = null;
+        track.querySelectorAll(".timeline-scene").forEach((scene) => {
+          scene.addEventListener("dragstart", () => {
+            dragged = scene;
+            scene.classList.add("dragging");
+          });
+          scene.addEventListener("dragend", async () => {
+            scene.classList.remove("dragging");
+            dragged = null;
+            await persistTimelineOrder();
+          });
+          scene.addEventListener("dragover", (event) => {
+            event.preventDefault();
+            if (!dragged || dragged === scene) return;
+            const rect = scene.getBoundingClientRect();
+            const isAfter = (event.clientX - rect.left) / rect.width > 0.5;
+            track.insertBefore(dragged, isAfter ? scene.nextSibling : scene);
+          });
+        });
+      }
+
+      async function persistTimelineOrder() {
+        const track = document.getElementById("timeline-track");
+        if (!track) return;
+        const ids = Array.from(track.querySelectorAll(".timeline-scene"), (scene) => scene.dataset.id);
+        for (let i = 0; i < ids.length; i++) {
+          const scene = allScenes.find((item) => item.__backendId === ids[i]);
+          if (scene && scene.order !== i) {
+            await window.dataSdk.update({ ...scene, order: i });
+          }
+        }
+        showToast("Tidslinje uppdaterad", "success");
+      }
+
+      function setupPhotoUpload() {
+        const upload = document.getElementById("photo-upload");
+        const fileInput = document.getElementById("photo-input");
+        if (!upload || !fileInput) return;
+
+        upload.addEventListener("click", () => fileInput.click());
+        upload.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            fileInput.click();
+          }
+        });
+
+        upload.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          upload.classList.add("dragover");
+        });
+
+        upload.addEventListener("dragleave", () => upload.classList.remove("dragover"));
+
+        upload.addEventListener("drop", (event) => {
+          event.preventDefault();
+          upload.classList.remove("dragover");
+          handlePhotoFiles(event.dataTransfer.files);
+        });
+
+        fileInput.addEventListener("change", (event) => {
+          handlePhotoFiles(event.target.files);
+        });
+      }
+
+      async function handlePhotoFiles(fileList) {
+        if (!selectedScene || !fileList.length) {
+          showToast("Ingen scen vald", "error");
+          return;
+        }
+
+        const files = Array.from(fileList);
+        const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+        const maxSize = 5 * 1024 * 1024;
+        let success = 0;
+
+        for (const file of files) {
+          if (!validTypes.includes(file.type)) {
+            showToast(`Filtyp stöds inte: ${file.name}`, "error");
+            continue;
+          }
+          if (file.size > maxSize) {
+            showToast(`Fil för stor: ${file.name}`, "error");
+            continue;
+          }
+          const data = await readFileAsDataURL(file);
+          if (!selectedScene.photos) selectedScene.photos = [];
+          selectedScene.photos.push({
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            data,
+            uploadedAt: new Date().toISOString()
+          });
+          success++;
+        }
+
+        if (success > 0) {
+          const result = await window.dataSdk.update(selectedScene);
+          if (result.isOk) {
+            selectedScene = result.data;
+            showToast(`${success} foto(n) uppladdade`, "success");
+          } else {
+            showToast("Kunde inte spara foton", "error");
+          }
+        }
+      }
+
+      function readFileAsDataURL(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      async function removePhoto(index) {
+        if (!selectedScene || !selectedScene.photos) return;
+        selectedScene.photos.splice(index, 1);
+        const result = await window.dataSdk.update(selectedScene);
+        if (result.isOk) {
+          selectedScene = result.data;
+          renderCurrentView();
+          showToast("Foto borttaget", "success");
+        } else {
+          showToast("Kunde inte ta bort foto", "error");
+        }
+      }
+
+      function setupDetailsForm() {
+        const form = document.getElementById("scene-form");
+        if (form) {
+          form.addEventListener("submit", handleSceneFormSubmit);
+        }
+        setupPhotoUpload();
+      }
+
+      function showKeyboardShortcuts() {
+        const overlay = document.createElement("div");
+        overlay.style.position = "fixed";
+        overlay.style.inset = "0";
+        overlay.style.background = "rgba(0,0,0,0.65)";
+        overlay.style.zIndex = "1000";
+
+        const modal = document.createElement("div");
+        modal.style.position = "absolute";
+        modal.style.top = "50%";
+        modal.style.left = "50%";
+        modal.style.transform = "translate(-50%, -50%)";
+        modal.style.background = "var(--panel)";
+        modal.style.border = "1px solid var(--line)";
+        modal.style.borderRadius = "1rem";
+        modal.style.padding = "1.2rem";
+        modal.style.width = "min(90vw, 320px)";
+
+        modal.innerHTML = `
+          <h3 style="margin-bottom:0.7rem;color:var(--text);font-size:0.95rem;">⌨️ Kortkommandon</h3>
+          <ul style="list-style:none;display:grid;gap:0.45rem;font-size:0.8rem;color:var(--sub);">
+            <li><strong>Ctrl/⌘ + N</strong> – Ny scen</li>
+            <li><strong>Ctrl/⌘ + S</strong> – Spara scen</li>
+            <li><strong>Ctrl/⌘ + Z</strong> – Ångra ritning</li>
+            <li><strong>Ctrl/⌘ + Shift + Z</strong> – Gör om ritning</li>
+            <li><strong>Ctrl/⌘ + F</strong> – Fullskärm rityta</li>
+            <li><strong>?</strong> – Visa denna hjälp</li>
+          </ul>
+          <button class="btn-primary" style="margin-top:0.9rem;" id="close-shortcuts">Stäng</button>
+        `;
+
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        overlay.addEventListener("click", (event) => {
+          if (event.target === overlay) {
+            overlay.remove();
+          }
+        });
+
+        modal.querySelector("#close-shortcuts").addEventListener("click", () => overlay.remove());
+      }
+
+      function showToast(message, type = "info") {
+        const existing = document.querySelector(".toast");
+        if (existing) existing.remove();
+        const toast = document.createElement("div");
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2800);
+      }
+
+      function exportToPDF() {
+        if (!allScenes.length) {
+          showToast("Inga scener att exportera", "error");
+          return;
+        }
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+          showToast("PDF-bibliotek saknas", "error");
+          return;
+        }
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFontSize(18);
+        doc.text(document.getElementById("app-title").textContent, 14, 20);
+        doc.setFontSize(12);
+        doc.text(`BPM: ${projectBPM}`, 14, 30);
+        doc.text(`Antal scener: ${allScenes.length}`, 14, 38);
+        let y = 50;
+        allScenes.forEach((scene, index) => {
+          if (y > 270) {
+            doc.addPage();
+            y = 20;
+          }
+          doc.setFont(undefined, "bold");
+          doc.text(`Scen ${index + 1}: ${scene.duration}`, 14, y);
+          y += 6;
+          doc.setFont(undefined, "normal");
+          doc.text(`Typ: ${scene.sceneType}`, 16, y); y += 6;
+          doc.text(`Beskrivning: ${scene.description || 'Ingen'}`, 16, y); y += 6;
+          doc.text(`Kamera: ${scene.cameraMovement || 'Ej angivet'}`, 16, y); y += 6;
+          doc.text(`Ljussättning: ${scene.lighting || 'Ej angivet'}`, 16, y); y += 6;
+          doc.text(`BPM-synkad: ${scene.bmpSync ? 'Ja' : 'Nej'}`, 16, y); y += 6;
+          if (scene.notes) {
+            doc.text(`Anteckningar: ${scene.notes.substring(0, 80)}`, 16, y);
+            y += 6;
+          }
+          doc.text(`Referensfoton: ${scene.photos ? scene.photos.length : 0}`, 16, y);
+          y += 8;
+        });
+        doc.save(`storyboard_${new Date().toISOString().split('T')[0]}.pdf`);
+        showToast("PDF skapad", "success");
+      }
+
+      function exportToJSON() {
+        if (!allScenes.length) {
+          showToast("Inga scener att exportera", "error");
+          return;
+        }
+        const data = {
+          project: {
+            title: document.getElementById("app-title").textContent,
+            subtitle: document.getElementById("subtitle-tag").textContent,
+            bpm: projectBPM,
+            exportedAt: new Date().toISOString()
+          },
+          scenes: allScenes
+        };
+        downloadFile(JSON.stringify(data, null, 2), "application/json", `storyboard_${new Date().toISOString().split('T')[0]}.json`);
+        showToast("JSON exporterad", "success");
+      }
+
+      function exportToText() {
+        if (!allScenes.length) {
+          showToast("Inga scener att exportera", "error");
+          return;
+        }
+        const lines = [
+          "MUSIKVIDEO STORYBOARD",
+          "======================",
+          `Projekt: ${document.getElementById("app-title").textContent}`,
+          `Undertitel: ${document.getElementById("subtitle-tag").textContent}`,
+          `BPM: ${projectBPM}`,
+          `Skapad: ${new Date().toLocaleString('sv-SE')}`,
+          "",
+          "SCENER:"
+        ];
+        allScenes.forEach((scene, index) => {
+          lines.push(`\nScen ${index + 1}: ${scene.duration}`);
+          lines.push(`Typ: ${scene.sceneType}`);
+          lines.push(`Beskrivning: ${scene.description || 'Ingen'}`);
+          lines.push(`Kamera: ${scene.cameraMovement || 'Ej angivet'}`);
+          lines.push(`Ljussättning: ${scene.lighting || 'Ej angivet'}`);
+          lines.push(`BPM-synkad: ${scene.bmpSync ? 'Ja' : 'Nej'}`);
+          lines.push(`Referensfoton: ${scene.photos ? scene.photos.length : 0}`);
+          lines.push(`Anteckningar: ${scene.notes || 'Inga'}`);
+        });
+        downloadFile(lines.join("\n"), "text/plain", `storyboard_${new Date().toISOString().split('T')[0]}.txt`);
+        showToast("Textfil exporterad", "success");
+      }
+
+      function downloadFile(content, type, filename) {
+        const blob = new Blob([content], { type });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+
+      window.saveInlineEdit = saveInlineEdit;
+      window.cancelInlineEdit = cancelInlineEdit;
+      window.removePhoto = removePhoto;
+
+      initializeApp();
+
+      // Post-render hooks
+      const observer = new MutationObserver(() => {
+        setupDetailsForm();
+      });
+      observer.observe(document.getElementById("main-content"), { childList: true, subtree: true });
+    </script>
+  </body>
+</html>
