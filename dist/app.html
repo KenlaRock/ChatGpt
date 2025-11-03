@@ -920,8 +920,26 @@ function renderCanvas(){
   setStatus('Redo');
 }
 
+function resolveSceneForFrame(fr,sceneHint=null){
+  if(sceneHint)return sceneHint;
+
+  const curr=currentScene();
+  if(curr&&curr.frames?.some(f=>f.id===fr.id)){
+    return curr;
+  }
+
+  for(const sc of state.currentProject?.scenes||[]){
+    if(sc.frames?.some(f=>f.id===fr.id)){
+      return sc;
+    }
+  }
+
+  return null;
+}
+
 function drawFrameComposite(fr,c,W,H,opts={}){
   const {grid=false,scene=null}=opts;
+  const targetScene=resolveSceneForFrame(fr,scene);
 
   c.save();
 
@@ -929,7 +947,7 @@ function drawFrameComposite(fr,c,W,H,opts={}){
     const finish=()=>{
       try{
         drawStrokes(fr,c,W,H);
-        if(grid)drawBpmGrid(c,W,H,scene);
+        if(grid)drawBpmGrid(c,W,H,targetScene);
       }finally{
         c.restore();
         resolve();
