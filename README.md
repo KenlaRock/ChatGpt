@@ -1,29 +1,12 @@
-# Data Viewer & Converter v2.2
+UNSORTED REPO
 
-Single-file web app for viewing and converting data between JSON, XML, YAML, CSV, Markdown and HTML.
+ToDo:
+1. Create folders, separating and sorting the contained files in to folders named and categorized by their main applications and grouped by relations accordingly.
 
-## Prerequisites
-- Node.js 20+
+2. Write relevant notes in this README to clarify status, structure, details, missing content and suggested actions for complementary changes and/or builds.
 
-## Setup
-Install dependencies for tests:
-```sh
-npm install
-```
+3. Prioritize repository content related to the Storyboard Webb App, and highlight focus on the app for @Codex.
 
-## Scripts
-- `npm test` – run unit tests with Jest
-- `npm run build` – generate `dist/` with app assets for deploy
+4. Build an Agent markdown file, clarifying the repo content and active areas to focus on. Clarify freedom to edit, move, create, delete and elaborate on all content in this repo for the agent/@codex.
 
-## Netlify
-Pushes to `main` or `File-Viewer-App` deploy via GitHub Actions.
-Set `NETLIFY_AUTH_TOKEN` in repository secrets for deployment.
-The build environment is pinned to Node.js 20 in `netlify.toml`.
-
-## Contributing
-1. Fork and clone the repo.
-2. Create a branch from `main` and make your changes.
-3. Run `npm test` and open a pull request.
-
-## Samples
-Sample files (`small.json`, `medium.csv`, `medium.xml`) are available for manual testing.
+5. Re-formulate and optimize these instructions to optimal instructions and information for agents/@codex to understand and follow.
