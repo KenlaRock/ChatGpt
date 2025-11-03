@@ -1251,11 +1251,11 @@ let saveTimer=null;
 
 function saveProjectDebounced(){
   if(!state.currentProject)return;
-  
+
   if(saveTimer)clearTimeout(saveTimer);
-  
+
   setStatus('Sparar…');
-  
+
   saveTimer=setTimeout(async()=>{
     await dbPut(state.currentProject);
     setStatus('Sparat '+new Date().toLocaleTimeString());
@@ -1263,6 +1263,22 @@ function saveProjectDebounced(){
 }
 
 // Export helpers
+function frameEntriesForProject(proj){
+  if(!proj?.scenes)return [];
+
+  const entries=[];
+
+  for(const sc of proj.scenes){
+    if(!sc?.frames)continue;
+
+    for(const fr of sc.frames){
+      entries.push({frame:fr,scene:sc});
+    }
+  }
+
+  return entries;
+}
+
 async function renderFrameToCanvas(fr,width,height,scene=null){
   const canvas=document.createElement('canvas');
   canvas.width=width;
@@ -1483,23 +1499,21 @@ async function buildZipBlob(){
   
   const zip=new JSZip();
   const proj=state.currentProject;
-  
+
   if(!proj){
     throw new Error('Inget projekt öppet');
   }
-  
+
   zip.file('project.json',JSON.stringify(proj,null,2));
-  
+
   const framesFolder=zip.folder('frames');
-  
-  for(const sc of proj.scenes){
-    for(const fr of sc.frames){
-      const canvas=await renderFrameToCanvas(fr,1280,aspectH(1280),sc);
-      const dataUrl=canvas.toDataURL('image/png');
-      const base64=dataUrl.split(',')[1];
-      const filename=`${sc.name.replace(/\s+/g,'_')}_${fr.id}.png`;
-      framesFolder.file(filename,base64,{base64:true});
-    }
+
+  for(const {frame:fr,scene:sc} of frameEntriesForProject(proj)){
+    const canvas=await renderFrameToCanvas(fr,1280,aspectH(1280),sc);
+    const dataUrl=canvas.toDataURL('image/png');
+    const base64=dataUrl.split(',')[1];
+    const filename=`${sc.name.replace(/\s+/g,'_')}_${fr.id}.png`;
+    framesFolder.file(filename,base64,{base64:true});
   }
   
   zip.file('shotlist.csv',makeShotlistCsv(proj));
@@ -1581,9 +1595,7 @@ async function buildWebmBlob(opts={}){
     if(e.data.size>0)chunks.push(e.data);
   };
   
-  const frameEntries=(state.currentProject?.scenes||[]).flatMap(sc=>
-    sc.frames.map(fr=>({frame:fr,scene:sc}))
-  );
+  const frameEntries=frameEntriesForProject(state.currentProject);
 
   if(!frameEntries.length){
     throw new Error('Inga frames att exportera');
