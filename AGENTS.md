@@ -4,7 +4,7 @@
 These instructions apply to the entire repository unless a subdirectory defines a more specific `AGENTS.md` file.
 
 ## Mission priorities
-1. **Storyboard delivery first.** Default to work that improves `apps/storyboard/dist` or its supporting build/test flows.
+1. **Storyboard delivery first.** Default to work that improves `apps/storyboard/dist`, the new root-level `index.html` prototype, or their supporting build/test flows.
 2. **Keep artifacts organized.** Follow the directory guide in the root `README.md` when introducing new assets so that documentation, configuration, data, and archives remain separated.
 3. **Document key findings.** Record notable decisions, risks, and follow-up items in `docs/` so that subsequent contributors have immediate context.
 

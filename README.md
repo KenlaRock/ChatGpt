@@ -4,12 +4,14 @@ This repository stores the Storyboard web application deliverables alongside sup
 
 ## Repository status
 - **Active focus:** `apps/storyboard/dist` contains the shipping single-page application bundle that should be verified, iterated, and shipped.
+- **Standalone prototype:** `index.html` in the repository root hosts the refreshed Musikvideo Pro storyboard experience used for rapid UI validation, export testing, and Android layout checks without running the build toolchain.
 - **Supporting assets:** Datasets, configuration, and documentation have been moved into dedicated folders to simplify discovery.
 - **Archived code:** Legacy Storyboard sources now live under `archive/` and require opt-in maintenance only when explicitly requested.
 
 ## Directory guide
 | Path | Purpose |
 | --- | --- |
+| `index.html` | Standalone Musikvideo Pro storyboard build focused on mobile-ready UI flows, export routines, and photo handling. |
 | `apps/storyboard/dist/` | Published Storyboard SPA bundle (HTML + docs). Target for functional validation and packaging tasks. |
 | `archive/storyboard-legacy/` | Frozen legacy implementation retained for reference. No changes unless a specific migration task requires it. |
 | `config/` | Deployment configuration such as `netlify.toml`. |

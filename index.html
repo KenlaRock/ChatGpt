@@ -1,0 +1,2870 @@
+<!doctype html>
+<html lang="sv">
+ <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <title>Storyboard – Musikvideo Pro</title>
+  <meta name="theme-color" content="#0b0d10">
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --bg: #0b0d10;
+      --panel: #12161b;
+      --muted: #1a2128;
+      --line: #23303a;
+      --text: #e6eef6;
+      --sub: #a6b3bf;
+      --accent: #e63946;
+      --ok: #22c55e;
+      --warn: #f59e0b;
+      --hover: #1e252c;
+      --success: #10b981;
+      --info: #3b82f6
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html,
+    body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Inter, "Noto Sans", Arial
+    }
+
+    button {
+      cursor: pointer;
+      transition: all .15s ease;
+      font-family: inherit;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    a {
+      color: #9bd
+    }
+
+    .app {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100%;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .75rem 1rem;
+      background: linear-gradient(180deg, #11161b, #0b0d10);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 5
+    }
+
+    header h1 {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: .3px
+    }
+
+    .tag {
+      font-size: 12px;
+      padding: .15rem .5rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--sub)
+    }
+
+    .nav {
+      display: flex;
+      gap: .5rem;
+      margin-left: auto
+    }
+
+    .nav button {
+      background: var(--muted);
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: .5rem .7rem;
+      border-radius: 10px;
+      font-size: 13px;
+    }
+
+    .nav button:hover {
+      background: var(--hover);
+    }
+
+    .nav button[aria-current="page"] {
+      outline: 2px solid var(--accent)
+    }
+
+    .export-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .export-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 1000;
+      min-width: 160px;
+      margin-top: 4px;
+    }
+
+    .export-menu button {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      padding: 8px 12px;
+      text-align: left;
+      font-size: 13px;
+      border-radius: 0;
+    }
+
+    .export-menu button:hover {
+      background: var(--hover);
+    }
+
+    .export-menu button:first-child {
+      border-radius: 10px 10px 0 0;
+    }
+
+    .export-menu button:last-child {
+      border-radius: 0 0 10px 10px;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 300px 1fr 320px;
+      gap: 10px;
+      padding: 10px
+    }
+
+    @media (max-width:1200px) {
+      main {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .col {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      min-height: 200px
+    }
+
+    .col h2,
+    .col h3 {
+      padding: .75rem 1rem;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+      letter-spacing: .3px;
+      color: var(--sub);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .col .body {
+      padding: 10px
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #10151a;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .row:hover {
+      background: var(--hover);
+      transform: translateY(-1px);
+    }
+
+    .row.active {
+      outline: 2px solid var(--accent);
+      background: rgba(230, 57, 70, 0.1);
+    }
+
+    .row.editing {
+      outline: 2px solid var(--info);
+      background: rgba(59, 130, 246, 0.1);
+    }
+
+    .row .info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .row .title {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .row .meta {
+      font-size: 11px;
+      color: var(--sub);
+    }
+
+    .row .actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .row .actions button {
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--sub);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+    }
+
+    .row .actions button:hover {
+      background: var(--muted);
+      color: var(--text);
+    }
+
+    .row .actions button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .scene-thumbnail {
+      width: 40px;
+      height: 30px;
+      background: #0f1419;
+      border-radius: 4px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: var(--sub);
+    }
+    .scene-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+
+    .inline-edit {
+      background: var(--muted);
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      width: 100%;
+      margin: 2px 0;
+    }
+
+    .inline-edit:focus {
+      outline: 2px solid var(--info);
+      border-color: var(--info);
+    }
+
+    .inline-actions {
+      display: flex;
+      gap: 4px;
+      margin-top: 6px;
+    }
+
+    .inline-actions button {
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      border: 1px solid var(--line);
+    }
+
+    .inline-actions .save-btn {
+      background: var(--success);
+      border-color: var(--success);
+      color: white;
+    }
+
+    .inline-actions .cancel-btn {
+      background: var(--muted);
+      color: var(--text);
+    }
+
+    .timeline-container {
+      overflow-x: auto;
+      padding: 10px 0;
+    }
+
+    .timeline-track {
+      display: flex;
+      gap: 12px;
+      min-width: max-content;
+      padding: 0 10px;
+    }
+
+    .timeline-scene {
+      width: 160px;
+      flex-shrink: 0;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: grab;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .timeline-scene:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .timeline-scene.dragging {
+      cursor: grabbing;
+      transform: rotate(5deg) scale(1.05);
+      z-index: 1000;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    .timeline-scene .thumbnail {
+      width: 100%;
+      height: 90px;
+      background: #0f1419;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--sub);
+      font-size: 11px;
+      position: relative;
+    }
+
+    .timeline-scene .thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .timeline-scene .info {
+      padding: 8px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 8px
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+      align-items: center
+    }
+
+    .toolbar .btn {
+      background: var(--muted);
+      border: 1px solid var(--line);
+      padding: .45rem .6rem;
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .toolbar .btn:hover {
+      background: var(--hover);
+    }
+
+    .toolbar .btn.active {
+      background: var(--accent);
+      border-color: var(--accent)
+    }
+
+    .toolbar input[type="color"] {
+      height: 34px;
+      width: 50px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--muted);
+      cursor: pointer;
+    }
+
+    .toolbar input[type="range"] {
+      height: 34px;
+      width: 100px;
+    }
+
+    .canvas-container {
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+
+    .canvas-fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.95);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .canvas-fullscreen canvas {
+      max-width: 90%;
+      max-height: 90%;
+    }
+
+    .zoom-controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      gap: 4px;
+      background: rgba(18, 22, 27, 0.9);
+      border-radius: 8px;
+      padding: 4px;
+    }
+
+    .zoom-btn {
+      background: var(--muted);
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .layer-controls {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+
+    .layer-btn {
+      background: var(--muted);
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .layer-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    canvas {
+      background: #0f1419;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      touch-action: none;
+      max-width: 100%;
+      width: 100%;
+      display: block;
+      cursor: crosshair;
+    }
+
+    label {
+      font-size: 12px;
+      color: var(--sub);
+      display: block;
+      margin-bottom: 4px;
+    }
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      background: #0f1419;
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: .5rem;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 13px;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      border: 1px solid var(--accent);
+      color: white;
+      padding: .6rem 1rem;
+      border-radius: 10px;
+      width: 100%;
+      font-weight: 500;
+      font-size: 13px;
+    }
+
+    .btn-primary:hover {
+      background: #d32f3c;
+    }
+
+    .btn-primary:disabled {
+      background: var(--muted);
+      border-color: var(--line);
+    }
+
+    .advanced-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .control-group {
+      background: var(--muted);
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+    }
+
+    .control-group h4 {
+      font-size: 11px;
+      color: var(--sub);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .icon-btn {
+      background: var(--muted);
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: 6px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .icon-btn:hover {
+      background: var(--hover);
+    }
+
+    .bpm-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--sub);
+      background: var(--muted);
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+    }
+
+    .bmp-indicator.synced {
+      color: var(--ok);
+      border-color: var(--ok);
+    }
+
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .template-card {
+      background: var(--muted);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .template-card:hover {
+      background: var(--hover);
+      transform: translateY(-1px);
+    }
+
+    .template-card .icon {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .template-card .name {
+      font-size: 11px;
+      color: var(--text);
+    }
+
+    .search-box {
+      width: 100%;
+      background: #0f1419;
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--sub);
+    }
+
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 1rem;
+      opacity: 0.5;
+    }
+
+    footer {
+      padding: 1rem;
+      text-align: center;
+      border-top: 1px solid var(--line);
+      font-size: 12px;
+      color: var(--sub);
+    }
+
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 12px 16px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 1000;
+      animation: slideIn 0.3s ease;
+      max-width: 300px;
+    }
+
+    .toast.success {
+      border-color: var(--success);
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    .toast.error {
+      border-color: var(--accent);
+      background: rgba(230, 57, 70, 0.1);
+    }
+
+    .toast.info {
+      border-color: var(--info);
+      background: rgba(59, 130, 246, 0.1);
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .limit-warning {
+      background: var(--warn);
+      color: #000;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .keyboard-shortcuts {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 400px;
+      z-index: 10000;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+
+    .shortcuts-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 9999;
+    }
+
+    .shortcut-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+      font-size: 12px;
+    }
+
+    .shortcut-key {
+      background: var(--muted);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 11px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: var(--muted);
+      border-radius: 2px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.3s ease;
+      border-radius: 2px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .stat-card {
+      background: var(--muted);
+      padding: 8px;
+      border-radius: 8px;
+      text-align: center;
+      border: 1px solid var(--line);
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: var(--sub);
+      margin-top: 2px;
+    }
+    .photo-upload-section {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    .photo-upload-area {
+      border: 2px dashed var(--line);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: 12px;
+    }
+
+    .photo-upload-area:hover {
+      border-color: var(--accent);
+      background: rgba(230, 57, 70, 0.05);
+    }
+
+    .photo-upload-area.dragover {
+      border-color: var(--accent);
+      background: rgba(230, 57, 70, 0.1);
+    }
+
+    .photo-preview {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border: 1px solid var(--line);
+    }
+
+    .photo-controls {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .photo-controls button {
+      background: var(--muted);
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .photo-controls button:hover {
+      background: var(--hover);
+    }
+
+    .photo-controls .remove-btn {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .photo-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .photo-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .photo-item:hover {
+      transform: scale(1.05);
+    }
+
+    .photo-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .photo-item .remove-photo {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background: rgba(230, 57, 70, 0.9);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .photo-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .photo-modal img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 8px;
+    }
+
+    .photo-modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+      cursor: pointer;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="app">
+   <header>
+    <h1 id="app-title">Storyboard – Musikvideo Pro</h1><span class="tag" id="subtitle-tag">Professional Edition</span>
+    <nav class="nav"><button id="nav-scenes" aria-current="page">Scener</button> <button id="nav-timeline">Tidslinje</button> <button id="nav-templates">Mallar</button> <button id="show-shortcuts" title="Kortkommandon (?)">⌨️</button>
+     <div class="export-dropdown"><button id="export-btn" title="Exportera">📤 Export</button>
+      <div class="export-menu" id="export-menu" style="display: none;"><button id="export-pdf">📄 PDF Rapport</button> <button id="export-json">📋 JSON Data</button> <button id="export-txt">📝 Text Fil</button>
+      </div>
+     </div>
+    </nav>
+   </header>
+   <main id="main-content"><!-- Content will be rendered here -->
+   </main>
+   <footer>
+    <p>Professionell musikvideo storyboard • Avancerade ritverktyg • BPM-synkronisering • PDF/JSON Export</p>
+   </footer>
+  </div>
+  <script>
+    const defaultConfig = {
+      app_title: "Storyboard – Musikvideo Pro",
+      subtitle_text: "Professional Edition",
+      project_bpm: "120",
+      background_color: "#0b0d10",
+      surface_color: "#12161b",
+      text_color: "#e6eef6",
+      primary_action_color: "#e63946",
+      secondary_action_color: "#22c55e"
+    };
+
+    let currentView = 'scenes';
+    let selectedScene = null;
+    let editingScene = null;
+    let allScenes = [];
+    let isDrawing = false;
+    let drawingContext = null;
+    let currentTool = 'pen';
+    let currentColor = '#e6eef6';
+    let currentLineWidth = 3;
+    let canvasZoom = 1;
+    let canvasOffsetX = 0;
+    let canvasOffsetY = 0;
+    let undoStack = [];
+    let redoStack = [];
+    let autoSaveTimer = null;
+    let draggedScene = null;
+    let isFullscreen = false;
+    let currentLayer = 'main';
+    let layers = { background: null, main: null, foreground: null };
+    let projectBPM = 120;
+    let searchQuery = '';
+    let exportMenuOpen = false;
+
+    // Templates for common music video scenes
+    const sceneTemplates = [
+      { name: 'Intro Shot', icon: '🎬', type: 'Intro', description: 'Öppningsscen', camera: 'Statisk', lighting: 'Dramatisk' },
+      { name: 'Close-up', icon: '👤', type: 'Vers', description: 'Närbild artist', camera: 'Zoom In', lighting: 'Mjuk' },
+      { name: 'Wide Shot', icon: '🌅', type: 'Refräng', description: 'Bred vy', camera: 'Pan Höger', lighting: 'Naturlig' },
+      { name: 'Performance', icon: '🎤', type: 'Refräng', description: 'Artistframträdande', camera: 'Handhållen', lighting: 'Scenljus' },
+      { name: 'Cutaway', icon: '✂️', type: 'Brygga', description: 'Mellanklipp', camera: 'Statisk', lighting: 'Kontrastrik' },
+      { name: 'Outro', icon: '🎭', type: 'Outro', description: 'Avslutning', camera: 'Zoom Out', lighting: 'Fade' }
+    ];
+
+    // Data SDK Handler
+    const dataHandler = {
+      onDataChanged(data) {
+        allScenes = data.sort((a, b) => (a.order || 0) - (b.order || 0));
+        renderCurrentView();
+      }
+    };
+
+    // Element SDK Implementation
+    async function onConfigChange(config) {
+      document.getElementById('app-title').textContent = config.app_title || defaultConfig.app_title;
+      document.getElementById('subtitle-tag').textContent = config.subtitle_text || defaultConfig.subtitle_text;
+      
+      if (config.project_bpm) {
+        projectBPM = parseInt(config.project_bpm) || 120;
+      }
+      
+      document.documentElement.style.setProperty('--bg', config.background_color || defaultConfig.background_color);
+      document.documentElement.style.setProperty('--panel', config.surface_color || defaultConfig.surface_color);
+      document.documentElement.style.setProperty('--text', config.text_color || defaultConfig.text_color);
+      document.documentElement.style.setProperty('--accent', config.primary_action_color || defaultConfig.primary_action_color);
+      document.documentElement.style.setProperty('--ok', config.secondary_action_color || defaultConfig.secondary_action_color);
+    }
+
+    function mapToCapabilities(config) {
+      return {
+        recolorables: [
+          {
+            get: () => config.background_color || defaultConfig.background_color,
+            set: (value) => {
+              if (window.elementSdk) {
+                window.elementSdk.config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            }
+          },
+          {
+            get: () => config.surface_color || defaultConfig.surface_color,
+            set: (value) => {
+              if (window.elementSdk) {
+                window.elementSdk.config.surface_color = value;
+                window.elementSdk.setConfig({ surface_color: value });
+              }
+            }
+          },
+          {
+            get: () => config.text_color || defaultConfig.text_color,
+            set: (value) => {
+              if (window.elementSdk) {
+                window.elementSdk.config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            }
+          },
+          {
+            get: () => config.primary_action_color || defaultConfig.primary_action_color,
+            set: (value) => {
+              if (window.elementSdk) {
+                window.elementSdk.config.primary_action_color = value;
+                window.elementSdk.setConfig({ primary_action_color: value });
+              }
+            }
+          },
+          {
+            get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+            set: (value) => {
+              if (window.elementSdk) {
+                window.elementSdk.config.secondary_action_color = value;
+                window.elementSdk.setConfig({ secondary_action_color: value });
+              }
+            }
+          }
+        ],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      };
+    }
+
+    function mapToEditPanelValues(config) {
+      return new Map([
+        ["app_title", config.app_title || defaultConfig.app_title],
+        ["subtitle_text", config.subtitle_text || defaultConfig.subtitle_text],
+        ["project_bpm", config.project_bpm || defaultConfig.project_bpm]
+      ]);
+    }
+
+    // Initialize SDKs
+    async function initializeApp() {
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange,
+          mapToCapabilities,
+          mapToEditPanelValues
+        });
+      }
+
+      if (window.dataSdk) {
+        const result = await window.dataSdk.init(dataHandler);
+        if (!result.isOk) {
+          showToast('Kunde inte initiera datalagring', 'error');
+        }
+      }
+
+      setupNavigation();
+      setupKeyboardShortcuts();
+      setupExportMenu();
+      renderCurrentView();
+    }
+
+    function setupNavigation() {
+      document.getElementById('nav-scenes').addEventListener('click', () => switchView('scenes'));
+      document.getElementById('nav-timeline').addEventListener('click', () => switchView('timeline'));
+      document.getElementById('nav-templates').addEventListener('click', () => switchView('templates'));
+      document.getElementById('show-shortcuts').addEventListener('click', showKeyboardShortcuts);
+    }
+
+    function setupExportMenu() {
+      const exportBtn = document.getElementById('export-btn');
+      const exportMenu = document.getElementById('export-menu');
+      
+      exportBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        exportMenuOpen = !exportMenuOpen;
+        exportMenu.style.display = exportMenuOpen ? 'block' : 'none';
+      });
+
+      document.addEventListener('click', () => {
+        if (exportMenuOpen) {
+          exportMenuOpen = false;
+          exportMenu.style.display = 'none';
+        }
+      });
+
+      document.getElementById('export-pdf').addEventListener('click', () => {
+        console.log('PDF export clicked');
+        exportToPDF();
+      });
+      document.getElementById('export-json').addEventListener('click', () => {
+        console.log('JSON export clicked');
+        exportToJSON();
+      });
+      document.getElementById('export-txt').addEventListener('click', () => {
+        console.log('Text export clicked');
+        exportToText();
+      });
+    }
+
+    function switchView(view) {
+      currentView = view;
+      document.querySelectorAll('.nav button').forEach(btn => btn.removeAttribute('aria-current'));
+      document.getElementById(`nav-${view}`).setAttribute('aria-current', 'page');
+      renderCurrentView();
+    }
+
+    function setupKeyboardShortcuts() {
+      document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        
+        switch(e.key.toLowerCase()) {
+          case 'n':
+            if (e.ctrlKey || e.metaKey) {
+              e.preventDefault();
+              handleAddScene();
+            }
+            break;
+          case 'z':
+            if (e.ctrlKey || e.metaKey) {
+              e.preventDefault();
+              if (e.shiftKey) {
+                redoCanvas();
+              } else {
+                undoCanvas();
+              }
+            }
+            break;
+          case 'f':
+            if (e.ctrlKey || e.metaKey) {
+              e.preventDefault();
+              toggleFullscreen();
+            }
+            break;
+          case '?':
+            showKeyboardShortcuts();
+            break;
+          case 'escape':
+            if (isFullscreen) {
+              toggleFullscreen();
+            }
+            if (editingScene) {
+              cancelInlineEdit();
+            }
+            hideKeyboardShortcuts();
+            break;
+          case 'enter':
+            if (editingScene && e.target.classList.contains('inline-edit')) {
+              e.preventDefault();
+              saveInlineEdit();
+            }
+            break;
+        }
+      });
+    }
+
+    function renderCurrentView() {
+      const main = document.getElementById('main-content');
+      
+      switch(currentView) {
+        case 'scenes':
+          renderScenesView(main);
+          break;
+        case 'timeline':
+          renderTimelineView(main);
+          break;
+        case 'templates':
+          renderTemplatesView(main);
+          break;
+      }
+    }
+
+    function renderScenesView(container) {
+      const filteredScenes = allScenes.filter(scene => 
+        !searchQuery || 
+        scene.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        scene.sceneType.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        scene.notes.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+      const limitWarning = allScenes.length >= 999 ? 
+        '<div class="limit-warning">⚠️ Maxgräns på 999 scener uppnådd. Ta bort scener för att lägga till nya.</div>' : '';
+
+      // Calculate project statistics
+      const stats = calculateProjectStats();
+
+      container.innerHTML = `
+        <div class="col">
+          <h2>
+            Scener (${allScenes.length}/999)
+            <button class="icon-btn" id="refresh-scenes" title="Uppdatera">🔄</button>
+          </h2>
+          <div class="body">
+            ${limitWarning}
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-value">${stats.totalScenes}</div>
+                <div class="stat-label">Scener</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">${stats.withDrawings}</div>
+                <div class="stat-label">Med ritning</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">${stats.bmpSynced}</div>
+                <div class="stat-label">BPM-synkad</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">${stats.avgDuration}s</div>
+                <div class="stat-label">Snitt längd</div>
+              </div>
+            </div>
+            <input type="text" class="search-box" id="search-scenes" placeholder="🔍 Sök scener..." value="${searchQuery}">
+            <button class="btn-primary" id="add-scene-btn" ${allScenes.length >= 999 ? 'disabled' : ''}>
+              + Ny Scen (Ctrl+N)
+            </button>
+            <div style="height: 12px;"></div>
+            <div class="list" id="scenes-list">
+              ${filteredScenes.length === 0 ? `
+                <div class="empty-state">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                  <p>${searchQuery ? 'Inga matchande scener' : 'Inga scener ännu'}</p>
+                  <p style="font-size: 11px; margin-top: 4px;">${searchQuery ? 'Prova en annan sökning' : 'Klicka på "Ny Scen" för att börja'}</p>
+                </div>
+              ` : filteredScenes.map(scene => renderSceneRow(scene)).join('')}
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <h2>Avancerad Rityta</h2>
+          <div class="body">
+            <div class="layer-controls">
+              <button class="layer-btn ${currentLayer === 'background' ? 'active' : ''}" data-layer="background">Bakgrund</button>
+              <button class="layer-btn ${currentLayer === 'main' ? 'active' : ''}" data-layer="main">Huvud</button>
+              <button class="layer-btn ${currentLayer === 'foreground' ? 'active' : ''}" data-layer="foreground">Förgrund</button>
+            </div>
+            <div class="toolbar">
+              <button class="btn ${currentTool === 'pen' ? 'active' : ''}" id="tool-pen">✏️ Penna</button>
+              <button class="btn ${currentTool === 'eraser' ? 'active' : ''}" id="tool-eraser">🧹 Sudd</button>
+              <button class="btn ${currentTool === 'text' ? 'active' : ''}" id="tool-text">📝 Text</button>
+              <button class="btn" id="tool-clear">🗑️ Rensa</button>
+              <button class="btn" id="tool-undo" title="Ångra (Ctrl+Z)">↶</button>
+              <button class="btn" id="tool-redo" title="Gör om (Ctrl+Shift+Z)">↷</button>
+              <input type="color" id="color-picker" value="${currentColor}" title="Färg">
+              <input type="range" id="line-width" min="1" max="20" value="${currentLineWidth}" title="Pennstorlek">
+              <button class="btn" id="fullscreen-btn" title="Fullskärm (Ctrl+F)">⛶</button>
+            </div>
+            <div class="canvas-container" id="canvas-container">
+              <canvas id="drawing-canvas" width="600" height="400"></canvas>
+              <div class="zoom-controls">
+                <button class="zoom-btn" id="zoom-out">−</button>
+                <span id="zoom-level">${Math.round(canvasZoom * 100)}%</span>
+                <button class="zoom-btn" id="zoom-in">+</button>
+                <button class="zoom-btn" id="zoom-reset">⌂</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <h2>Scendetaljer</h2>
+          <div class="body" id="details-panel">
+            ${selectedScene ? renderSceneDetails(selectedScene) : `
+              <div class="empty-state">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <p>Välj en scen för att redigera</p>
+                <p style="font-size: 11px; margin-top: 4px;">Använd mallarna för snabbare start</p>
+              </div>
+            `}
+          </div>
+        </div>
+      `;
+
+      setupScenesEventListeners();
+      setupDrawingCanvas();
+      
+      if (selectedScene && selectedScene.drawing) {
+        loadDrawingToCanvas(selectedScene.drawing);
+      }
+    }
+
+    function renderSceneRow(scene) {
+      const isEditing = editingScene && editingScene.__backendId === scene.__backendId;
+      const isSelected = selectedScene && selectedScene.__backendId === scene.__backendId;
+      
+      if (isEditing) {
+        return `
+          <div class="row editing" data-id="${scene.__backendId}">
+            <div class="scene-thumbnail">
+              ${scene.thumbnail ? `<img src="${scene.thumbnail}" alt="Thumbnail">` : '🎬'}
+            </div>
+            <div class="info" style="flex: 1;">
+              <input type="text" class="inline-edit" id="edit-duration" value="${scene.duration}" placeholder="0:00-0:15">
+              <select class="inline-edit" id="edit-scene-type">
+                <option value="Intro" ${scene.sceneType === 'Intro' ? 'selected' : ''}>Intro</option>
+                <option value="Vers" ${scene.sceneType === 'Vers' ? 'selected' : ''}>Vers</option>
+                <option value="Refräng" ${scene.sceneType === 'Refräng' ? 'selected' : ''}>Refräng</option>
+                <option value="Brygga" ${scene.sceneType === 'Brygga' ? 'selected' : ''}>Brygga</option>
+                <option value="Outro" ${scene.sceneType === 'Outro' ? 'selected' : ''}>Outro</option>
+                <option value="Övrigt" ${scene.sceneType === 'Övrigt' ? 'selected' : ''}>Övrigt</option>
+              </select>
+              <input type="text" class="inline-edit" id="edit-description" value="${scene.description}" placeholder="Beskrivning">
+              <div class="inline-actions">
+                <button class="save-btn" onclick="saveInlineEdit()">💾 Spara</button>
+                <button class="cancel-btn" onclick="cancelInlineEdit()">❌ Avbryt</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      
+      return `
+        <div class="row ${isSelected ? 'active' : ''}" data-id="${scene.__backendId}">
+          <div class="scene-thumbnail">
+            ${scene.thumbnail ? `<img src="${scene.thumbnail}" alt="Thumbnail">` : '🎬'}
+          </div>
+          <div class="info">
+            <div class="title">${scene.duration} • ${scene.sceneType}</div>
+            <div class="meta">${scene.description || 'Ingen beskrivning'}</div>
+            <div style="display: flex; gap: 4px; margin-top: 4px;">
+              ${scene.bmpSync ? '<div class="bmp-indicator synced">♪ BPM</div>' : ''}
+              ${scene.photos && scene.photos.length > 0 ? `<div class="bmp-indicator" style="border-color: var(--info); color: var(--info);">📸 ${scene.photos.length}</div>` : ''}
+              ${scene.drawing ? '<div class="bmp-indicator" style="border-color: var(--warn); color: var(--warn);">🎨 Ritning</div>' : ''}
+            </div>
+          </div>
+          <div class="actions">
+            <button class="icon-btn quick-edit-btn" data-id="${scene.__backendId}" title="Snabbredigera">✏️</button>
+            <button class="icon-btn duplicate-btn" data-id="${scene.__backendId}" title="Duplicera">📋</button>
+            <button class="edit-btn primary" data-id="${scene.__backendId}">Redigera</button>
+            <button class="delete-btn" data-id="${scene.__backendId}">Ta bort</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSceneDetails(scene) {
+      return `
+        <form id="scene-form">
+          <div class="form-group">
+            <label for="duration">Tidsstämpel</label>
+            <input type="text" id="duration" value="${scene.duration || ''}" placeholder="0:00-0:15">
+          </div>
+          <div class="form-group">
+            <label for="scene-type">Scentyp</label>
+            <select id="scene-type">
+              <option value="Intro" ${scene.sceneType === 'Intro' ? 'selected' : ''}>Intro</option>
+              <option value="Vers" ${scene.sceneType === 'Vers' ? 'selected' : ''}>Vers</option>
+              <option value="Refräng" ${scene.sceneType === 'Refräng' ? 'selected' : ''}>Refräng</option>
+              <option value="Brygga" ${scene.sceneType === 'Brygga' ? 'selected' : ''}>Brygga</option>
+              <option value="Outro" ${scene.sceneType === 'Outro' ? 'selected' : ''}>Outro</option>
+              <option value="Övrigt" ${scene.sceneType === 'Övrigt' ? 'selected' : ''}>Övrigt</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="description">Beskrivning</label>
+            <input type="text" id="description" value="${scene.description || ''}" placeholder="Kort beskrivning">
+          </div>
+          <div class="advanced-controls">
+            <div class="control-group">
+              <h4>📹 Kamera</h4>
+              <select id="camera-movement">
+                <option value="Statisk" ${scene.cameraMovement === 'Statisk' ? 'selected' : ''}>Statisk</option>
+                <option value="Pan Vänster" ${scene.cameraMovement === 'Pan Vänster' ? 'selected' : ''}>Pan Vänster</option>
+                <option value="Pan Höger" ${scene.cameraMovement === 'Pan Höger' ? 'selected' : ''}>Pan Höger</option>
+                <option value="Zoom In" ${scene.cameraMovement === 'Zoom In' ? 'selected' : ''}>Zoom In</option>
+                <option value="Zoom Out" ${scene.cameraMovement === 'Zoom Out' ? 'selected' : ''}>Zoom Out</option>
+                <option value="Handhållen" ${scene.cameraMovement === 'Handhållen' ? 'selected' : ''}>Handhållen</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <h4>💡 Ljussättning</h4>
+              <select id="lighting">
+                <option value="Naturlig" ${scene.lighting === 'Naturlig' ? 'selected' : ''}>Naturlig</option>
+                <option value="Dramatisk" ${scene.lighting === 'Dramatisk' ? 'selected' : ''}>Dramatisk</option>
+                <option value="Mjuk" ${scene.lighting === 'Mjuk' ? 'selected' : ''}>Mjuk</option>
+                <option value="Kontrastrik" ${scene.lighting === 'Kontrastrik' ? 'selected' : ''}>Kontrastrik</option>
+                <option value="Scenljus" ${scene.lighting === 'Scenljus' ? 'selected' : ''}>Scenljus</option>
+                <option value="Fade" ${scene.lighting === 'Fade' ? 'selected' : ''}>Fade</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="costume">👔 Kostym/Makeup</label>
+            <input type="text" id="costume" value="${scene.costume || ''}" placeholder="Kostym- och makeup-anteckningar">
+          </div>
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="bmp-sync" ${scene.bmpSync ? 'checked' : ''}> 
+              ♪ Synka med BPM (${projectBPM})
+            </label>
+          </div>
+          <div class="form-group">
+            <label for="notes">Anteckningar</label>
+            <textarea id="notes" placeholder="Detaljerade anteckningar...">${scene.notes || ''}</textarea>
+          </div>
+          
+          <div class="photo-upload-section">
+            <h4 style="font-size: 13px; margin-bottom: 8px; color: var(--text);">📸 Referensfoton</h4>
+            <div class="photo-upload-area" id="photo-upload-area">
+              <div style="color: var(--sub); font-size: 12px;">
+                📤 Klicka eller dra foton hit<br>
+                <span style="font-size: 10px;">JPG, PNG, GIF, WebP (max 5MB per fil)</span>
+              </div>
+              <input type="file" id="photo-input" accept="image/*" multiple style="display: none;">
+            </div>
+            ${scene.photos && scene.photos.length > 0 ? `
+              <div class="photo-gallery" id="photo-gallery">
+                ${scene.photos.map((photo, index) => `
+                  <div class="photo-item" data-index="${index}">
+                    <img src="${photo.data}" alt="${photo.name}" onerror="this.style.display='none';">
+                    <button class="remove-photo" onclick="removePhoto(${index})" title="Ta bort foto">×</button>
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+          
+          <button type="submit" class="btn-primary" id="save-scene-btn">💾 Spara Ändringar</button>
+        </form>
+      `;
+    }
+
+    function renderTimelineView(container) {
+      container.innerHTML = `
+        <div class="col" style="grid-column: 1 / -1;">
+          <h2>Filmisk Tidslinje</h2>
+          <div class="body">
+            ${allScenes.length === 0 ? `
+              <div class="empty-state">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <p>Ingen tidslinje att visa</p>
+                <p style="font-size: 11px; margin-top: 4px;">Lägg till scener för att se tidslinjen</p>
+              </div>
+            ` : `
+              <div class="timeline-container">
+                <div class="timeline-track" id="timeline-track">
+                  ${allScenes.map((scene, index) => `
+                    <div class="timeline-scene" draggable="true" data-id="${scene.__backendId}" data-order="${index}">
+                      <div class="thumbnail">
+                        ${scene.thumbnail ? `<img src="${scene.thumbnail}" alt="Scene ${index + 1}">` : `
+                          <div style="color: var(--sub); font-size: 24px;">🎬</div>
+                        `}
+                        <div style="position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.7); color: white; padding: 2px 4px; border-radius: 4px; font-size: 10px;">
+                          ${index + 1}
+                        </div>
+                        ${scene.bmpSync ? `
+                          <div style="position: absolute; top: 4px; right: 4px; background: var(--ok); color: white; padding: 2px 4px; border-radius: 4px; font-size: 10px;">
+                            ♪
+                          </div>
+                        ` : ''}
+                      </div>
+                      <div class="info">
+                        <div class="title" style="font-size: 12px; font-weight: 600;">${scene.duration}</div>
+                        <div class="meta" style="margin-top: 2px; font-size: 11px;">${scene.sceneType}</div>
+                        <div style="font-size: 10px; color: var(--sub); margin-top: 4px; line-height: 1.3;">
+                          ${scene.description || 'Ingen beskrivning'}
+                        </div>
+                        ${scene.cameraMovement ? `
+                          <div style="font-size: 10px; color: var(--accent); margin-top: 2px;">
+                            📹 ${scene.cameraMovement}
+                          </div>
+                        ` : ''}
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            `}
+          </div>
+        </div>
+      `;
+
+      setupTimelineDragDrop();
+    }
+
+    function renderTemplatesView(container) {
+      container.innerHTML = `
+        <div class="col" style="grid-column: 1 / -1;">
+          <h2>Scenmallar</h2>
+          <div class="body">
+            <p style="color: var(--sub); margin-bottom: 16px; font-size: 13px;">
+              Välj en mall för att snabbt skapa vanliga musikvideoscener
+            </p>
+            <div class="template-grid">
+              ${sceneTemplates.map(template => `
+                <div class="template-card" data-template='${JSON.stringify(template)}'>
+                  <div class="icon">${template.icon}</div>
+                  <div class="name">${template.name}</div>
+                  <div style="font-size: 10px; color: var(--sub); margin-top: 4px;">
+                    ${template.description}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+            <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line);">
+              <h3 style="font-size: 13px; margin-bottom: 12px; color: var(--sub);">Snabbtips för musikvideor:</h3>
+              <ul style="font-size: 12px; color: var(--sub); line-height: 1.6; padding-left: 16px;">
+                <li>Börja med en stark öppningsscen som fångar uppmärksamhet</li>
+                <li>Variera mellan närbilder och vida vyer för dynamik</li>
+                <li>Synka kamerarörelser med musikens rytm och BPM</li>
+                <li>Använd ljussättning för att skapa stämning</li>
+                <li>Planera kostym- och makeup-byten mellan scener</li>
+                <li>Avsluta med en minnesvärd outro-scen</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      `;
+
+      setupTemplateEventListeners();
+    }
+
+    function calculateProjectStats() {
+      const totalScenes = allScenes.length;
+      const withDrawings = allScenes.filter(s => s.drawing && s.drawing.length > 0).length;
+      const bmpSynced = allScenes.filter(s => s.bmpSync).length;
+      
+      // Calculate average duration (simplified)
+      const durations = allScenes.map(s => {
+        const match = s.duration.match(/(\d+):(\d+)/);
+        if (match) {
+          return parseInt(match[1]) * 60 + parseInt(match[2]);
+        }
+        return 15; // default
+      });
+      const avgDuration = durations.length > 0 ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length) : 0;
+      
+      return { totalScenes, withDrawings, bmpSynced, avgDuration };
+    }
+
+    function setupScenesEventListeners() {
+      const addBtn = document.getElementById('add-scene-btn');
+      if (addBtn) {
+        addBtn.addEventListener('click', handleAddScene);
+      }
+
+      const refreshBtn = document.getElementById('refresh-scenes');
+      if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+          showToast('Uppdaterar scener...', 'info');
+          renderCurrentView();
+        });
+      }
+
+      const searchBox = document.getElementById('search-scenes');
+      if (searchBox) {
+        searchBox.addEventListener('input', (e) => {
+          searchQuery = e.target.value;
+          renderCurrentView();
+        });
+      }
+
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.id;
+          const scene = allScenes.find(s => s.__backendId === id);
+          if (scene) {
+            selectedScene = scene;
+            editingScene = null;
+            renderCurrentView();
+            showToast(`Redigerar: ${scene.description || 'Scen ' + (allScenes.indexOf(scene) + 1)}`, 'info');
+          }
+        });
+      });
+
+      // Add click handlers for scene rows
+      document.querySelectorAll('.row').forEach(row => {
+        row.addEventListener('click', (e) => {
+          // Don't trigger if clicking on buttons
+          if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+          
+          const id = row.dataset.id;
+          const scene = allScenes.find(s => s.__backendId === id);
+          if (scene) {
+            selectedScene = scene;
+            editingScene = null;
+            renderCurrentView();
+          }
+        });
+      });
+
+      document.querySelectorAll('.quick-edit-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.id;
+          const scene = allScenes.find(s => s.__backendId === id);
+          if (scene) {
+            editingScene = scene;
+            selectedScene = null;
+            renderCurrentView();
+          }
+        });
+      });
+
+      document.querySelectorAll('.duplicate-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          handleDuplicateScene(btn.dataset.id);
+        });
+      });
+
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          handleDeleteScene(btn.dataset.id);
+        });
+      });
+
+      document.querySelectorAll('.layer-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentLayer = btn.dataset.layer;
+          document.querySelectorAll('.layer-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        });
+      });
+
+      const form = document.getElementById('scene-form');
+      if (form) {
+        form.addEventListener('submit', handleSaveScene);
+      }
+
+      setupPhotoUpload();
+    }
+
+    function setupTemplateEventListeners() {
+      document.querySelectorAll('.template-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const template = JSON.parse(card.dataset.template);
+          handleCreateFromTemplate(template);
+        });
+      });
+    }
+
+    function setupTimelineDragDrop() {
+      const timelineTrack = document.getElementById('timeline-track');
+      if (!timelineTrack) return;
+
+      let draggedElement = null;
+      let draggedIndex = null;
+
+      document.querySelectorAll('.timeline-scene').forEach(scene => {
+        scene.addEventListener('dragstart', (e) => {
+          draggedElement = scene;
+          draggedIndex = parseInt(scene.dataset.order);
+          scene.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+
+        scene.addEventListener('dragend', () => {
+          if (draggedElement) {
+            draggedElement.classList.remove('dragging');
+            draggedElement = null;
+            draggedIndex = null;
+          }
+        });
+
+        scene.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+        });
+
+        scene.addEventListener('drop', (e) => {
+          e.preventDefault();
+          if (draggedElement && draggedElement !== scene) {
+            const targetIndex = parseInt(scene.dataset.order);
+            handleReorderScenes(draggedIndex, targetIndex);
+          }
+        });
+      });
+    }
+
+    async function saveInlineEdit() {
+      if (!editingScene) return;
+
+      const duration = document.getElementById('edit-duration').value;
+      const sceneType = document.getElementById('edit-scene-type').value;
+      const description = document.getElementById('edit-description').value;
+
+      const updatedScene = {
+        ...editingScene,
+        duration,
+        sceneType,
+        description
+      };
+
+      const result = await window.dataSdk.update(updatedScene);
+      
+      if (result.isOk) {
+        showToast('Scen uppdaterad!', 'success');
+        editingScene = null;
+        renderCurrentView();
+      } else {
+        showToast('Kunde inte spara ändringar', 'error');
+      }
+    }
+
+    function cancelInlineEdit() {
+      editingScene = null;
+      renderCurrentView();
+    }
+
+    // Make functions globally available
+    window.saveInlineEdit = saveInlineEdit;
+    window.cancelInlineEdit = cancelInlineEdit;
+
+    async function handleCreateFromTemplate(template) {
+      if (allScenes.length >= 999) {
+        showToast('Maxgräns på 999 scener uppnådd', 'error');
+        return;
+      }
+
+      const newScene = {
+        id: 'scene_' + Date.now(),
+        timestamp: new Date().toISOString(),
+        duration: '0:00-0:00',
+        sceneType: template.type,
+        description: template.description,
+        notes: `Mall: ${template.name}`,
+        drawing: '',
+        order: allScenes.length,
+        cameraMovement: template.camera || 'Statisk',
+        lighting: template.lighting || 'Naturlig',
+        costume: '',
+        bmpSync: false,
+        thumbnail: '',
+        photos: []
+      };
+
+      const result = await window.dataSdk.create(newScene);
+      
+      if (result.isOk) {
+        showToast(`Scen skapad från mall: ${template.name}`, 'success');
+        switchView('scenes');
+      } else {
+        showToast('Kunde inte skapa scen från mall', 'error');
+      }
+    }
+
+    async function handleAddScene() {
+      if (allScenes.length >= 999) {
+        showToast('Maxgräns på 999 scener uppnådd', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('add-scene-btn');
+      btn.disabled = true;
+      btn.textContent = 'Skapar...';
+
+      const newScene = {
+        id: 'scene_' + Date.now(),
+        timestamp: new Date().toISOString(),
+        duration: '0:00-0:00',
+        sceneType: 'Intro',
+        description: '',
+        notes: '',
+        drawing: '',
+        order: allScenes.length,
+        cameraMovement: 'Statisk',
+        lighting: 'Naturlig',
+        costume: '',
+        bmpSync: false,
+        thumbnail: '',
+        photos: []
+      };
+
+      const result = await window.dataSdk.create(newScene);
+      
+      if (result.isOk) {
+        showToast('Scen skapad!', 'success');
+      } else {
+        showToast('Kunde inte skapa scen', 'error');
+        btn.disabled = false;
+        btn.textContent = '+ Ny Scen (Ctrl+N)';
+      }
+    }
+
+    async function handleDuplicateScene(id) {
+      if (allScenes.length >= 999) {
+        showToast('Maxgräns på 999 scener uppnådd', 'error');
+        return;
+      }
+
+      const originalScene = allScenes.find(s => s.__backendId === id);
+      if (!originalScene) return;
+
+      const duplicatedScene = {
+        ...originalScene,
+        id: 'scene_' + Date.now(),
+        timestamp: new Date().toISOString(),
+        order: allScenes.length,
+        description: originalScene.description + ' (Kopia)'
+      };
+
+      delete duplicatedScene.__backendId;
+
+      const result = await window.dataSdk.create(duplicatedScene);
+      
+      if (result.isOk) {
+        showToast('Scen duplicerad!', 'success');
+      } else {
+        showToast('Kunde inte duplicera scen', 'error');
+      }
+    }
+
+    async function handleSaveScene(e) {
+      e.preventDefault();
+      
+      if (!selectedScene) {
+        showToast('Ingen scen vald att spara', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('save-scene-btn');
+      if (!btn) return;
+      
+      btn.disabled = true;
+      btn.textContent = '💾 Sparar...';
+
+      try {
+        const canvas = document.getElementById('drawing-canvas');
+        const drawingData = canvas ? canvas.toDataURL() : selectedScene.drawing;
+        
+        // Generate thumbnail
+        const thumbnail = generateThumbnail(canvas);
+
+        // Get form values with validation
+        const duration = document.getElementById('duration')?.value || selectedScene.duration;
+        const sceneType = document.getElementById('scene-type')?.value || selectedScene.sceneType;
+        const description = document.getElementById('description')?.value || selectedScene.description;
+        const notes = document.getElementById('notes')?.value || selectedScene.notes;
+        const cameraMovement = document.getElementById('camera-movement')?.value || selectedScene.cameraMovement;
+        const lighting = document.getElementById('lighting')?.value || selectedScene.lighting;
+        const costume = document.getElementById('costume')?.value || selectedScene.costume;
+        const bmpSync = document.getElementById('bmp-sync')?.checked || selectedScene.bmpSync;
+
+        const updatedScene = {
+          ...selectedScene,
+          duration,
+          sceneType,
+          description,
+          notes,
+          cameraMovement,
+          lighting,
+          costume,
+          bmpSync,
+          drawing: drawingData,
+          thumbnail: thumbnail,
+          photos: selectedScene.photos || []
+        };
+
+        const result = await window.dataSdk.update(updatedScene);
+        
+        if (result.isOk) {
+          showToast('Scen uppdaterad!', 'success');
+          selectedScene = updatedScene;
+        } else {
+          showToast('Kunde inte spara ändringar', 'error');
+          console.error('Save scene error:', result.error);
+        }
+        
+      } catch (error) {
+        console.error('Save scene error:', error);
+        showToast('Ett fel uppstod vid sparning', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '💾 Spara Ändringar';
+      }
+    }
+
+    async function handleDeleteScene(id) {
+      const scene = allScenes.find(s => s.__backendId === id);
+      if (!scene) {
+        showToast('Scen hittades inte', 'error');
+        return;
+      }
+
+      // Simple confirmation using button state
+      const deleteBtn = document.querySelector(`[data-id="${id}"].delete-btn`);
+      if (!deleteBtn) return;
+
+      if (deleteBtn.textContent === 'Ta bort') {
+        deleteBtn.textContent = 'Bekräfta?';
+        deleteBtn.style.background = 'var(--accent)';
+        deleteBtn.style.color = 'white';
+        
+        setTimeout(() => {
+          if (deleteBtn.textContent === 'Bekräfta?') {
+            deleteBtn.textContent = 'Ta bort';
+            deleteBtn.style.background = '';
+            deleteBtn.style.color = '';
+          }
+        }, 3000);
+        return;
+      }
+
+      if (deleteBtn.textContent === 'Bekräfta?') {
+        deleteBtn.disabled = true;
+        deleteBtn.textContent = 'Tar bort...';
+
+        const result = await window.dataSdk.delete(scene);
+        
+        if (result.isOk) {
+          if (selectedScene && selectedScene.__backendId === id) {
+            selectedScene = null;
+          }
+          if (editingScene && editingScene.__backendId === id) {
+            editingScene = null;
+          }
+          showToast(`Scen borttagen: ${scene.description || 'Scen'}`, 'success');
+        } else {
+          showToast('Kunde inte ta bort scen', 'error');
+          console.error('Delete scene error:', result.error);
+          deleteBtn.disabled = false;
+          deleteBtn.textContent = 'Ta bort';
+          deleteBtn.style.background = '';
+          deleteBtn.style.color = '';
+        }
+      }
+    }
+
+    async function handleReorderScenes(fromIndex, toIndex) {
+      if (fromIndex === toIndex) return;
+
+      const reorderedScenes = [...allScenes];
+      const [movedScene] = reorderedScenes.splice(fromIndex, 1);
+      reorderedScenes.splice(toIndex, 0, movedScene);
+
+      // Update order for all affected scenes
+      for (let i = 0; i < reorderedScenes.length; i++) {
+        if (reorderedScenes[i].order !== i) {
+          const updatedScene = { ...reorderedScenes[i], order: i };
+          await window.dataSdk.update(updatedScene);
+        }
+      }
+
+      showToast('Scenordning uppdaterad', 'success');
+    }
+
+    function setupDrawingCanvas() {
+      const canvas = document.getElementById('drawing-canvas');
+      if (!canvas) return;
+
+      drawingContext = canvas.getContext('2d');
+      drawingContext.lineCap = 'round';
+      drawingContext.lineJoin = 'round';
+      
+      // Clear canvas and set background
+      drawingContext.fillStyle = '#0f1419';
+      drawingContext.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Save initial state for undo
+      saveCanvasState();
+
+      setupDrawingTools();
+      setupCanvasEvents();
+      setupZoomControls();
+    }
+
+    function setupDrawingTools() {
+      const toolPen = document.getElementById('tool-pen');
+      const toolEraser = document.getElementById('tool-eraser');
+      const toolText = document.getElementById('tool-text');
+      const toolClear = document.getElementById('tool-clear');
+      const toolUndo = document.getElementById('tool-undo');
+      const toolRedo = document.getElementById('tool-redo');
+      const colorPicker = document.getElementById('color-picker');
+      const lineWidth = document.getElementById('line-width');
+      const fullscreenBtn = document.getElementById('fullscreen-btn');
+      const canvas = document.getElementById('drawing-canvas');
+
+      if (toolPen) {
+        toolPen.addEventListener('click', () => setTool('pen'));
+      }
+
+      if (toolEraser) {
+        toolEraser.addEventListener('click', () => setTool('eraser'));
+      }
+
+      if (toolText) {
+        toolText.addEventListener('click', () => setTool('text'));
+      }
+
+      if (toolClear) {
+        toolClear.addEventListener('click', () => {
+          if (drawingContext && canvas) {
+            drawingContext.fillStyle = '#0f1419';
+            drawingContext.fillRect(0, 0, canvas.width, canvas.height);
+            saveCanvasState();
+            showToast('Rityta rensad', 'info');
+          }
+        });
+      }
+
+      if (toolUndo) {
+        toolUndo.addEventListener('click', undoCanvas);
+      }
+
+      if (toolRedo) {
+        toolRedo.addEventListener('click', redoCanvas);
+      }
+
+      if (colorPicker) {
+        colorPicker.addEventListener('change', (e) => {
+          currentColor = e.target.value;
+        });
+      }
+
+      if (lineWidth) {
+        lineWidth.addEventListener('input', (e) => {
+          currentLineWidth = parseInt(e.target.value);
+        });
+      }
+
+      if (fullscreenBtn) {
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+      }
+    }
+
+    function setTool(tool) {
+      currentTool = tool;
+      document.querySelectorAll('.toolbar .btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(`tool-${tool}`).classList.add('active');
+    }
+
+    function setupCanvasEvents() {
+      const canvas = document.getElementById('drawing-canvas');
+      let lastX = 0;
+      let lastY = 0;
+
+      function getCanvasCoordinates(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        
+        return {
+          x: (clientX - rect.left) * scaleX,
+          y: (clientY - rect.top) * scaleY
+        };
+      }
+
+      function startDrawing(e) {
+        if (currentTool === 'text') {
+          handleTextTool(e);
+          return;
+        }
+
+        isDrawing = true;
+        const coords = getCanvasCoordinates(e);
+        lastX = coords.x;
+        lastY = coords.y;
+      }
+
+      function draw(e) {
+        if (!isDrawing || currentTool === 'text') return;
+        e.preventDefault();
+
+        const coords = getCanvasCoordinates(e);
+
+        drawingContext.beginPath();
+        drawingContext.moveTo(lastX, lastY);
+        drawingContext.lineTo(coords.x, coords.y);
+        
+        if (currentTool === 'pen') {
+          drawingContext.strokeStyle = currentColor;
+          drawingContext.lineWidth = currentLineWidth;
+          drawingContext.globalCompositeOperation = 'source-over';
+        } else if (currentTool === 'eraser') {
+          drawingContext.lineWidth = currentLineWidth * 2;
+          drawingContext.globalCompositeOperation = 'destination-out';
+        }
+        
+        drawingContext.stroke();
+
+        lastX = coords.x;
+        lastY = coords.y;
+
+        // Auto-save while drawing
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(() => {
+          if (selectedScene) {
+            autoSaveDrawing();
+          }
+        }, 2000);
+      }
+
+      function stopDrawing() {
+        if (isDrawing) {
+          isDrawing = false;
+          saveCanvasState();
+        }
+      }
+
+      function handleTextTool(e) {
+        const coords = getCanvasCoordinates(e);
+        
+        // Create a simple inline text input
+        const textInput = document.createElement('input');
+        textInput.type = 'text';
+        textInput.placeholder = 'Ange text...';
+        textInput.style.position = 'fixed';
+        textInput.style.left = e.clientX + 'px';
+        textInput.style.top = e.clientY + 'px';
+        textInput.style.zIndex = '10000';
+        textInput.style.background = 'var(--panel)';
+        textInput.style.border = '1px solid var(--line)';
+        textInput.style.color = 'var(--text)';
+        textInput.style.padding = '4px 8px';
+        textInput.style.borderRadius = '4px';
+        textInput.style.fontSize = '13px';
+        textInput.style.fontFamily = 'inherit';
+        
+        document.body.appendChild(textInput);
+        textInput.focus();
+        
+        function addTextToCanvas() {
+          const text = textInput.value.trim();
+          if (text && drawingContext) {
+            const fontSize = Math.max(12, currentLineWidth * 3);
+            drawingContext.font = `${fontSize}px Arial, sans-serif`;
+            drawingContext.fillStyle = currentColor;
+            drawingContext.textBaseline = 'top';
+            drawingContext.fillText(text, coords.x, coords.y);
+            saveCanvasState();
+            showToast('Text tillagd', 'success');
+          }
+        }
+        
+        textInput.addEventListener('keydown', (keyEvent) => {
+          keyEvent.stopPropagation();
+          if (keyEvent.key === 'Enter') {
+            addTextToCanvas();
+            if (document.body.contains(textInput)) {
+              document.body.removeChild(textInput);
+            }
+          } else if (keyEvent.key === 'Escape') {
+            if (document.body.contains(textInput)) {
+              document.body.removeChild(textInput);
+            }
+          }
+        });
+        
+        textInput.addEventListener('blur', () => {
+          setTimeout(() => {
+            addTextToCanvas();
+            if (document.body.contains(textInput)) {
+              document.body.removeChild(textInput);
+            }
+          }, 100);
+        });
+      }
+
+      canvas.addEventListener('mousedown', startDrawing);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', stopDrawing);
+      canvas.addEventListener('mouseout', stopDrawing);
+
+      canvas.addEventListener('touchstart', startDrawing);
+      canvas.addEventListener('touchmove', draw);
+      canvas.addEventListener('touchend', stopDrawing);
+    }
+
+    function setupZoomControls() {
+      const zoomIn = document.getElementById('zoom-in');
+      const zoomOut = document.getElementById('zoom-out');
+      const zoomReset = document.getElementById('zoom-reset');
+      const zoomLevel = document.getElementById('zoom-level');
+
+      if (zoomIn) {
+        zoomIn.addEventListener('click', () => {
+          canvasZoom = Math.min(canvasZoom * 1.2, 5);
+          updateCanvasZoom();
+        });
+      }
+
+      if (zoomOut) {
+        zoomOut.addEventListener('click', () => {
+          canvasZoom = Math.max(canvasZoom / 1.2, 0.2);
+          updateCanvasZoom();
+        });
+      }
+
+      if (zoomReset) {
+        zoomReset.addEventListener('click', () => {
+          canvasZoom = 1;
+          canvasOffsetX = 0;
+          canvasOffsetY = 0;
+          updateCanvasZoom();
+        });
+      }
+    }
+
+    function updateCanvasZoom() {
+      const canvas = document.getElementById('drawing-canvas');
+      const zoomLevel = document.getElementById('zoom-level');
+      
+      if (canvas) {
+        canvas.style.transform = `scale(${canvasZoom}) translate(${canvasOffsetX}px, ${canvasOffsetY}px)`;
+      }
+      
+      if (zoomLevel) {
+        zoomLevel.textContent = `${Math.round(canvasZoom * 100)}%`;
+      }
+    }
+
+    function saveCanvasState() {
+      const canvas = document.getElementById('drawing-canvas');
+      if (canvas) {
+        undoStack.push(canvas.toDataURL());
+        if (undoStack.length > 20) {
+          undoStack.shift();
+        }
+        redoStack = [];
+      }
+    }
+
+    function undoCanvas() {
+      if (undoStack.length > 1) {
+        redoStack.push(undoStack.pop());
+        const previousState = undoStack[undoStack.length - 1];
+        loadDrawingToCanvas(previousState);
+        showToast('Ångrade senaste åtgärd', 'info');
+      } else {
+        showToast('Inget att ångra', 'info');
+      }
+    }
+
+    function redoCanvas() {
+      if (redoStack.length > 0) {
+        const nextState = redoStack.pop();
+        undoStack.push(nextState);
+        loadDrawingToCanvas(nextState);
+        showToast('Gjorde om åtgärd', 'info');
+      } else {
+        showToast('Inget att göra om', 'info');
+      }
+    }
+
+    function toggleFullscreen() {
+      const canvas = document.getElementById('drawing-canvas');
+      
+      if (!canvas) {
+        showToast('Ingen rityta att visa i fullskärm', 'error');
+        return;
+      }
+      
+      if (!isFullscreen) {
+        const fullscreenDiv = document.createElement('div');
+        fullscreenDiv.className = 'canvas-fullscreen';
+        fullscreenDiv.id = 'fullscreen-container';
+        
+        // Create close button
+        const closeBtn = document.createElement('button');
+        closeBtn.innerHTML = '✕';
+        closeBtn.style.position = 'absolute';
+        closeBtn.style.top = '20px';
+        closeBtn.style.right = '20px';
+        closeBtn.style.background = 'var(--accent)';
+        closeBtn.style.color = 'white';
+        closeBtn.style.border = 'none';
+        closeBtn.style.borderRadius = '50%';
+        closeBtn.style.width = '40px';
+        closeBtn.style.height = '40px';
+        closeBtn.style.fontSize = '18px';
+        closeBtn.style.cursor = 'pointer';
+        closeBtn.style.zIndex = '10001';
+        closeBtn.addEventListener('click', toggleFullscreen);
+        
+        const clonedCanvas = canvas.cloneNode(true);
+        const ctx = clonedCanvas.getContext('2d');
+        ctx.drawImage(canvas, 0, 0);
+        
+        fullscreenDiv.appendChild(clonedCanvas);
+        fullscreenDiv.appendChild(closeBtn);
+        
+        document.body.appendChild(fullscreenDiv);
+        isFullscreen = true;
+        
+        showToast('Fullskärm aktiverat - tryck Escape eller ✕ för att stänga', 'info');
+        
+        fullscreenDiv.addEventListener('click', (e) => {
+          if (e.target === fullscreenDiv) {
+            toggleFullscreen();
+          }
+        });
+      } else {
+        const fullscreenContainer = document.getElementById('fullscreen-container');
+        if (fullscreenContainer) {
+          fullscreenContainer.remove();
+        }
+        isFullscreen = false;
+        showToast('Fullskärm avaktiverat', 'info');
+      }
+    }
+
+    function loadDrawingToCanvas(dataUrl) {
+      const canvas = document.getElementById('drawing-canvas');
+      if (!canvas || !dataUrl) return;
+
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      img.onload = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+      };
+      img.src = dataUrl;
+    }
+
+    function generateThumbnail(canvas) {
+      if (!canvas) return '';
+      
+      const thumbnailCanvas = document.createElement('canvas');
+      thumbnailCanvas.width = 160;
+      thumbnailCanvas.height = 90;
+      
+      const ctx = thumbnailCanvas.getContext('2d');
+      ctx.drawImage(canvas, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
+      
+      return thumbnailCanvas.toDataURL();
+    }
+
+    async function autoSaveDrawing() {
+      if (!selectedScene) return;
+      
+      const canvas = document.getElementById('drawing-canvas');
+      const drawingData = canvas ? canvas.toDataURL() : '';
+      const thumbnail = generateThumbnail(canvas);
+      
+      const updatedScene = {
+        ...selectedScene,
+        drawing: drawingData,
+        thumbnail: thumbnail
+      };
+
+      await window.dataSdk.update(updatedScene);
+    }
+
+    // Export Functions
+    async function exportToPDF() {
+      if (allScenes.length === 0) {
+        showToast('Inga scener att exportera', 'error');
+        return;
+      }
+
+      showToast('Skapar PDF-rapport...', 'info');
+
+      try {
+        if (!window.jspdf) {
+          showToast('PDF-bibliotek inte laddat', 'error');
+          return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Title page
+        doc.setFontSize(20);
+        doc.text(document.getElementById('app-title').textContent || 'Storyboard', 20, 30);
+        
+        doc.setFontSize(12);
+        doc.text(`BPM: ${projectBPM}`, 20, 45);
+        doc.text(`Antal scener: ${allScenes.length}`, 20, 55);
+        doc.text(`Skapad: ${new Date().toLocaleDateString('sv-SE')}`, 20, 65);
+        
+        let yPos = 85;
+        
+        // Scene details
+        doc.setFontSize(16);
+        doc.text('SCENER:', 20, yPos);
+        yPos += 15;
+        
+        for (let i = 0; i < allScenes.length; i++) {
+          const scene = allScenes[i];
+          
+          if (yPos > 250) {
+            doc.addPage();
+            yPos = 20;
+          }
+          
+          doc.setFontSize(12);
+          doc.setFont(undefined, 'bold');
+          doc.text(`Scen ${i + 1}: ${scene.duration || 'Okänd tid'}`, 20, yPos);
+          yPos += 8;
+          
+          doc.setFont(undefined, 'normal');
+          doc.text(`Typ: ${scene.sceneType || 'Okänd'}`, 25, yPos);
+          yPos += 6;
+          doc.text(`Beskrivning: ${scene.description || 'Ingen beskrivning'}`, 25, yPos);
+          yPos += 6;
+          doc.text(`Kamera: ${scene.cameraMovement || 'Ej specificerad'}`, 25, yPos);
+          yPos += 6;
+          doc.text(`Ljussättning: ${scene.lighting || 'Ej specificerad'}`, 25, yPos);
+          yPos += 6;
+          doc.text(`BPM-synkad: ${scene.bmpSync ? 'Ja' : 'Nej'}`, 25, yPos);
+          yPos += 6;
+          
+          if (scene.costume) {
+            doc.text(`Kostym/Makeup: ${scene.costume}`, 25, yPos);
+            yPos += 6;
+          }
+          
+          if (scene.notes) {
+            const notes = scene.notes.length > 60 ? scene.notes.substring(0, 60) + '...' : scene.notes;
+            doc.text(`Anteckningar: ${notes}`, 25, yPos);
+            yPos += 6;
+          }
+          
+          if (scene.photos && scene.photos.length > 0) {
+            doc.text(`Referensfoton: ${scene.photos.length} st`, 25, yPos);
+            yPos += 6;
+          }
+          
+          if (scene.drawing) {
+            doc.text(`Ritning: Ja`, 25, yPos);
+            yPos += 6;
+          }
+          
+          yPos += 5; // Extra space between scenes
+        }
+        
+        const filename = `storyboard_${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(filename);
+        showToast('PDF-rapport skapad!', 'success');
+        
+      } catch (error) {
+        console.error('PDF export error:', error);
+        showToast('Kunde inte skapa PDF-rapport. Kontrollera att jsPDF är laddat.', 'error');
+      }
+    }
+
+    async function exportToJSON() {
+      if (allScenes.length === 0) {
+        showToast('Inga scener att exportera', 'error');
+        return;
+      }
+
+      showToast('Förbereder JSON-export...', 'info');
+
+      const exportData = {
+        project: {
+          title: document.getElementById('app-title').textContent,
+          subtitle: document.getElementById('subtitle-tag').textContent,
+          bpm: projectBPM,
+          created: new Date().toISOString(),
+          totalScenes: allScenes.length,
+          version: "1.0"
+        },
+        scenes: allScenes.map((scene, index) => ({
+          id: scene.id,
+          number: index + 1,
+          duration: scene.duration,
+          sceneType: scene.sceneType,
+          description: scene.description,
+          notes: scene.notes,
+          cameraMovement: scene.cameraMovement,
+          lighting: scene.lighting,
+          costume: scene.costume,
+          bmpSync: scene.bmpSync,
+          order: scene.order,
+          timestamp: scene.timestamp,
+          hasDrawing: !!scene.drawing,
+          hasThumbnail: !!scene.thumbnail,
+          photoCount: scene.photos ? scene.photos.length : 0,
+          photos: scene.photos ? scene.photos.map(p => ({
+            name: p.name,
+            size: p.size,
+            type: p.type,
+            uploadedAt: p.uploadedAt
+          })) : []
+        })),
+        statistics: calculateProjectStats(),
+        exportedAt: new Date().toISOString()
+      };
+
+      const jsonString = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `storyboard_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast('JSON-data exporterad!', 'success');
+    }
+
+    async function exportToText() {
+      if (allScenes.length === 0) {
+        showToast('Inga scener att exportera', 'error');
+        return;
+      }
+
+      showToast('Förbereder textexport...', 'info');
+      
+      const stats = calculateProjectStats();
+      const exportText = `
+MUSIKVIDEO STORYBOARD
+=====================
+Projekt: ${document.getElementById('app-title').textContent}
+Undertitel: ${document.getElementById('subtitle-tag').textContent}
+BPM: ${projectBPM}
+Antal scener: ${allScenes.length}
+Scener med ritning: ${stats.withDrawings}
+BPM-synkade scener: ${stats.bmpSynced}
+Skapad: ${new Date().toLocaleString('sv-SE')}
+
+SCENER:
+${allScenes.map((scene, index) => `
+Scen ${index + 1}: ${scene.duration}
+${'='.repeat(40)}
+Typ: ${scene.sceneType}
+Beskrivning: ${scene.description || 'Ingen beskrivning'}
+Kamera: ${scene.cameraMovement || 'Ej specificerad'}
+Ljussättning: ${scene.lighting || 'Ej specificerad'}
+Kostym/Makeup: ${scene.costume || 'Ej specificerad'}
+BPM-synkad: ${scene.bmpSync ? 'Ja' : 'Nej'}
+Ritning: ${scene.drawing ? 'Ja' : 'Nej'}
+Referensfoton: ${scene.photos ? scene.photos.length : 0} st
+Anteckningar: ${scene.notes || 'Inga anteckningar'}
+`).join('')}
+
+PROJEKTSTATISTIK:
+================
+Totalt antal scener: ${stats.totalScenes}
+Scener med ritningar: ${stats.withDrawings}
+BPM-synkade scener: ${stats.bmpSynced}
+Genomsnittlig scenlängd: ${stats.avgDuration} sekunder
+
+Exporterad från Musikvideo Storyboard Pro
+Exportdatum: ${new Date().toLocaleString('sv-SE')}
+      `.trim();
+
+      const blob = new Blob([exportText], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `storyboard_${new Date().toISOString().split('T')[0]}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast('Textfil exporterad!', 'success');
+    }
+
+    function showKeyboardShortcuts() {
+      const overlay = document.createElement('div');
+      overlay.className = 'shortcuts-overlay';
+      
+      const modal = document.createElement('div');
+      modal.className = 'keyboard-shortcuts';
+      modal.innerHTML = `
+        <h3 style="margin-bottom: 16px; color: var(--text);">⌨️ Kortkommandon</h3>
+        <div class="shortcut-item">
+          <span>Ny scen</span>
+          <span class="shortcut-key">Ctrl+N</span>
+        </div>
+        <div class="shortcut-item">
+          <span>Ångra ritning</span>
+          <span class="shortcut-key">Ctrl+Z</span>
+        </div>
+        <div class="shortcut-item">
+          <span>Gör om ritning</span>
+          <span class="shortcut-key">Ctrl+Shift+Z</span>
+        </div>
+        <div class="shortcut-item">
+          <span>Fullskärm rityta</span>
+          <span class="shortcut-key">Ctrl+F</span>
+        </div>
+        <div class="shortcut-item">
+          <span>Spara snabbredigering</span>
+          <span class="shortcut-key">Enter</span>
+        </div>
+        <div class="shortcut-item">
+          <span>Avbryt redigering</span>
+          <span class="shortcut-key">Escape</span>
+        </div>
+        <div class="shortcut-item">
+          <span>Visa kortkommandon</span>
+          <span class="shortcut-key">?</span>
+        </div>
+        <div style="margin-top: 16px; text-align: center;">
+          <button class="btn-primary" onclick="hideKeyboardShortcuts()">Stäng</button>
+        </div>
+      `;
+      
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+      
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          hideKeyboardShortcuts();
+        }
+      });
+    }
+
+    function hideKeyboardShortcuts() {
+      const overlay = document.querySelector('.shortcuts-overlay');
+      if (overlay) {
+        overlay.remove();
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      const existing = document.querySelector('.toast');
+      if (existing) existing.remove();
+
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    // Photo upload functions
+    function setupPhotoUpload() {
+      const uploadArea = document.getElementById('photo-upload-area');
+      const photoInput = document.getElementById('photo-input');
+      
+      if (!uploadArea || !photoInput) return;
+
+      // Click to upload
+      uploadArea.addEventListener('click', () => {
+        photoInput.click();
+      });
+
+      // File input change
+      photoInput.addEventListener('change', (e) => {
+        handlePhotoFiles(e.target.files);
+      });
+
+      // Drag and drop
+      uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+      });
+
+      uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+      });
+
+      uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        handlePhotoFiles(e.dataTransfer.files);
+      });
+
+      // Photo gallery clicks
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('.photo-item') && !e.target.classList.contains('remove-photo')) {
+          const photoItem = e.target.closest('.photo-item');
+          const img = photoItem.querySelector('img');
+          showPhotoModal(img.src, img.alt);
+        }
+      });
+    }
+
+    async function handlePhotoFiles(files) {
+      if (!selectedScene || !files.length) {
+        showToast('Ingen scen vald för fotouppladdning', 'error');
+        return;
+      }
+
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      let successCount = 0;
+      let errorCount = 0;
+      
+      showToast(`Laddar upp ${files.length} foto(n)...`, 'info');
+      
+      for (let file of files) {
+        if (file.size > maxSize) {
+          showToast(`Fil för stor: ${file.name} (max 5MB)`, 'error');
+          errorCount++;
+          continue;
+        }
+
+        if (!validTypes.includes(file.type)) {
+          showToast(`Filtyp stöds ej: ${file.name}`, 'error');
+          errorCount++;
+          continue;
+        }
+
+        try {
+          const photoData = await readFileAsDataURL(file);
+          const photo = {
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            data: photoData,
+            uploadedAt: new Date().toISOString()
+          };
+
+          // Add to scene photos
+          if (!selectedScene.photos) {
+            selectedScene.photos = [];
+          }
+          selectedScene.photos.push(photo);
+          successCount++;
+
+        } catch (error) {
+          console.error('Photo upload error:', error);
+          showToast(`Kunde inte ladda upp: ${file.name}`, 'error');
+          errorCount++;
+        }
+      }
+      
+      if (successCount > 0) {
+        // Update UI and save to database
+        renderCurrentView();
+        
+        // Auto-save the scene with new photos
+        const result = await window.dataSdk.update(selectedScene);
+        if (result.isOk) {
+          showToast(`${successCount} foto(n) uppladdade!`, 'success');
+        } else {
+          showToast('Foton uppladdade men kunde inte sparas', 'error');
+        }
+      }
+      
+      if (errorCount > 0 && successCount === 0) {
+        showToast('Inga foton kunde laddas upp', 'error');
+      }
+    }
+
+    function readFileAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function removePhoto(index) {
+      if (!selectedScene || !selectedScene.photos) return;
+
+      const photo = selectedScene.photos[index];
+      selectedScene.photos.splice(index, 1);
+
+      // Update scene in database
+      const result = await window.dataSdk.update(selectedScene);
+      
+      if (result.isOk) {
+        renderCurrentView();
+        showToast(`Foto borttaget: ${photo.name}`, 'success');
+      } else {
+        showToast('Kunde inte ta bort foto', 'error');
+        // Restore photo on error
+        selectedScene.photos.splice(index, 0, photo);
+      }
+    }
+
+    function showPhotoModal(src, alt) {
+      const modal = document.createElement('div');
+      modal.className = 'photo-modal';
+      modal.innerHTML = `
+        <img src="${src}" alt="${alt}">
+        <button class="photo-modal-close" onclick="closePhotoModal()">×</button>
+      `;
+      
+      document.body.appendChild(modal);
+      
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          closePhotoModal();
+        }
+      });
+    }
+
+    function closePhotoModal() {
+      const modal = document.querySelector('.photo-modal');
+      if (modal) {
+        modal.remove();
+      }
+    }
+
+    // Make functions globally available
+    window.removePhoto = removePhoto;
+    window.closePhotoModal = closePhotoModal;
+    window.hideKeyboardShortcuts = hideKeyboardShortcuts;
+
+    initializeApp();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998c2f9d57d2a618',t:'MTc2MjE3NjIwNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
