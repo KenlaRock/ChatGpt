@@ -25,3 +25,8 @@
 - Implementerat HTML single-file export och PDF export via print-dialog.
 - Tillägg av Force export‑checkbox vid valideringsfel.
 - Behållit alla M2‑funktioner.
+## 2025-11-03 14:02:00 — Mobiloptimerad fristående storyboard
+- Ny fristående `index.html` med lokalt datalager, förbättrad ritpanel och mallstöd för snabbtest av storyboardflöden.
+- Åtgärdade exportfel (PDF/JSON/TXT) genom robusta nedladdare och jsPDF-säkerhetskontroller.
+- Förbättrat fotoarbetsflöde: validering, sparning och borttagning uppdaterar scenen direkt via fallback-lagring.
+- Responsiva justeringar för Android/mobil, flytande snabbknappar och tangentbordsgenvägar för förbättrad navigering.

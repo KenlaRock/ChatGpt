@@ -13,6 +13,7 @@ These instructions apply to the entire repository unless a subdirectory defines 
 - Prefer automated verification (`npm test`, `npm run build`) whenever you touch application assets. Capture command output in your work logs and PR descriptions.
 - Treat anything inside `archive/` as read-only unless maintenance of legacy assets is specifically requested.
 - Avoid adding external service dependencies; stay within the assets already tracked by the repository.
+- The root `index.html` offers a lightweight playground version of the Storyboard SPA; keep it feature-aligned with `apps/storyboard/dist` and document meaningful UX or workflow differences in `docs/`.
 
 ## Reporting expectations
 - Summarize structural changes, test coverage, and any new risks in the PR description when opening or updating pull requests.
