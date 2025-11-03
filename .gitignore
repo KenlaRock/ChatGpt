@@ -1,4 +1,4 @@
 node_modules/
-dist/
 authorized_keys
+dist/*.zip
 
