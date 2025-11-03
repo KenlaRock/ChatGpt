@@ -37,6 +37,14 @@ This repository stores the Storyboard web application deliverables alongside sup
    npm run build
    ```
 
+4. Trigger a Netlify deploy directly from the command line when necessary:
+   ```bash
+   npm run netlify:trigger:build    # Production build hook
+   npm run netlify:trigger:preview  # Preview server refresh
+   ```
+
+   Use `npm run netlify:trigger` without arguments to see the supported targets.
+
 ## Notes for Codex agents
 - You have full permission to create, modify, move, or delete files as required to keep the Storyboard application healthy.
 - Capture observations, open questions, or follow-up work inside `docs/` so that future passes can pick them up quickly.
