@@ -1864,7 +1864,10 @@
         id: 'scene_' + Date.now(),
         timestamp: new Date().toISOString(),
         order: allScenes.length,
-        description: originalScene.description + ' (Kopia)'
+        description: originalScene.description + ' (Kopia)',
+        photos: Array.isArray(originalScene.photos)
+          ? originalScene.photos.map(photo => ({ ...photo }))
+          : []
       };
 
       delete duplicatedScene.__backendId;
