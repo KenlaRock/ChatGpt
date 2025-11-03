@@ -1,9 +1,15 @@
 [build]
-  publish = "dist"
+  publish = "apps/storyboard/dist"
   command = "npm run build"
 
   [build.environment]
     NODE_VERSION = "20"
+
+[context.deploy-preview]
+  publish = "apps/storyboard/dist"
+
+[context.branch-deploy]
+  publish = "apps/storyboard/dist"
 
 [[headers]]
   for = "/app.html"

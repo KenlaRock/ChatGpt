@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "cd dist && rm -f app.zip && zip -q app.zip app.html README.md CHANGELOG.md QA-rapport.md",
-    "test": "jest"
+    "build": "cd apps/storyboard/dist && rm -f app.zip && zip -q app.zip app.html README.md CHANGELOG.md QA-rapport.md",
+    "test": "jest",
+    "netlify:trigger": "node tools/netlify/trigger.js",
+    "netlify:trigger:build": "node tools/netlify/trigger.js build",
+    "netlify:trigger:preview": "node tools/netlify/trigger.js preview"
   },
   "devDependencies": {
     "jest": "^29.7.0"

@@ -1,5 +1,9 @@
 # CHANGELOG — v2.2
 
+## 2025-11-03 — Netlify workflow helpers
+- Added CLI helpers (`npm run netlify:trigger:*`) for quickly firing the Storyboard Netlify build and preview hooks.
+- Documented the new commands in the repository README for easy discovery.
+
 ## 2025-09-12 00:00:00 — Final (full-feature + mobilfix)
 - Off‑canvas meny för mobil med ☰‑knapp. Uppdaterad Content‑Security‑Policy tillåter `blob:` för worker/script/connect så att appen fungerar på `file://` i Chrome på Android. Om Workern inte kan skapas används en fallback i main thread.
 - Implementerad clipboard‑fallback: om urklipps‑API saknas används prompt för manuell inklistring.
