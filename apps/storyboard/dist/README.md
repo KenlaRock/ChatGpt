@@ -13,4 +13,4 @@ Detta paket innehåller den fristående storyboard-editorn som HTML-fil samt til
 3. Projektdata lagras lokalt med IndexedDB. Använd exportfunktionerna (JSON, PDF, ZIP, WebM, CSV) för att säkerhetskopiera.
 
 ## Bygga zip-paket
-Kör `npm run build` i repo-rotkatalogen för att uppdatera `dist/app.zip` med senaste filer.
+Kör `npm run build` i repo-rotkatalogen för att uppdatera `apps/storyboard/dist/app.zip` med senaste filer.

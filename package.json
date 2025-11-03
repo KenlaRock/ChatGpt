@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "cd dist && rm -f app.zip && zip -q app.zip app.html README.md CHANGELOG.md QA-rapport.md",
+    "build": "cd apps/storyboard/dist && rm -f app.zip && zip -q app.zip app.html README.md CHANGELOG.md QA-rapport.md",
     "test": "jest"
   },
   "devDependencies": {

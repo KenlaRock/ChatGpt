@@ -1,12 +1,49 @@
-UNSORTED REPO
+# Storyboard Workspace Repository
 
-ToDo:
-1. Create folders, separating and sorting the contained files in to folders named and categorized by their main applications and grouped by relations accordingly.
+This repository stores the Storyboard web application deliverables alongside supporting assets, archives, and documentation. The content has been regrouped to make the active Storyboard build the primary focus while still keeping historical material available for reference.
 
-2. Write relevant notes in this README to clarify status, structure, details, missing content and suggested actions for complementary changes and/or builds.
+## Repository status
+- **Active focus:** `apps/storyboard/dist` contains the shipping single-page application bundle that should be verified, iterated, and shipped.
+- **Supporting assets:** Datasets, configuration, and documentation have been moved into dedicated folders to simplify discovery.
+- **Archived code:** Legacy Storyboard sources now live under `archive/` and require opt-in maintenance only when explicitly requested.
 
-3. Prioritize repository content related to the Storyboard Webb App, and highlight focus on the app for @Codex.
+## Directory guide
+| Path | Purpose |
+| --- | --- |
+| `apps/storyboard/dist/` | Published Storyboard SPA bundle (HTML + docs). Target for functional validation and packaging tasks. |
+| `archive/storyboard-legacy/` | Frozen legacy implementation retained for reference. No changes unless a specific migration task requires it. |
+| `config/` | Deployment configuration such as `netlify.toml`. |
+| `data/` | Sample datasets (`medium.csv`, `medium.xml`, `small.json`) used during validation and demos. |
+| `docs/` | Repository level changelog, QA report, and other written references. |
+| `tests/` | Automated regression tests (currently Jest). |
 
-4. Build an Agent markdown file, clarifying the repo content and active areas to focus on. Clarify freedom to edit, move, create, delete and elaborate on all content in this repo for the agent/@codex.
+## Workflow expectations
+1. **Storyboard first.** Treat improvements to `apps/storyboard/dist` as the default priority. Validate UI behaviour, export routines, and packaging scripts whenever updates are made.
+2. **Respect folder ownership.** Use the directory guide above when creating new files so that documentation, data, and deployment artefacts remain separated.
+3. **Document outcomes.** Update `docs/` with changelog entries or QA notes that result from functional changes.
+4. **Preserve archives.** Do not move or edit files within `archive/` unless the work is explicitly scoped to legacy maintenance.
 
-5. Re-formulate and optimize these instructions to optimal instructions and information for agents/@codex to understand and follow.
+## Getting started
+1. Install dependencies (Node 18+ is recommended):
+   ```bash
+   npm install
+   ```
+2. Run the automated checks:
+   ```bash
+   npm test
+   ```
+3. Package the Storyboard bundle when needed:
+   ```bash
+   npm run build
+   ```
+
+## Notes for Codex agents
+- You have full permission to create, modify, move, or delete files as required to keep the Storyboard application healthy.
+- Capture observations, open questions, or follow-up work inside `docs/` so that future passes can pick them up quickly.
+- See `AGENTS.md` for the detailed collaboration contract and instructions that apply across branches.
+
+## Open opportunities
+- Expand the automated test suite beyond the current sanity check.
+- Replace placeholder datasets in `data/` with realistic scenarios that cover edge cases.
+- Build developer tooling around the packaging workflow (linting, validation scripts, etc.).
+
