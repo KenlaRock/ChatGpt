@@ -776,7 +776,7 @@ function renderOverview(){
       const ctx=canvas.getContext('2d');
       ctx.fillStyle='#0f1419';
       ctx.fillRect(0,0,canvas.width,canvas.height);
-      drawFrameComposite(fr,ctx,canvas.width,canvas.height,{grid:false})
+      drawFrameComposite(fr,ctx,canvas.width,canvas.height,{grid:false,scene:sc})
         .catch(()=>{})
         .finally(()=>{
           thumb.textContent='';
@@ -866,11 +866,11 @@ function renderFrames(){
     
     el.frameGrid.appendChild(div);
     
-    setTimeout(()=>renderThumbnail(fr,thumb),10);
+    setTimeout(()=>renderThumbnail(fr,thumb,sc),10);
   });
 }
 
-function renderThumbnail(fr,thumbEl){
+function renderThumbnail(fr,thumbEl,scene){
   const c=document.createElement('canvas');
   c.width=320;
   c.height=aspectH(320);
@@ -878,7 +878,7 @@ function renderThumbnail(fr,thumbEl){
   ctx.fillStyle='#0f1419';
   ctx.fillRect(0,0,c.width,c.height);
 
-  drawFrameComposite(fr,ctx,c.width,c.height,{grid:false})
+  drawFrameComposite(fr,ctx,c.width,c.height,{grid:false,scene:scene})
     .catch(()=>{})
     .finally(()=>{
       thumbEl.textContent='';
@@ -913,14 +913,15 @@ function renderCanvas(){
   ctx.fillRect(0,0,el.board.width,el.board.height);
   
   drawFrameComposite(fr,ctx,el.board.width,el.board.height,{
-    grid:el.toggleBpmGrid.checked
+    grid:el.toggleBpmGrid.checked,
+    scene:currentScene()
   });
   
   setStatus('Redo');
 }
 
 function drawFrameComposite(fr,c,W,H,opts={}){
-  const {grid=false}=opts;
+  const {grid=false,scene=null}=opts;
 
   c.save();
 
@@ -928,7 +929,7 @@ function drawFrameComposite(fr,c,W,H,opts={}){
     const finish=()=>{
       try{
         drawStrokes(fr,c,W,H);
-        if(grid)drawBpmGrid(c,W,H);
+        if(grid)drawBpmGrid(c,W,H,scene);
       }finally{
         c.restore();
         resolve();
@@ -986,8 +987,8 @@ function drawStrokes(fr,c,W,H){
   }
 }
 
-function drawBpmGrid(c,W,H){
-  const sc=currentScene();
+function drawBpmGrid(c,W,H,scene){
+  const sc=scene||currentScene();
   if(!sc)return;
   
   const bpm=sc.bpm||120;
@@ -1244,7 +1245,7 @@ function saveProjectDebounced(){
 }
 
 // Export helpers
-async function renderFrameToCanvas(fr,width,height){
+async function renderFrameToCanvas(fr,width,height,scene=null){
   const canvas=document.createElement('canvas');
   canvas.width=width;
   canvas.height=height;
@@ -1254,7 +1255,8 @@ async function renderFrameToCanvas(fr,width,height){
   c.fillRect(0,0,width,height);
 
   await drawFrameComposite(fr,c,width,height,{
-    grid:state.currentProject?.settings?.showBpmGrid
+    grid:state.currentProject?.settings?.showBpmGrid,
+    scene:scene
   });
 
   return canvas;
@@ -1323,7 +1325,8 @@ async function buildPdfBlob(opts={}){
   const pageW=doc.internal.pageSize.getWidth();
   const pageH=doc.internal.pageSize.getHeight();
   
-  const frames=currentScene()?currentScene().frames:(state.currentProject?.scenes?.[0]?.frames||[]);
+  const sourceScene=currentScene()||state.currentProject?.scenes?.[0]||null;
+  const frames=sourceScene?.frames||[];
   const perPage=Math.max(1,+layout);
   
   const aspect=state.currentProject?.aspect||'16:9';
@@ -1332,7 +1335,7 @@ async function buildPdfBlob(opts={}){
   const headerCanvas=header?makeHeaderFooterCanvas({
     widthPx:1600,
     textL:state.currentProject?.name||'',
-    textR:currentScene()?.name||''
+    textR:sourceScene?.name||''
   }):null;
   
   const footerCanvas=footer?makeHeaderFooterCanvas({
@@ -1415,7 +1418,7 @@ async function buildPdfBlob(opts={}){
       const x=10+col*(cellW+(cols>1?10:0));
       const y=usableTop+row*(cellH+vgap);
       
-      const canvas=await renderFrameToCanvas(fr,Math.round(cellW*4),Math.round(cellH*4));
+      const canvas=await renderFrameToCanvas(fr,Math.round(cellW*4),Math.round(cellH*4),sourceScene);
       const imgData=canvas.toDataURL('image/jpeg',0.92);
       doc.addImage(imgData,'JPEG',x,y,cellW,cellH);
       
@@ -1473,7 +1476,7 @@ async function buildZipBlob(){
   
   for(const sc of proj.scenes){
     for(const fr of sc.frames){
-      const canvas=await renderFrameToCanvas(fr,1280,aspectH(1280));
+      const canvas=await renderFrameToCanvas(fr,1280,aspectH(1280),sc);
       const dataUrl=canvas.toDataURL('image/png');
       const base64=dataUrl.split(',')[1];
       const filename=`${sc.name.replace(/\s+/g,'_')}_${fr.id}.png`;
@@ -1560,19 +1563,25 @@ async function buildWebmBlob(opts={}){
     if(e.data.size>0)chunks.push(e.data);
   };
   
-  const frames=state.currentProject?.scenes?.flatMap(sc=>sc.frames)||[];
-  
-  if(!frames.length){
+  const frameEntries=(state.currentProject?.scenes||[]).flatMap(sc=>
+    sc.frames.map(fr=>({frame:fr,scene:sc}))
+  );
+
+  if(!frameEntries.length){
     throw new Error('Inga frames att exportera');
   }
   
   const xfade=Math.max(0,xfadeFrames|0);
   const msPerFrame=1000/fps;
   
-  function drawFrame(fr){
+  function drawFrame(entry){
+    const {frame:fr,scene}=entry;
     g.fillStyle='#0f1419';
     g.fillRect(0,0,W,H);
-    drawFrameComposite(fr,g,W,H,{grid:state.currentProject?.settings?.showBpmGrid});
+    drawFrameComposite(fr,g,W,H,{
+      grid:state.currentProject?.settings?.showBpmGrid,
+      scene:scene
+    });
   }
   
   return new Promise(resolve=>{
@@ -1593,34 +1602,39 @@ async function buildWebmBlob(opts={}){
     
     let i=0;
     let tPrev=performance.now();
-    let remaining=frames[0].durationMs;
-    
-    drawFrame(frames[0]);
-    
+    let remaining=frameEntries[0].frame.durationMs;
+
+    drawFrame(frameEntries[0]);
+
     function step(now){
       const dt=now-tPrev;
       tPrev=now;
       remaining-=dt;
-      
-      if(xfade>0&&remaining<=xfade*msPerFrame&&i<frames.length-1){
+
+      if(xfade>0&&remaining<=xfade*msPerFrame&&i<frameEntries.length-1){
+        const currentEntry=frameEntries[i];
+        const nextEntry=frameEntries[i+1];
         const alpha=Math.max(0,1-(remaining/(xfade*msPerFrame)));
-        drawFrame(frames[i]);
+        drawFrame(currentEntry);
         g.save();
         g.globalAlpha=alpha;
-        drawFrameComposite(frames[i+1],g,W,H,{grid:state.currentProject?.settings?.showBpmGrid});
+        drawFrameComposite(nextEntry.frame,g,W,H,{
+          grid:state.currentProject?.settings?.showBpmGrid,
+          scene:nextEntry.scene
+        });
         g.restore();
       }
-      
+
       if(remaining<=0){
         i++;
-        if(i>=frames.length){
+        if(i>=frameEntries.length){
           rec.stop();
           return;
         }
-        remaining=frames[i].durationMs;
-        drawFrame(frames[i]);
+        remaining=frameEntries[i].frame.durationMs;
+        drawFrame(frameEntries[i]);
       }
-      
+
       requestAnimationFrame(step);
     }
     
