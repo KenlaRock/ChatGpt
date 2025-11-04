@@ -1,6 +1,14 @@
 import { neon } from '@netlify/neon';
 
-const sql = neon();
+let cachedSql;
+
+function getSql() {
+  if (!cachedSql) {
+    cachedSql = neon();
+  }
+  return cachedSql;
+}
+
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 100;
 
@@ -49,9 +57,23 @@ export default async function handler(event) {
     };
   }
 
+  if (event.httpMethod && event.httpMethod.toUpperCase() !== 'GET') {
+    return response({
+      statusCode: 405,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Allow': 'GET, OPTIONS'
+      },
+      body: {
+        error: 'Method not allowed. Use GET to retrieve posts.'
+      }
+    });
+  }
+
   const limit = parseLimit(event.queryStringParameters?.limit);
 
   try {
+    const sql = getSql();
     const rows = await sql`SELECT * FROM posts LIMIT ${limit}`;
     return response({
       statusCode: 200,
