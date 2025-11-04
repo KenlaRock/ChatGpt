@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#0b0d10">
   <script src="/_sdk/data_sdk.js"></script>
   <script src="/_sdk/element_sdk.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="./vendor/jspdf.umd.min.js"></script>
   <style>
     body {
       box-sizing: border-box;
@@ -953,7 +953,6 @@
     }
   </style>
   <style>@view-transition { navigation: auto; }</style>
-  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
  </head>
  <body>
   <div class="app">
@@ -1006,6 +1005,93 @@
     let projectBPM = 120;
     let searchQuery = '';
     let exportMenuOpen = false;
+
+    const HTML_ESCAPE_LOOKUP = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+      '`': '&#96;'
+    };
+
+    const HTML_ESCAPE_REGEX = /[&<>"'`]/g;
+
+    function escapeHtml(value) {
+      if (value === null || value === undefined) {
+        return '';
+      }
+
+      return String(value).replace(HTML_ESCAPE_REGEX, (char) => HTML_ESCAPE_LOOKUP[char] || char);
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value);
+    }
+
+    function sanitizeUrl(url) {
+      if (typeof url !== 'string') {
+        return '';
+      }
+
+      const trimmed = url.trim();
+      if (!trimmed) {
+        return '';
+      }
+
+      if (/^data:image\//i.test(trimmed)) {
+        return trimmed;
+      }
+
+      if (/^(https?:)?\/\//i.test(trimmed)) {
+        try {
+          const parsed = new URL(trimmed, window.location.origin);
+          if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+            return parsed.href;
+          }
+        } catch (error) {
+          return '';
+        }
+        return '';
+      }
+
+      if (trimmed.startsWith('/')) {
+        return trimmed;
+      }
+
+      if (/^[A-Za-z0-9_\-./]+$/.test(trimmed)) {
+        return trimmed;
+      }
+
+      return '';
+    }
+
+    function deepClone(data) {
+      try {
+        if (typeof structuredClone === 'function') {
+          return structuredClone(data);
+        }
+      } catch (error) {
+        // Fallback below
+      }
+
+      try {
+        return JSON.parse(JSON.stringify(data));
+      } catch (error) {
+        if (Array.isArray(data)) {
+          return data.map((item) => deepClone(item));
+        }
+
+        if (data && typeof data === 'object') {
+          return Object.keys(data).reduce((acc, key) => {
+            acc[key] = deepClone(data[key]);
+            return acc;
+          }, {});
+        }
+
+        return data;
+      }
+    }
 
     // Templates for common music video scenes
     const sceneTemplates = [
@@ -1239,12 +1325,20 @@
     }
 
     function renderScenesView(container) {
-      const filteredScenes = allScenes.filter(scene => 
-        !searchQuery || 
-        scene.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        scene.sceneType.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        scene.notes.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      const normalizedQuery = (searchQuery || '').trim().toLowerCase();
+      const filteredScenes = allScenes.filter((scene) => {
+        if (!normalizedQuery) return true;
+
+        const description = (scene.description || '').toLowerCase();
+        const sceneType = (scene.sceneType || '').toLowerCase();
+        const notes = (scene.notes || '').toLowerCase();
+
+        return (
+          description.includes(normalizedQuery) ||
+          sceneType.includes(normalizedQuery) ||
+          notes.includes(normalizedQuery)
+        );
+      });
 
       const limitWarning = allScenes.length >= 999 ? 
         '<div class="limit-warning">⚠️ Maxgräns på 999 scener uppnådd. Ta bort scener för att lägga till nya.</div>' : '';
@@ -1278,7 +1372,7 @@
                 <div class="stat-label">Snitt längd</div>
               </div>
             </div>
-            <input type="text" class="search-box" id="search-scenes" placeholder="🔍 Sök scener..." value="${searchQuery}">
+            <input type="text" class="search-box" id="search-scenes" placeholder="🔍 Sök scener..." value="${escapeAttribute(searchQuery)}">
             <button class="btn-primary" id="add-scene-btn" ${allScenes.length >= 999 ? 'disabled' : ''}>
               + Ny Scen (Ctrl+N)
             </button>
@@ -1312,8 +1406,8 @@
               <button class="btn" id="tool-clear">🗑️ Rensa</button>
               <button class="btn" id="tool-undo" title="Ångra (Ctrl+Z)">↶</button>
               <button class="btn" id="tool-redo" title="Gör om (Ctrl+Shift+Z)">↷</button>
-              <input type="color" id="color-picker" value="${currentColor}" title="Färg">
-              <input type="range" id="line-width" min="1" max="20" value="${currentLineWidth}" title="Pennstorlek">
+              <input type="color" id="color-picker" value="${escapeAttribute(currentColor)}" title="Färg">
+              <input type="range" id="line-width" min="1" max="20" value="${escapeAttribute(currentLineWidth)}" title="Pennstorlek">
               <button class="btn" id="fullscreen-btn" title="Fullskärm (Ctrl+F)">⛶</button>
             </div>
             <div class="canvas-container" id="canvas-container">
@@ -1355,15 +1449,27 @@
     function renderSceneRow(scene) {
       const isEditing = editingScene && editingScene.__backendId === scene.__backendId;
       const isSelected = selectedScene && selectedScene.__backendId === scene.__backendId;
-      
+
+      const safeId = escapeAttribute(scene.__backendId || '');
+      const safeThumbnail = sanitizeUrl(scene.thumbnail || '');
+      const thumbnailMarkup = safeThumbnail
+        ? `<img src="${safeThumbnail}" alt="Thumbnail">`
+        : '🎬';
+      const safeDuration = escapeHtml(scene.duration || '');
+      const safeSceneType = escapeHtml(scene.sceneType || '');
+      const safeDescription = escapeHtml(scene.description || 'Ingen beskrivning');
+      const hasPhotos = Array.isArray(scene.photos) && scene.photos.length > 0;
+
       if (isEditing) {
+        const safeDurationValue = escapeAttribute(scene.duration || '');
+        const safeDescriptionValue = escapeAttribute(scene.description || '');
         return `
-          <div class="row editing" data-id="${scene.__backendId}">
+          <div class="row editing" data-id="${safeId}">
             <div class="scene-thumbnail">
-              ${scene.thumbnail ? `<img src="${scene.thumbnail}" alt="Thumbnail">` : '🎬'}
+              ${thumbnailMarkup}
             </div>
             <div class="info" style="flex: 1;">
-              <input type="text" class="inline-edit" id="edit-duration" value="${scene.duration}" placeholder="0:00-0:15">
+              <input type="text" class="inline-edit" id="edit-duration" value="${safeDurationValue}" placeholder="0:00-0:15">
               <select class="inline-edit" id="edit-scene-type">
                 <option value="Intro" ${scene.sceneType === 'Intro' ? 'selected' : ''}>Intro</option>
                 <option value="Vers" ${scene.sceneType === 'Vers' ? 'selected' : ''}>Vers</option>
@@ -1372,7 +1478,7 @@
                 <option value="Outro" ${scene.sceneType === 'Outro' ? 'selected' : ''}>Outro</option>
                 <option value="Övrigt" ${scene.sceneType === 'Övrigt' ? 'selected' : ''}>Övrigt</option>
               </select>
-              <input type="text" class="inline-edit" id="edit-description" value="${scene.description}" placeholder="Beskrivning">
+              <input type="text" class="inline-edit" id="edit-description" value="${safeDescriptionValue}" placeholder="Beskrivning">
               <div class="inline-actions">
                 <button class="save-btn" onclick="saveInlineEdit()">💾 Spara</button>
                 <button class="cancel-btn" onclick="cancelInlineEdit()">❌ Avbryt</button>
@@ -1381,37 +1487,108 @@
           </div>
         `;
       }
-      
+
       return `
-        <div class="row ${isSelected ? 'active' : ''}" data-id="${scene.__backendId}">
+        <div class="row ${isSelected ? 'active' : ''}" data-id="${safeId}">
           <div class="scene-thumbnail">
-            ${scene.thumbnail ? `<img src="${scene.thumbnail}" alt="Thumbnail">` : '🎬'}
+            ${thumbnailMarkup}
           </div>
           <div class="info">
-            <div class="title">${scene.duration} • ${scene.sceneType}</div>
-            <div class="meta">${scene.description || 'Ingen beskrivning'}</div>
+            <div class="title">${safeDuration} • ${safeSceneType}</div>
+            <div class="meta">${safeDescription}</div>
             <div style="display: flex; gap: 4px; margin-top: 4px;">
               ${scene.bmpSync ? '<div class="bmp-indicator synced">♪ BPM</div>' : ''}
-              ${scene.photos && scene.photos.length > 0 ? `<div class="bmp-indicator" style="border-color: var(--info); color: var(--info);">📸 ${scene.photos.length}</div>` : ''}
+              ${hasPhotos ? `<div class="bmp-indicator" style="border-color: var(--info); color: var(--info);">📸 ${scene.photos.length}</div>` : ''}
               ${scene.drawing ? '<div class="bmp-indicator" style="border-color: var(--warn); color: var(--warn);">🎨 Ritning</div>' : ''}
             </div>
           </div>
           <div class="actions">
-            <button class="icon-btn quick-edit-btn" data-id="${scene.__backendId}" title="Snabbredigera">✏️</button>
-            <button class="icon-btn duplicate-btn" data-id="${scene.__backendId}" title="Duplicera">📋</button>
-            <button class="edit-btn primary" data-id="${scene.__backendId}">Redigera</button>
-            <button class="delete-btn" data-id="${scene.__backendId}">Ta bort</button>
+            <button class="icon-btn quick-edit-btn" data-id="${safeId}" title="Snabbredigera">✏️</button>
+            <button class="icon-btn duplicate-btn" data-id="${safeId}" title="Duplicera">📋</button>
+            <button class="edit-btn primary" data-id="${safeId}">Redigera</button>
+            <button class="delete-btn" data-id="${safeId}">Ta bort</button>
           </div>
         </div>
       `;
     }
 
+    function renderTimelineScene(scene, index) {
+      const safeId = escapeAttribute(scene.__backendId || '');
+      const safeThumbnail = sanitizeUrl(scene.thumbnail || '');
+      const thumbnailMarkup = safeThumbnail
+        ? `<img src="${safeThumbnail}" alt="Scene ${index + 1}">`
+        : `
+                          <div style="color: var(--sub); font-size: 24px;">🎬</div>
+                        `;
+      const safeDuration = escapeHtml(scene.duration || '');
+      const safeSceneType = escapeHtml(scene.sceneType || '');
+      const safeDescription = escapeHtml(scene.description || 'Ingen beskrivning');
+      const safeCameraMovement = escapeHtml(scene.cameraMovement || '');
+
+      return `
+                    <div class="timeline-scene" draggable="true" data-id="${safeId}" data-order="${index}">
+                      <div class="thumbnail">
+                        ${thumbnailMarkup}
+                        <div style="position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.7); color: white; padding: 2px 4px; border-radius: 4px; font-size: 10px;">
+                          ${index + 1}
+                        </div>
+                        ${scene.bmpSync ? `
+                          <div style="position: absolute; top: 4px; right: 4px; background: var(--ok); color: white; padding: 2px 4px; border-radius: 4px; font-size: 10px;">
+                            ♪
+                          </div>
+                        ` : ''}
+                      </div>
+                      <div class="info">
+                        <div class="title" style="font-size: 12px; font-weight: 600;">${safeDuration}</div>
+                        <div class="meta" style="margin-top: 2px; font-size: 11px;">${safeSceneType}</div>
+                        <div style="font-size: 10px; color: var(--sub); margin-top: 4px; line-height: 1.3;">
+                          ${safeDescription}
+                        </div>
+                        ${scene.cameraMovement ? `
+                          <div style="font-size: 10px; color: var(--accent); margin-top: 2px;">
+                            📹 ${safeCameraMovement}
+                          </div>
+                        ` : ''}
+                      </div>
+                    </div>
+                  `;
+    }
+
     function renderSceneDetails(scene) {
+      const safeDuration = escapeAttribute(scene.duration || '');
+      const safeDescription = escapeAttribute(scene.description || '');
+      const safeCostume = escapeAttribute(scene.costume || '');
+      const safeNotes = escapeHtml(scene.notes || '');
+
+      const photoItems = Array.isArray(scene.photos)
+        ? scene.photos.map((photo, index) => {
+            const safePhotoSrc = sanitizeUrl(photo && photo.data ? photo.data : '');
+            if (!safePhotoSrc) {
+              return '';
+            }
+            const safePhotoName = escapeAttribute(photo && photo.name ? photo.name : `Foto ${index + 1}`);
+            return `
+                  <div class="photo-item" data-index="${index}">
+                    <img src="${safePhotoSrc}" alt="${safePhotoName}" onerror="this.style.display='none';">
+                    <button class="remove-photo" onclick="removePhoto(${index})" title="Ta bort foto">×</button>
+                  </div>
+                `;
+          }).filter(Boolean)
+        : [];
+
+      const photosMarkup = photoItems.length > 0
+        ? `
+              <div class="photo-gallery" id="photo-gallery">
+                ${photoItems.join('')}
+              </div>
+            `
+        : '';
+
       return `
         <form id="scene-form">
           <div class="form-group">
             <label for="duration">Tidsstämpel</label>
-            <input type="text" id="duration" value="${scene.duration || ''}" placeholder="0:00-0:15">
+            <input type="text" id="duration" value="${safeDuration}" placeholder="0:00-0:15">
           </div>
           <div class="form-group">
             <label for="scene-type">Scentyp</label>
@@ -1426,7 +1603,7 @@
           </div>
           <div class="form-group">
             <label for="description">Beskrivning</label>
-            <input type="text" id="description" value="${scene.description || ''}" placeholder="Kort beskrivning">
+            <input type="text" id="description" value="${safeDescription}" placeholder="Kort beskrivning">
           </div>
           <div class="advanced-controls">
             <div class="control-group">
@@ -1454,7 +1631,7 @@
           </div>
           <div class="form-group">
             <label for="costume">👔 Kostym/Makeup</label>
-            <input type="text" id="costume" value="${scene.costume || ''}" placeholder="Kostym- och makeup-anteckningar">
+            <input type="text" id="costume" value="${safeCostume}" placeholder="Kostym- och makeup-anteckningar">
           </div>
           <div class="form-group">
             <label>
@@ -1464,9 +1641,9 @@
           </div>
           <div class="form-group">
             <label for="notes">Anteckningar</label>
-            <textarea id="notes" placeholder="Detaljerade anteckningar...">${scene.notes || ''}</textarea>
+            <textarea id="notes" placeholder="Detaljerade anteckningar...">${safeNotes}</textarea>
           </div>
-          
+
           <div class="photo-upload-section">
             <h4 style="font-size: 13px; margin-bottom: 8px; color: var(--text);">📸 Referensfoton</h4>
             <div class="photo-upload-area" id="photo-upload-area">
@@ -1476,16 +1653,7 @@
               </div>
               <input type="file" id="photo-input" accept="image/*" multiple style="display: none;">
             </div>
-            ${scene.photos && scene.photos.length > 0 ? `
-              <div class="photo-gallery" id="photo-gallery">
-                ${scene.photos.map((photo, index) => `
-                  <div class="photo-item" data-index="${index}">
-                    <img src="${photo.data}" alt="${photo.name}" onerror="this.style.display='none';">
-                    <button class="remove-photo" onclick="removePhoto(${index})" title="Ta bort foto">×</button>
-                  </div>
-                `).join('')}
-              </div>
-            ` : ''}
+            ${photosMarkup}
           </div>
           
           <button type="submit" class="btn-primary" id="save-scene-btn">💾 Spara Ändringar</button>
@@ -1509,35 +1677,7 @@
             ` : `
               <div class="timeline-container">
                 <div class="timeline-track" id="timeline-track">
-                  ${allScenes.map((scene, index) => `
-                    <div class="timeline-scene" draggable="true" data-id="${scene.__backendId}" data-order="${index}">
-                      <div class="thumbnail">
-                        ${scene.thumbnail ? `<img src="${scene.thumbnail}" alt="Scene ${index + 1}">` : `
-                          <div style="color: var(--sub); font-size: 24px;">🎬</div>
-                        `}
-                        <div style="position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.7); color: white; padding: 2px 4px; border-radius: 4px; font-size: 10px;">
-                          ${index + 1}
-                        </div>
-                        ${scene.bmpSync ? `
-                          <div style="position: absolute; top: 4px; right: 4px; background: var(--ok); color: white; padding: 2px 4px; border-radius: 4px; font-size: 10px;">
-                            ♪
-                          </div>
-                        ` : ''}
-                      </div>
-                      <div class="info">
-                        <div class="title" style="font-size: 12px; font-weight: 600;">${scene.duration}</div>
-                        <div class="meta" style="margin-top: 2px; font-size: 11px;">${scene.sceneType}</div>
-                        <div style="font-size: 10px; color: var(--sub); margin-top: 4px; line-height: 1.3;">
-                          ${scene.description || 'Ingen beskrivning'}
-                        </div>
-                        ${scene.cameraMovement ? `
-                          <div style="font-size: 10px; color: var(--accent); margin-top: 2px;">
-                            📹 ${scene.cameraMovement}
-                          </div>
-                        ` : ''}
-                      </div>
-                    </div>
-                  `).join('')}
+                  ${allScenes.map((scene, index) => renderTimelineScene(scene, index)).join('')}
                 </div>
               </div>
             `}
@@ -1557,15 +1697,21 @@
               Välj en mall för att snabbt skapa vanliga musikvideoscener
             </p>
             <div class="template-grid">
-              ${sceneTemplates.map(template => `
-                <div class="template-card" data-template='${JSON.stringify(template)}'>
-                  <div class="icon">${template.icon}</div>
-                  <div class="name">${template.name}</div>
+              ${sceneTemplates.map((template) => {
+                const templateData = escapeAttribute(JSON.stringify(template));
+                const safeIcon = escapeHtml(template.icon || '');
+                const safeName = escapeHtml(template.name || '');
+                const safeDescription = escapeHtml(template.description || '');
+                return `
+                <div class="template-card" data-template="${templateData}">
+                  <div class="icon">${safeIcon}</div>
+                  <div class="name">${safeName}</div>
                   <div style="font-size: 10px; color: var(--sub); margin-top: 4px;">
-                    ${template.description}
+                    ${safeDescription}
                   </div>
                 </div>
-              `).join('')}
+              `;
+              }).join('')}
             </div>
             <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line);">
               <h3 style="font-size: 13px; margin-bottom: 12px; color: var(--sub);">Snabbtips för musikvideor:</h3>
@@ -1859,18 +2005,18 @@
       const originalScene = allScenes.find(s => s.__backendId === id);
       if (!originalScene) return;
 
-      const duplicatedScene = {
-        ...originalScene,
-        id: 'scene_' + Date.now(),
-        timestamp: new Date().toISOString(),
-        order: allScenes.length,
-        description: originalScene.description + ' (Kopia)',
-        photos: Array.isArray(originalScene.photos)
-          ? originalScene.photos.map(photo => ({ ...photo }))
-          : []
-      };
+      const duplicatedScene = deepClone(originalScene);
+      const baseDescription = originalScene.description || `Scen ${allScenes.indexOf(originalScene) + 1}`;
 
+      duplicatedScene.id = 'scene_' + Date.now();
+      duplicatedScene.timestamp = new Date().toISOString();
+      duplicatedScene.order = allScenes.length;
+      duplicatedScene.description = `${baseDescription} (Kopia)`;
       delete duplicatedScene.__backendId;
+
+      if (!Array.isArray(duplicatedScene.photos)) {
+        duplicatedScene.photos = [];
+      }
 
       const result = await window.dataSdk.create(duplicatedScene);
       
@@ -2839,15 +2985,29 @@ Exportdatum: ${new Date().toLocaleString('sv-SE')}
     }
 
     function showPhotoModal(src, alt) {
+      const safeSrc = sanitizeUrl(src || '');
+      if (!safeSrc) {
+        showToast('Ogiltig bild att visa', 'error');
+        return;
+      }
+
       const modal = document.createElement('div');
       modal.className = 'photo-modal';
-      modal.innerHTML = `
-        <img src="${src}" alt="${alt}">
-        <button class="photo-modal-close" onclick="closePhotoModal()">×</button>
-      `;
-      
+
+      const image = document.createElement('img');
+      image.src = safeSrc;
+      image.alt = alt || '';
+
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'photo-modal-close';
+      closeBtn.type = 'button';
+      closeBtn.textContent = '×';
+      closeBtn.addEventListener('click', closePhotoModal);
+
+      modal.appendChild(image);
+      modal.appendChild(closeBtn);
       document.body.appendChild(modal);
-      
+
       modal.addEventListener('click', (e) => {
         if (e.target === modal) {
           closePhotoModal();
@@ -2864,10 +3024,9 @@ Exportdatum: ${new Date().toLocaleString('sv-SE')}
 
     // Make functions globally available
     window.removePhoto = removePhoto;
-    window.closePhotoModal = closePhotoModal;
     window.hideKeyboardShortcuts = hideKeyboardShortcuts;
 
     initializeApp();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998c2f9d57d2a618',t:'MTc2MjE3NjIwNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ </body>
 </html>
