@@ -1787,7 +1787,18 @@ el.audioFile.onchange=async e=>{
   const file=e.target.files?.[0];
   if(!file)return;
 
-  setStatus('Laddar ljud…');
+  const project=state.currentProject;
+  if(!project){
+    setStatus('Ingen aktivt projekt');
+    el.audioFile.value='';
+    return;
+  }
+
+  const projectId=project.id;
+  const isActiveProject=()=>state.currentProject===project||state.currentProject?.id===projectId;
+  const setStatusIfActive=msg=>{if(isActiveProject())setStatus(msg);};
+
+  setStatusIfActive('Laddar ljud…');
 
   try{
     const dataUrl=await new Promise((resolve,reject)=>{
@@ -1798,20 +1809,25 @@ el.audioFile.onchange=async e=>{
     });
 
     if(typeof dataUrl==='string'){
-      el.audio.src=dataUrl;
+      project.audio=dataUrl;
 
-      if(state.currentProject){
-        state.currentProject.audio=dataUrl;
+      if(isActiveProject()){
+        el.audio.src=dataUrl;
         saveProjectDebounced();
+        setStatusIfActive('Ljud laddat');
+      }else{
+        try{
+          await dbPut(project);
+        }catch(saveErr){
+          console.error('Audio background save failed:',saveErr);
+        }
       }
-
-      setStatus('Ljud laddat');
     }else{
       throw new Error('Okänt filformat');
     }
   }catch(err){
     console.error('Audio load failed:',err);
-    setStatus('Ljudfel');
+    setStatusIfActive('Ljudfel');
     alert('Misslyckades läsa ljudfilen: '+(err?.message||err));
   }finally{
     el.audioFile.value='';
