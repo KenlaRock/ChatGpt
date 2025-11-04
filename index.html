@@ -1,1936 +1,2013 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="sv">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-    <title>Storyboard – Musikvideo Pro</title>
-    <meta name="theme-color" content="#0b0d10">
-    <link rel="manifest" href="./manifest.webmanifest">
-    <script src="./apps/storyboard/dist/vendor/jspdf.umd.min.js" defer></script>
-    <style>
-      :root {
-        --bg: #0b0d10;
-        --panel: #12161b;
-        --muted: #1a2128;
-        --line: #23303a;
-        --text: #e6eef6;
-        --sub: #a6b3bf;
-        --accent: #e63946;
-        --success: #16a34a;
-        --warn: #f59e0b;
-      }
+<head>
+  <meta charset="utf-8" />
+  <!--
+    Remove maximum‑scale from the viewport meta tag to allow users to zoom and respect their default text
+    size preferences. See web.dev guidance about not restricting zoom【0863740095805868†L142-L190】.
+  -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>AudioVisual Storyboard – Concept Vangård</title>
+  <meta name="theme-color" content="#1a1d29" />
+  <meta name="description" content="Professional storyboard creation tool for audiovisual projects" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-192.png" />
+  <!-- Preconnect to font domains for faster font loading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Modern dark theme with purple/blue accents */
+      /* Updated color palette for a fresher look */
+      --bg: #0e141f;
+      --bg-elevated: #1b2232;
+      --bg-surface: #253046;
+      --bg-hover: #2d3a52;
+      --bg-selected: #3a4871;
+      --border: #2e3e5c;
+      --text-primary: #e3e9f8;
+      --text-secondary: #9ba7c2;
+      --text-muted: #6f7a96;
+      --accent-primary: #8b5cf6;
+      --accent-secondary: #0ea5e9;
+      --accent-gradient: linear-gradient(135deg, #8b5cf6, #0ea5e9);
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --radius: 12px;
+      --radius-lg: 16px;
+      --gap: 12px;
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
 
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-      html,
-      body {
-        min-height: 100%;
-        background: var(--bg);
-        color: var(--text);
-        font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-      }
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      /* Prevent horizontal overscroll/back navigation on touch devices and restrict gestures to vertical scrolling */
+      overscroll-behavior-x: contain;
+      touch-action: pan-y;
+    }
 
-      button,
-      input,
-      select,
-      textarea {
-        font: inherit;
-      }
+    a {
+      color: var(--accent-secondary);
+      text-decoration: none;
+      transition: var(--transition);
+    }
 
-      button {
-        cursor: pointer;
-        transition: background 0.2s ease, transform 0.2s ease;
-      }
+    a:hover {
+      text-decoration: underline;
+    }
 
-      button:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-      }
+    button {
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+      font-weight: 500;
+      border: none;
+      outline: none;
+      position: relative;
+      overflow: hidden;
+    }
 
-      .app {
-        display: grid;
-        min-height: 100vh;
-        grid-template-rows: auto 1fr auto;
-      }
+    button:active {
+      transform: scale(0.98);
+    }
 
-      header {
-        display: flex;
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      /* contain horizontal overscroll inside the app to reduce accidental side swiping */
+      overscroll-behavior-x: contain;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      /* Increase z-index so the sticky header always stays above scene cards. 10 was not sufficient on some devices */
+      z-index: 100;
+      flex-wrap: wrap;
+      box-shadow: var(--shadow);
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      flex: 1;
+      min-width: 140px;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .brand {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .nav {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .nav button {
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .nav button:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .nav button[aria-current="page"] {
+      background: var(--accent-gradient);
+      color: white;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    /* Buttons were slightly oversized on mobile, leading to a cluttered UI.
+       Reduce font-size and padding to make the interface feel lighter and
+       consume less vertical space. */
+    .btn {
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      padding: 0.4rem 0.75rem;
+      border-radius: var(--radius);
+      font-size: 0.75rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: var(--transition);
+      border: 1px solid var(--border);
+    }
+
+    .btn:hover {
+      background: var(--bg-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow);
+    }
+
+    .btn.primary {
+      background: var(--accent-gradient);
+      color: white;
+      border: none;
+    }
+
+    .btn.ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+    }
+
+    .badge {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      background: var(--bg-surface);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    main {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+    }
+
+    .section {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      /* tighten vertical space by reducing padding */
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+      box-shadow: var(--shadow);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 680px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: var(--transition);
+      /* Make cards participate in stacking context so they don't unexpectedly overlay the sticky header */
+      position: relative;
+      z-index: 1;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .card.selected {
+      outline: 2px solid var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+    }
+
+    .card header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--accent-gradient);
+      color: white;
+      padding: 0.75rem 1rem;
+    }
+
+    .card .left {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card .num {
+      font-weight: 600;
+    }
+
+    .card .actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    /* Hide action icons when the card is collapsed to prevent layout overflow on small screens. Users can expand the card to access these actions. */
+    .card.collapsed .actions {
+      display: none;
+    }
+
+    .card .icon {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    .card .icon:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .card.locked {
+      opacity: 0.85;
+      filter: saturate(0.7);
+    }
+
+    /* collapsed scenes reduce vertical height; body hidden when collapsed */
+    .card.collapsed .body { display: none; }
+    /* When collapsed, shrink image height further to 100px to save vertical space */
+    .card.collapsed .img { height: 100px; }
+
+    /* Reduce default image height from 180px to 160px to compress card height. */
+    .img {
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+
+    .placeholder {
+      font-size: 3rem;
+      color: var(--text-muted);
+    }
+
+    .body {
+      padding: 1rem;
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      display: block;
+      margin-bottom: 0.25rem;
+      font-weight: 500;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius);
+      font-family: inherit;
+      font-size: 0.875rem;
+      transition: var(--transition);
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 56px;
+    }
+
+    input,
+    textarea,
+    button {
+      min-height: 40px;
+    }
+
+    /* selection bar */
+    .selbar {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      align-items: center;
+      margin: 1rem 0;
+      padding: 1rem;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+    }
+
+    /* Hide selbar when it has the hidden class. Used on small screens to declutter the UI. */
+    #selbar.hidden {
+      display: none;
+    }
+
+    .selbar input[type="text"] {
+      min-width: 120px;
+    }
+
+    .selbar textarea {
+      min-width: 200px;
+      min-height: 40px;
+    }
+
+    .selbar .split {
+      width: 1px;
+      background: var(--border);
+      height: 32px;
+    }
+
+    /* chips */
+    .chips {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-primary);
+      border-radius: 999px;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    /* quick tags */
+    .qtags {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+
+    .qtags .qt {
+      border: 1px solid currentColor;
+      background: transparent;
+      border-radius: 999px;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.68rem;
+      line-height: 1.2;
+      transition: var(--transition);
+    }
+
+    .qtags .qt:hover {
+      background: var(--bg-hover);
+      opacity: 0.85;
+    }
+
+    .qtags .qt[data-cat="camera"] {
+      color: var(--success);
+      border-color: var(--success);
+    }
+
+    .qtags .qt[data-cat="light"] {
+      color: var(--warning);
+      border-color: var(--warning);
+    }
+
+    .qtags .qt[data-cat="vfx"] {
+      color: var(--accent-primary);
+      border-color: var(--accent-primary);
+    }
+
+    /* timeline */
+    .timeline-wrap {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .timeline-toolbar {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .timeline {
+      position: relative;
+      display: block;
+      overflow: auto;
+      padding: 1rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      white-space: nowrap;
+      height: 260px;
+      /* allow both horizontal and vertical scrolling gestures inside the timeline */
+      touch-action: pan-x pan-y;
+    }
+
+    .beat {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      width: 1px;
+      background: var(--border);
+      opacity: 0.5;
+    }
+
+    .lane-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .lane-label {
+      position: absolute;
+      left: 6px;
+      font-size: 0.625rem;
+      color: var(--text-muted);
+    }
+
+    .marker {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      width: 2px;
+      background: var(--warning);
+    }
+
+    .marker::after {
+      content: attr(data-label);
+      position: absolute;
+      top: -10px;
+      left: 4px;
+      font-size: 0.625rem;
+      background: var(--bg-elevated);
+      padding: 2px 4px;
+      border-radius: 6px;
+      color: var(--warning);
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .snap {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--error);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .block {
+      position: absolute;
+      height: 72px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 8px;
+      user-select: none;
+      transition: var(--transition);
+    }
+
+    .block:hover {
+      background: var(--bg-hover);
+    }
+
+    .block .title {
+      font-size: 0.75rem;
+    }
+
+    .block .dur {
+      position: absolute;
+      bottom: 4px;
+      right: 6px;
+      font-size: 0.6875rem;
+      color: var(--text-secondary);
+    }
+
+    .block.drag {
+      outline: 2px dashed var(--accent-secondary);
+      opacity: 0.95;
+    }
+
+    .block.overlap {
+      outline: 2px solid var(--warning);
+    }
+
+    .block.locked {
+      outline: 2px solid var(--text-muted);
+      background: var(--bg);
+    }
+
+    /* overview */
+    .ov-toolbar {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .ov-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+    }
+
+    @media (min-width: 780px) {
+      .ov-grid {
+        grid-template-columns: repeat(6, 1fr);
+      }
+    }
+
+    .thumb {
+      aspect-ratio: 16/9;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      background-size: cover;
+      background-position: center;
+      transition: var(--transition);
+    }
+
+    .thumb:hover {
+      transform: scale(1.02);
+      box-shadow: var(--shadow);
+    }
+
+    /* Side thumbnail navigation for scenes */
+    .thumb-nav {
+      position: fixed;
+      right: 10px;
+      width: 60px;
+      max-height: 70vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 9;
+    }
+    .thumb-nav img {
+      width: 100%;
+      height: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      object-fit: cover;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .thumb-nav img:hover {
+      transform: scale(1.1);
+    }
+
+    /* Responsive adjustments for thumbnail navigation on mobile: position at bottom as a horizontal gallery */
+    @media (max-width: 900px) {
+      .thumb-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: auto;
+        width: 100%;
+        height: 64px;
+        padding: 0.5rem;
+        flex-direction: row;
         align-items: center;
-        gap: 0.75rem;
-        padding: 0.9rem 1.2rem;
-        background: linear-gradient(180deg, #11161b 0%, #0b0d10 100%);
-        border-bottom: 1px solid var(--line);
-        position: sticky;
-        top: 0;
-        z-index: 10;
+        justify-content: flex-start;
+        overflow-x: auto;
+        overflow-y: hidden;
+        gap: 0.5rem;
+        background: var(--bg-elevated);
+        border-top: 1px solid var(--border);
+      }
+      .thumb-nav img {
+        width: 56px;
+        height: 100%;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        flex-shrink: 0;
+      }
+      .thumb-nav img:hover {
+        transform: scale(1.05);
+      }
+    }
+
+    /* Prevent cards from sliding under the sticky header when scrolled into view */
+    .card {
+      scroll-margin-top: 96px;
+    }
+
+    /* Add spacing to the scenes view to ensure cards do not overlap the sticky header */
+    #view-scenes {
+      padding-top: 1rem;
+    }
+
+    /* On small screens, add bottom padding to scenes so that the floating thumbnail bar doesn't cover content */
+    @media (max-width: 900px) {
+      #view-scenes {
+        padding-bottom: 80px;
+      }
+    }
+
+    /* Actions menu toggle and responsive behaviour */
+    #actions.hidden {
+      display: none !important;
+    }
+    /* Hide menu button by default; visible only on narrow screens */
+    #toggle-actions {
+      display: none;
+    }
+    @media (max-width: 900px) {
+      #toggle-actions {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 0.5rem;
+      }
+      /* Hide the actions container by default on mobile; toggled via JS */
+      #actions {
+        display: none;
+      }
+      #actions:not(.hidden) {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+    }
+    @media (min-width: 901px) {
+      /* On larger screens, always show actions and hide menu button */
+      #toggle-actions {
+        display: none;
+      }
+      #actions {
+        display: flex;
+      }
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 1.5rem;
+      transform: translateX(-50%);
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      border-radius: var(--radius);
+      padding: 0.75rem 1.5rem;
+      opacity: 0;
+      transition: opacity 0.25s;
+      z-index: 999;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    /* Loading animation */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Material Icons */
+    .material-icons {
+      font-size: 1.25rem;
+      vertical-align: middle;
+    }
+
+    /* Focus styles for keyboard navigation */
+    button:focus,
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: 2px solid var(--accent-secondary);
+      outline-offset: 2px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      header {
+        padding: 0.75rem 1rem;
       }
 
       header h1 {
-        font-size: 1.05rem;
-        letter-spacing: 0.3px;
-      }
-
-      .tag {
-        padding: 0.2rem 0.6rem;
-        border-radius: 999px;
-        border: 1px solid var(--line);
-        font-size: 0.75rem;
-        color: var(--sub);
-      }
-
-      .nav {
-        margin-left: auto;
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-        flex-wrap: wrap;
-      }
-
-      .nav button {
-        border-radius: 0.8rem;
-        border: 1px solid var(--line);
-        background: var(--muted);
-        color: var(--text);
-        padding: 0.45rem 0.75rem;
-        font-size: 0.85rem;
-      }
-
-      .nav button:hover,
-      .nav button:focus-visible {
-        background: #1a2129;
-        transform: translateY(-1px);
-      }
-
-      .nav button[aria-current="page"] {
-        outline: 2px solid var(--accent);
-      }
-
-      .export-menu {
-        position: absolute;
-        top: calc(100% + 4px);
-        right: 0;
-        background: var(--panel);
-        border-radius: 0.9rem;
-        border: 1px solid var(--line);
-        overflow: hidden;
-        display: none;
-      }
-
-      .export-menu button {
-        display: block;
-        width: 100%;
-        border: none;
-        background: transparent;
-        color: var(--text);
-        padding: 0.6rem 0.9rem;
-        text-align: left;
-        font-size: 0.85rem;
-      }
-
-      .export-menu button:hover,
-      .export-menu button:focus-visible {
-        background: #1a2129;
+        font-size: 1.25rem;
       }
 
       main {
         padding: 1rem;
-        display: grid;
-        grid-template-columns: 320px 1fr 340px;
-        gap: 0.85rem;
       }
 
-      @media (max-width: 1100px) {
-        main {
-          grid-template-columns: 260px 1fr 280px;
-        }
-      }
-
-      @media (max-width: 920px) {
-        main {
-          grid-template-columns: 1fr;
-        }
-        .details-column {
-          order: 3;
-        }
-      }
-
-      @media (max-width: 720px) {
-        header {
-          flex-wrap: wrap;
-        }
-        .nav {
-          width: 100%;
-          justify-content: space-between;
-        }
-        main {
-          padding: 0.9rem 0.8rem 5rem;
-        }
-        .floating-actions {
-          display: block;
-        }
-      }
-
-      .col {
-        background: var(--panel);
-        border-radius: 1rem;
-        border: 1px solid var(--line);
-        overflow: hidden;
-        min-height: 200px;
-        box-shadow: 0 24px 40px rgba(0, 0, 0, 0.35);
-      }
-
-      .col h2,
-      .col h3 {
-        padding: 0.85rem 1.1rem;
-        border-bottom: 1px solid var(--line);
-        font-size: 0.85rem;
-        color: var(--sub);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        letter-spacing: 0.2px;
-      }
-
-      .col .body {
-        padding: 0.85rem;
-      }
-
-      .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 0.6rem;
-        margin-bottom: 0.8rem;
-      }
-
-      .stat-card {
-        background: var(--muted);
-        border-radius: 0.9rem;
-        border: 1px solid var(--line);
-        padding: 0.6rem;
-        text-align: center;
-      }
-
-      .stat-card .value {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: var(--accent);
-      }
-
-      .stat-card .label {
-        font-size: 0.7rem;
-        color: var(--sub);
-        margin-top: 0.2rem;
-      }
-
-      .search-box {
-        width: 100%;
-        padding: 0.55rem 0.75rem;
-        border-radius: 0.75rem;
-        border: 1px solid var(--line);
-        background: #0f1419;
-        color: var(--text);
-        margin-bottom: 0.75rem;
-        font-size: 0.85rem;
-      }
-
-      .btn-primary {
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        padding: 0.65rem 1rem;
-        border-radius: 0.9rem;
-        border: 1px solid var(--accent);
-        background: var(--accent);
-        color: #fff;
-        font-weight: 600;
-        font-size: 0.85rem;
-      }
-
-      .btn-primary:hover,
-      .btn-primary:focus-visible {
-        background: #d73340;
-      }
-
-      .limit-warning {
-        background: rgba(245, 158, 11, 0.2);
-        border: 1px solid rgba(245, 158, 11, 0.5);
-        color: var(--warn);
-        border-radius: 0.75rem;
-        padding: 0.55rem 0.7rem;
-        font-size: 0.75rem;
-        margin-bottom: 0.75rem;
-      }
-
-      .list {
-        display: flex;
-        flex-direction: column;
-        gap: 0.6rem;
-      }
-
-      .row {
-        display: grid;
-        grid-template-columns: auto 1fr auto;
-        gap: 0.6rem;
-        align-items: center;
-        padding: 0.65rem;
-        border-radius: 0.9rem;
-        border: 1px solid var(--line);
-        background: rgba(16, 21, 26, 0.9);
-        cursor: pointer;
-        transition: transform 0.2s ease, background 0.2s ease;
-      }
-
-      .row:hover {
-        transform: translateY(-1px);
-        background: #1a2028;
-      }
-
-      .row.active {
-        outline: 2px solid var(--accent);
-        background: rgba(230, 57, 70, 0.1);
-      }
-
-      .scene-thumb {
-        width: 44px;
-        height: 34px;
-        border-radius: 0.6rem;
-        background: #0f1419;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.75rem;
-        color: var(--sub);
-        overflow: hidden;
-      }
-
-      .scene-thumb img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-
-      .scene-info {
-        display: flex;
-        flex-direction: column;
-        gap: 0.2rem;
-        min-width: 0;
-      }
-
-      .scene-title {
-        font-size: 0.85rem;
-        font-weight: 600;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .scene-meta {
-        font-size: 0.7rem;
-        color: var(--sub);
-      }
-
-      .scene-badges {
-        display: flex;
-        gap: 0.3rem;
-        flex-wrap: wrap;
-        margin-top: 0.3rem;
-      }
-
-      .badge {
-        font-size: 0.65rem;
-        padding: 0.15rem 0.45rem;
-        border-radius: 999px;
-        border: 1px solid var(--line);
-        background: var(--muted);
-        color: var(--sub);
-      }
-
-      .row .actions {
-        display: flex;
-        gap: 0.35rem;
-      }
-
-      .row .actions button {
-        border-radius: 0.6rem;
-        border: 1px solid var(--line);
-        background: none;
-        color: var(--sub);
-        font-size: 0.7rem;
-        padding: 0.3rem 0.5rem;
-      }
-
-      .row .actions button.primary {
-        background: var(--accent);
-        border-color: var(--accent);
-        color: white;
-      }
-
-      .inline-edit {
-        width: 100%;
-        background: var(--muted);
-        border: 1px solid var(--line);
-        border-radius: 0.65rem;
-        padding: 0.35rem 0.5rem;
-        color: var(--text);
-        font-size: 0.75rem;
-        margin-bottom: 0.4rem;
-      }
-
-      .inline-actions {
-        display: flex;
-        gap: 0.4rem;
-      }
-
-      .inline-actions button {
-        flex: 1;
-        border-radius: 0.6rem;
-        border: 1px solid var(--line);
-        padding: 0.35rem 0.5rem;
-        font-size: 0.75rem;
-      }
-
-      .inline-actions .save-btn {
-        background: var(--success);
-        border-color: var(--success);
-        color: #041407;
-      }
-
-      .canvas-wrapper {
-        border-radius: 0.9rem;
-        border: 1px solid var(--line);
-        background: rgba(16, 21, 26, 0.85);
-        padding: 0.7rem;
-      }
-
-      canvas {
-        width: 100%;
-        max-width: 620px;
-        border-radius: 0.8rem;
-        border: 1px solid var(--line);
-        background: #0f1419;
-        display: block;
-        touch-action: none;
-      }
-
-      .toolbar {
-        display: flex;
-        gap: 0.4rem;
-        flex-wrap: wrap;
-        margin-bottom: 0.6rem;
-      }
-
-      .toolbar button,
-      .toolbar input[type="color"],
-      .toolbar input[type="range"] {
-        border-radius: 0.7rem;
-        border: 1px solid var(--line);
-        background: var(--muted);
-        color: var(--text);
-        padding: 0.35rem 0.65rem;
-        font-size: 0.75rem;
-      }
-
-      .toolbar button.active {
-        background: var(--accent);
-        border-color: var(--accent);
-      }
-
-      .zoom-controls {
-        display: flex;
-        gap: 0.3rem;
-        justify-content: flex-end;
-        margin-top: 0.5rem;
-      }
-
-      .zoom-controls button {
-        border-radius: 0.55rem;
-        border: 1px solid var(--line);
-        background: var(--muted);
-        color: var(--text);
-        padding: 0.25rem 0.5rem;
-        font-size: 0.7rem;
-      }
-
-      .details-form label {
-        display: block;
-        font-size: 0.75rem;
-        color: var(--sub);
-        margin-bottom: 0.25rem;
-      }
-
-      .details-form input,
-      .details-form select,
-      .details-form textarea {
-        width: 100%;
-        border-radius: 0.8rem;
-        border: 1px solid var(--line);
-        background: #0f1419;
-        color: var(--text);
-        padding: 0.5rem 0.65rem;
-        margin-bottom: 0.7rem;
-        font-size: 0.8rem;
-      }
-
-      .photo-upload {
-        border: 2px dashed var(--line);
-        border-radius: 0.9rem;
-        padding: 0.7rem;
-        text-align: center;
-        margin-bottom: 0.7rem;
-        color: var(--sub);
-        font-size: 0.75rem;
-      }
-
-      .photo-upload.dragover {
-        border-color: var(--accent);
-        color: var(--accent);
-      }
-
-      .photo-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-        gap: 0.5rem;
-        margin-bottom: 0.8rem;
-      }
-
-      .photo-card {
-        position: relative;
-        aspect-ratio: 1;
-        border-radius: 0.7rem;
-        overflow: hidden;
-        border: 1px solid var(--line);
-        background: #0f1419;
-      }
-
-      .photo-card img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-
-      .photo-card button {
-        position: absolute;
-        top: 4px;
-        right: 4px;
-        border: none;
-        border-radius: 50%;
-        background: rgba(230, 57, 70, 0.9);
-        color: #fff;
-        width: 22px;
-        height: 22px;
-        font-size: 0.7rem;
-      }
-
-      .timeline-track {
-        display: flex;
-        gap: 0.6rem;
-        overflow-x: auto;
-        padding: 0.6rem 0.2rem;
-      }
-
-      .timeline-scene {
-        width: 150px;
-        flex-shrink: 0;
-        border-radius: 0.8rem;
-        border: 1px solid var(--line);
-        background: var(--panel);
-        overflow: hidden;
-        cursor: grab;
-      }
-
-      .timeline-scene.dragging {
-        transform: rotate(3deg) scale(1.05);
-      }
-
-      .timeline-thumb {
-        height: 80px;
-        background: #0f1419;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        color: var(--sub);
-        font-size: 0.9rem;
-      }
-
-      .timeline-thumb img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-
-      .template-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-        gap: 0.6rem;
-      }
-
-      .template-card {
-        border-radius: 0.9rem;
-        border: 1px solid var(--line);
-        background: var(--muted);
-        padding: 0.7rem;
-        text-align: center;
-        cursor: pointer;
-        transition: transform 0.2s ease, background 0.2s ease;
-      }
-
-      .template-card:hover,
-      .template-card:focus-visible {
-        background: #1a2129;
-        transform: translateY(-2px);
-      }
-
-      .empty-state {
-        padding: 2rem 1rem;
-        text-align: center;
-        color: var(--sub);
-        font-size: 0.85rem;
-      }
-
-      footer {
+      .section {
         padding: 1rem;
-        text-align: center;
-        font-size: 0.75rem;
-        color: var(--sub);
-        border-top: 1px solid var(--line);
       }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>AudioVisual Storyboard</h1>
+        <div class="brand">by Concept Vangård</div>
+      </div>
+      <nav class="nav" role="tablist">
+        <button id="tab-scenes" aria-current="page">Scener</button>
+        <button id="tab-timeline">Tidslinje</button>
+        <button id="tab-overview">Översikt</button>
+        <button id="tab-export">Export</button>
+      </nav>
+      <!-- Collapsible actions menu on mobile -->
+      <button id="toggle-actions" class="btn ghost menu-btn" aria-label="Visa eller dölj verktyg">
+        <span class="material-icons">menu</span>
+      </button>
+      <div id="actions" class="toolbar actions">
+        <button id="btn-add" class="btn primary" aria-label="Lägg till ny scen">
+          <span class="material-icons">add</span> Ny scen
+        </button>
+        <button id="btn-import-images" class="btn" aria-label="Batchimportera bilder">
+          <span class="material-icons">photo_library</span> Batch-import bilder
+        </button>
+        <input id="file-import-images" type="file" accept="image/*" multiple style="display:none" />
+        <button id="btn-import-json" class="btn" aria-label="Importera JSON">
+          <span class="material-icons">upload_file</span> Import JSON
+        </button>
+        <input id="file-import-json" type="file" accept="application/json" style="display:none" />
+      </div>
+    </header>
 
-      .toast {
-        position: fixed;
-        bottom: 1.2rem;
-        right: 1.2rem;
-        padding: 0.8rem 1rem;
-        border-radius: 0.9rem;
-        border: 1px solid var(--line);
-        background: var(--panel);
-        box-shadow: 0 18px 36px rgba(0, 0, 0, 0.4);
-        animation: toast-in 0.3s ease;
-        font-size: 0.8rem;
-        z-index: 999;
+    <main>
+      <!-- Scenes -->
+      <section id="view-scenes" class="section">
+        <div class="toolbar" style="margin-bottom:1rem">
+          <span class="badge">Scener: <b id="proj-count">0</b></span>
+          <!-- Toggle button to show/hide bulk action tools on small screens -->
+          <button id="toggle-selbar" class="btn ghost" aria-label="Visa eller dölj urvalsverktyg">Verktyg</button>
+          <div style="flex:1"></div>
+          <button id="btn-export-json-top" class="btn ghost" aria-label="Exportera JSON">
+            <span class="material-icons">download</span> Export JSON
+          </button>
+        </div>
+        <div class="selbar" id="selbar">
+          <span class="badge">Markerade: <b id="sel-count">0</b></span>
+          <button class="btn" id="sel-all">Markera alla</button>
+          <button class="btn" id="sel-none">Rensa markering</button>
+          <div class="split"></div>
+
+          <label class="badge">Längd <input id="bulk-dur" type="text" placeholder="t.ex. 8s / 1:20" style="margin-left:6px"></label>
+          <button class="btn" id="bulk-set-dur">Sätt längd</button>
+          <div class="split"></div>
+
+          <label class="badge">Kamera
+            <select id="bulk-cam" style="margin-left:6px">
+              <option>Wide</option><option selected>Medium</option><option>Close</option><option>Dutch</option><option>Top</option><option>Low</option>
+            </select>
+          </label>
+          <button class="btn" id="bulk-set-cam">Sätt kamera</button>
+          <div class="split"></div>
+
+          <label class="badge">tags.camera <input id="bulk-tags-camera" type="text" placeholder="ex: low angle, handheld" style="margin-left:6px"></label>
+          <label class="badge">tags.light <input id="bulk-tags-light" type="text" placeholder="ex: backlight, smoke"></label>
+          <label class="badge">tags.vfx <input id="bulk-tags-vfx" type="text" placeholder="ex: sparks, particles"></label>
+          <button class="btn" id="bulk-add-tags">+ Lägg till</button>
+          <button class="btn" id="bulk-replace-tags">↺ Ersätt</button>
+          <button class="btn" id="bulk-clear-tags">✕ Rensa</button>
+          <div class="split"></div>
+
+          <label class="badge">Lane
+            <select id="bulk-lane" style="margin-left:6px">
+              <option value="0" selected>0</option><option value="1">1</option><option value="2">2</option>
+            </select>
+          </label>
+          <button class="btn" id="bulk-set-lane">Sätt lane</button>
+          <div class="split"></div>
+
+          <button class="btn" id="bulk-dup">📋 Duplicera markerade</button>
+          <button class="btn" id="bulk-del">🗑️ Ta bort markerade</button>
+          <div class="split"></div>
+          <button class="btn" id="bulk-lock">🔒 Lås markerade</button>
+          <button class="btn" id="bulk-unlock">🔓 Lås upp markerade</button>
+        </div>
+
+        <div class="qtags" id="qtags">
+          <span class="badge">Snabbtaggar:</span>
+          <button class="qt" data-cat="camera" data-val="low angle">camera: low angle</button>
+          <button class="qt" data-cat="camera" data-val="handheld">camera: handheld</button>
+          <button class="qt" data-cat="light" data-val="backlight">light: backlight</button>
+          <button class="qt" data-cat="light" data-val="smoke">light: smoke</button>
+          <button class="qt" data-cat="vfx" data-val="smoke">vfx: smoke</button>
+          <button class="qt" data-cat="vfx" data-val="sparks">vfx: sparks</button>
+          <button class="qt" data-cat="vfx" data-val="particles">vfx: particles</button>
+          <button class="qt" data-cat="vfx" data-val="laser">vfx: laser</button>
+        </div>
+
+        <div class="toolbar" style="margin:1rem 0">
+          <label class="badge">Sortering (Visning)
+            <select id="sort-by" style="margin-left:6px">
+              <option value="start" selected>Start</option>
+              <option value="title">Titel</option>
+              <option value="duration">Längd</option>
+              <option value="camera">Kamera</option>
+            </select>
+          </label>
+          <label class="badge">Riktning
+            <select id="sort-dir" style="margin-left:6px">
+              <option value="asc" selected>Stigande</option>
+              <option value="desc">Fallande</option>
+            </select>
+          </label>
+        </div>
+
+        <div id="grid" class="grid"></div>
+        <div id="empty" class="section" style="display:none;text-align:center">Inga scener ännu.</div>
+        <!-- Thumbnail navigation for quick scene access -->
+      </section>
+
+      <!-- Timeline -->
+      <section id="view-timeline" class="section" style="display:none">
+        <div class="timeline-wrap">
+          <div class="timeline-toolbar">
+            <label class="badge">BPM <input id="bpm" type="number" min="30" max="300" value="120" style="width:80px;margin-left:6px"></label>
+            <div class="audio-bar">
+              <input id="audio-file" type="file" accept="audio/*">
+              <button id="play" class="btn">▶/⏸</button>
+              <button id="stop" class="btn">⏹</button>
+              <input id="scrub" type="range" min="0" max="0" value="0" style="width:220px">
+              <span class="badge" id="cur-time">0:00</span> / <span class="badge" id="dur-time">0:00</span>
+            </div>
+            <div style="flex:1"></div>
+            <button class="btn" id="tl-zoom-out">−</button>
+            <button class="btn" id="tl-zoom-in">+</button>
+            <button class="btn" id="tl-fit">Auto-fit längder</button>
+            <button class="btn" id="tl-resolve">Auto-resolve överlapp</button>
+            <button class="btn" id="tl-snap-toggle">Snap: Beat</button>
+            <label class="badge">Grid
+              <input id="grid-hard" type="checkbox" style="margin-left:6px"> Hard
+            </label>
+            <label class="badge">Quantize
+              <select id="grid-quant" style="margin-left:6px">
+                <option value="1" selected>1 beat</option>
+                <option value="0.5">1/2 beat</option>
+                <option value="0.25">1/4 beat</option>
+              </select>
+            </label>
+            <label class="badge">Auto-reflow
+              <input id="reflow-toggle" type="checkbox" checked style="margin-left:6px">
+            </label>
+          </div>
+
+          <details style="margin-top:6px">
+            <summary class="badge" style="cursor:pointer">Lane-inställningar (namn & färg)</summary>
+            <div id="lanes-box" style="margin-top:8px"></div>
+          </details>
+
+          <div id="timeline" class="timeline"></div>
+          <small class="badge" style="margin-top:6px">Tips: **Shift-drag** snäpper till närmaste marker. **Ctrl** = till nästa, **Alt** = till föregående. Mobil: växla "Snap: …".</small>
+
+          <div class="toolbar" style="margin-top:10px">
+            <label class="badge">Marker label <input id="marker-label" type="text" style="width:160px;margin-left:6px" placeholder="ex: Verse A"></label>
+            <label class="badge">Typ
+              <select id="marker-type">
+                <option>Section</option><option>Verse</option><option>Chorus</option><option>Bridge</option><option>Custom</option>
+              </select>
+            </label>
+            <label class="badge">Tid <input id="marker-time" type="text" style="width:80px;margin-left:6px" placeholder="mm:ss eller sek"></label>
+            <button class="btn" id="marker-add-cur">+ Add @ Current</button>
+            <button class="btn" id="marker-add-manual">+ Add Manual</button>
+            <button class="btn" id="marker-align">Align Scenes → Markers</button>
+            <button class="btn" id="marker-clear">Rensa markers</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Overview -->
+      <section id="view-overview" class="section" style="display:none">
+        <div class="ov-toolbar">
+          <label class="badge">Filter
+            <select id="filter-cat" style="margin-left:6px">
+              <option value="title">Titel</option>
+              <option value="description">Beskrivning</option>
+              <option value="tags.camera">tags.camera</option>
+              <option value="tags.light">tags.light</option>
+              <option value="tags.vfx" selected>tags.vfx</option>
+            </select>
+          </label>
+          <input id="filter-text" type="text" placeholder="t.ex. smoke" style="width:160px">
+          <div style="flex:1"></div>
+          <button class="btn" id="ov-prev">◀</button>
+          <span class="badge" id="ov-page">1 / 1</span>
+          <button class="btn" id="ov-next">▶</button>
+        </div>
+        <div id="ov-grid" class="ov-grid" style="margin-top:10px"></div>
+      </section>
+
+      <!-- Export -->
+      <section id="view-export" class="section" style="display:none">
+        <div class="toolbar" style="gap:8px;flex-wrap:wrap">
+          <label class="badge">Upplägg
+            <select id="pdf-layout">
+              <option value="1">1/sida</option>
+              <option value="2">2/sida</option>
+              <option value="4">4/sida</option>
+              <option value="6" selected>6/sida</option>
+              <option value="12">12/sida</option>
+            </select>
+          </label>
+          <label class="badge">Orientering
+            <select id="pdf-orientation">
+              <option value="portrait">Stående</option>
+              <option value="landscape" selected>Liggande</option>
+            </select>
+          </label>
+          <label class="badge">Rubrik
+            <input type="text" id="pdf-title" value="AudioVisual Storyboard — Musikvideo" style="width:220px;margin-left:6px">
+          </label>
+          <label class="badge"><input id="pdf-cover" type="checkbox" style="margin-right:6px">Inkludera sammanfattning (shot-list)</label>
+          <label class="badge"><input id="pdf-logo" type="checkbox" style="margin-right:6px">Visa logga i header</label>
+          <label class="badge"><input id="pdf-group" type="checkbox" style="margin-right:6px">Visa sektion (marker) per scen</label>
+          <div style="flex:1"></div>
+          <button class="btn primary" id="btn-export-pdf" aria-label="Exportera PDF">
+            <span class="material-icons">picture_as_pdf</span> Exportera PDF
+          </button>
+          <button class="btn" id="btn-export-json" aria-label="Exportera JSON">
+            <span class="material-icons">code</span> Exportera JSON
+          </button>
+          <button class="btn" id="btn-export-zip" aria-label="Exportera ZIP">
+            <span class="material-icons">archive</span> Export ZIP
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Thumbnail navigation container moved outside scenes for better positioning -->
+    <div id="thumb-nav" class="thumb-nav" aria-label="Scenöversikt"></div>
+
+    <div class="toast" id="toast"></div>
+    <input id="file-hidden" type="file" accept="image/*" style="display:none" />
+  </div>
+
+<script defer>
+(function(){
+  'use strict';
+  /** Keys */
+  const STORAGE_KEY='sb_scenesv211sf';
+  const MARKERS_KEY='sb_markersv211sf';
+  const LANE_KEY='sb_lanesv211sf';
+
+  /** State */
+  let scenes=[], markers=[], laneMeta=[];
+  let selected=new Set();
+  let viewSortBy='start', viewSortDir='asc';
+  let audioCtx=null, audioBuf=null, audioSrc=null, audioStart=0, audioOffset=0, rafId=0;
+  let bpm=120, beatMs=500;
+  let timelinePxPerSec=30;
+  let laneCount=3;
+  let idb;
+  let snapEl=null;
+  let snapMode='beat'; // beat|marker
+  let hardGrid=false;
+  let quantDiv=1; // 1, 0.5, 0.25
+  let autoReflow=true;
+
+  /** Perf: debounced save + raf scheduler */
+  let _saveTimer=null;
+  function saveDebounced(){ clearTimeout(_saveTimer); _saveTimer=setTimeout(()=>save(), 200); }
+
+  let _rafScheduled=false, _needs={tl:false, sc:false, ov:false};
+  function scheduleRender({timeline=false, scenes=false, overview=false}={}){
+    _needs.tl = _needs.tl || timeline;
+    _needs.sc = _needs.sc || scenes;
+    _needs.ov = _needs.ov || overview;
+    if(_rafScheduled) return;
+    _rafScheduled=true;
+    requestAnimationFrame(()=>{
+      if(_needs.tl) renderTimeline();
+      if(_needs.sc) renderScenes();
+      if(_needs.ov) renderOverview();
+      _needs={tl:false, sc:false, ov:false};
+      _rafScheduled=false;
+    });
+  }
+
+  /** Marker cache */
+  let _markersSorted=null;
+  function markDirty(){ _markersSorted=null; }
+  function markersSorted(){
+    if(_markersSorted) return _markersSorted;
+    _markersSorted = [...markers].sort((a,b)=>a.t-b.t);
+    return _markersSorted;
+  }
+
+  /** DOM */
+  const $=s=>document.querySelector(s);
+  const el={
+    nav:{ scenes:$('#tab-scenes'), timeline:$('#tab-timeline'), overview:$('#tab-overview'), export:$('#tab-export') },
+    view:{ scenes:$('#view-scenes'), timeline:$('#view-timeline'), overview:$('#view-overview'), export:$('#view-export') },
+    add:$('#btn-add'), grid:$('#grid'), empty:$('#empty'), projCount:$('#proj-count'),
+    // selection
+    selCount:$('#sel-count'), selAll:$('#sel-all'), selNone:$('#sel-none'),
+  selbar:$('#selbar'), toggleSelbar:$('#toggle-selbar'),
+  // header actions menu
+  actions:$('#actions'), toggleActions:$('#toggle-actions'),
+    bulkDur:$('#bulk-dur'), bulkSetDur:$('#bulk-set-dur'),
+    bulkCam:$('#bulk-cam'), bulkSetCam:$('#bulk-set-cam'),
+    bulkCamTags:$('#bulk-tags-camera'), bulkLightTags:$('#bulk-tags-light'), bulkVfxTags:$('#bulk-tags-vfx'),
+    bulkAddTags:$('#bulk-add-tags'), bulkReplaceTags:$('#bulk-replace-tags'), bulkClearTags:$('#bulk-clear-tags'),
+    bulkLane:$('#bulk-lane'), bulkSetLane:$('#bulk-set-lane'),
+    bulkDup:$('#bulk-dup'), bulkDel:$('#bulk-del'),
+    bulkLock:$('#bulk-lock'), bulkUnlock:$('#bulk-unlock'),
+    qtags:$('#qtags'), sortBy:$('#sort-by'), sortDir:$('#sort-dir'),
+    // timeline
+    tl:$('#timeline'), bpm:$('#bpm'), audioFile:$('#audio-file'), play:$('#play'), stop:$('#stop'), scrub:$('#scrub'), curTime:$('#cur-time'), durTime:$('#dur-time'),
+    tlFit:$('#tl-fit'), tlResolve:$('#tl-resolve'), tlSnapToggle:$('#tl-snap-toggle'),
+    tlZoomIn:$('#tl-zoom-in'), tlZoomOut:$('#tl-zoom-out'),
+    gridHard:$('#grid-hard'), gridQuant:$('#grid-quant'),
+    reflowToggle:$('#reflow-toggle'),
+    // markers
+    mLabel:$('#marker-label'), mType:$('#marker-type'), mTime:$('#marker-time'),
+    addAtCur:$('#marker-add-cur'), addManual:$('#marker-add-manual'), clearMarkers:$('#marker-clear'), alignMarkers:$('#marker-align'),
+    // lane settings
+    lanesBox:$('#lanes-box'),
+    // overview
+    fCat:$('#filter-cat'), fText:$('#filter-text'),
+    ovPrev:$('#ov-prev'), ovNext:$('#ov-next'), ovPage:$('#ov-page'), ovGrid:$('#ov-grid'),
+    // export
+    pdfLayout:$('#pdf-layout'), pdfOrientation:$('#pdf-orientation'), pdfTitle:$('#pdf-title'),
+    exportPdf:$('#btn-export-pdf'), exportJson:$('#btn-export-json'), exportZip:$('#btn-export-zip'), exportJsonTop:$('#btn-export-json-top'),
+    pdfCover:$('#pdf-cover'), pdfLogo:$('#pdf-logo'), pdfGroup:$('#pdf-group'),
+    // files + toast
+    importJsonBtn:$('#btn-import-json'), importJsonFile:$('#file-import-json'),
+    importImages:$('#btn-import-images'), fileImages:$('#file-import-images'),
+    fileHidden:$('#file-hidden'), toast:$('#toast'),
+    thumbNav:$('#thumb-nav'),
+  };
+
+  function toast(msg){ el.toast.textContent=msg; el.toast.classList.add('show'); setTimeout(()=>el.toast.classList.remove('show'),2200); }
+
+  /** IDB */
+  function openDB(){
+    return new Promise((resolve)=>{
+      try{
+        const req=indexedDB.open('StoryboardApp',8);
+        req.onupgradeneeded=()=>{ const db=req.result; if(!db.objectStoreNames.contains('images')) db.createObjectStore('images'); };
+        req.onsuccess=()=>{ resolve(req.result); };
+        req.onerror=()=>resolve(null);
+      }catch(_){ resolve(null); }
+    });
+  }
+  function putImage(key, blob){ return new Promise((res,rej)=>{ if(!idb) return res(false); const tx=idb.transaction('images','readwrite'); tx.objectStore('images').put(blob,key); tx.oncomplete=()=>res(true); tx.onerror=()=>rej(tx.error); }); }
+  function getImage(key){ return new Promise((res,rej)=>{ if(!idb) return res(null); const tx=idb.transaction('images','readonly'); const rq=tx.objectStore('images').get(key); rq.onsuccess=()=>res(rq.result||null); rq.onerror=()=>rej(rq.error); }); }
+
+  /** Storage */
+  function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(scenes)); el.projCount.textContent=String(scenes.length); }
+  function load(){ try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||[]}catch(e){return[]} }
+  function saveMarkers(){ localStorage.setItem(MARKERS_KEY, JSON.stringify(markers)); }
+  function loadMarkers(){ try{return JSON.parse(localStorage.getItem(MARKERS_KEY))||[]}catch(e){return[]} }
+  function saveLanes(){ localStorage.setItem(LANE_KEY, JSON.stringify(laneMeta)); }
+  function loadLanes(){ try{return JSON.parse(localStorage.getItem(LANE_KEY))||[]}catch(e){return[]} }
+  function uid(){ return 'scene-' + Date.now() + '-' + Math.random().toString(36).slice(2,7); }
+
+  /** Utils */
+  function parseSec(v){
+    if(!v) return 5;
+    v=String(v).trim().toLowerCase();
+    if(/^\d+ms$/.test(v)) return Math.max(0.1, parseInt(v)/1000);
+    if(/^\d+(\.\d+)?m$/.test(v)) return Math.max(0.1, parseFloat(v)*60);
+    if(/^\d+s$/.test(v)) return Math.max(0.1, parseInt(v));
+    if(/^\d+:\d{1,2}$/.test(v)){ const [m,s]=v.split(':').map(Number); return Math.max(0.1, m*60+s); }
+    if(/^\d+(\.\d+)?$/.test(v)) return Math.max(0.1, parseFloat(v));
+    return 5;
+  }
+  function fmtTime(s){ const m=Math.floor(s/60),sec=Math.floor(s%60); return `${m}:${(sec<10?'0':'')+sec}`; }
+  // HTML escape helper to prevent injection in template strings.
+  function esc(s){
+    return String(s || '').replace(/[&<>"']/g, function(m){
+      return {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[m];
+    });
+  }
+
+  /** Duration cache */
+  function durSec(s){ 
+    if(typeof s._durSec==='number') return s._durSec;
+    const d=parseSec(s.duration||'0'); s._durSec=d; return d;
+  }
+  function setDuration(s, value){
+    s.duration = value;
+    s._durSec = parseSec(value||'0');
+  }
+
+  /** Selection */
+  function isSelected(id){ return selected.has(id); }
+  function setSelected(id, on){ if(on) selected.add(id); else selected.delete(id); updateSelBar(); }
+  function updateSelBar(){ el.selCount.textContent=String(selected.size); }
+
+  /** Defaults */
+  function ensureDefaults(){
+    let t=0;
+    for(const s of scenes){
+      if(typeof s.startOffset!=='number' || isNaN(s.startOffset)){ s.startOffset=t; }
+      if(typeof s.lane!=='number' || isNaN(s.lane)){ s.lane=0; }
+      s._durSec=parseSec(s.duration||'0');
+      t += s._durSec;
+    }
+    if(!Array.isArray(laneMeta) || laneMeta.length<laneCount){
+      const lm=[];
+      const defs=[{n:'A-roll',c:'#7c3aed'},{n:'B-roll',c:'#3b82f6'},{n:'VFX',c:'#f59e0b'}];
+      for(let i=0;i<laneCount;i++){ lm.push(laneMeta[i]||{name:defs[i]?.n||('Spår '+i), color:defs[i]?.c||'#8899aa'}); }
+      laneMeta=lm;
+    }
+  }
+  function renumberByTime(){
+    scenes.sort((a,b)=> (a.lane-b.lane) || (a.startOffset-b.startOffset) || (a.title||'').localeCompare(b.title||''));
+    scenes.forEach((s,i)=> s.scene_number=i+1);
+  }
+
+  /** Quantize / Snap */
+  function beatLen(){ return beatMs/1000; }
+  function quantize(time, mode, dir){ // mode: 'beat' or 'marker', dir: -1 prev, 0 nearest, +1 next
+    if(mode==='marker'){
+      if(markers.length===0) return time;
+      const _ms=markersSorted();
+      if(dir<0){ // prev
+        let prev=_ms[0].t;
+        for(const m of _ms){ if(m.t<=time) prev=m.t; else break; }
+        return prev;
+      }else if(dir>0){ // next
+        for(const m of _ms){ if(m.t>=time) return m.t; }
+        return _ms[_ms.length-1].t;
+      }else{ // nearest
+        let best=_ms[0].t, d=1e9;
+        for(const m of _ms){ const dd=Math.abs(time-m.t); if(dd<d){d=dd; best=m.t;} }
+        return best;
       }
+    } else {
+      const step=beatLen()*quantDiv;
+      if(dir<0) return Math.floor(time/step)*step;
+      if(dir>0) return Math.ceil(time/step)*step;
+      return Math.round(time/step)*step;
+    }
+  }
 
-      .toast.success {
-        border-color: var(--success);
+  /** Overlaps */
+  function laneScenes(ln){ return scenes.filter(s=> (s.lane||0)===ln).sort((a,b)=>a.startOffset-b.startOffset); }
+  function findOverlaps(){
+    const set=new Set();
+    for(let ln=0; ln<laneCount; ln++){
+      const arr=laneScenes(ln);
+      for(let i=0;i<arr.length-1;i++){
+        const a=arr[i], b=arr[i+1];
+        if(a.startOffset+durSec(a) > b.startOffset) { set.add(a.id); set.add(b.id); }
       }
-
-      .toast.error {
-        border-color: var(--accent);
-      }
-
-      @keyframes toast-in {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
+    }
+    return set;
+  }
+  function resolveOverlaps(){
+    let fixes=0;
+    for(let ln=0; ln<laneCount; ln++){
+      const arr=laneScenes(ln);
+      for(let i=0;i<arr.length-1;i++){
+        const a=arr[i], b=arr[i+1];
+        const aEnd=a.startOffset+durSec(a)+0.001;
+        if(aEnd > b.startOffset && !b.locked){
+          const snapped=quantize(aEnd, hardGrid?'beat':snapMode, +1); // push forward
+          b.startOffset = snapped;
+          b.updated_at=new Date().toISOString();
+          fixes++;
         }
-        to {
-          opacity: 1;
-          transform: translateY(0);
+      }
+    }
+    if(fixes){ renumberByTime(); saveDebounced(); scheduleRender({timeline:true, scenes:true}); toast(`Överlapp auto-fixade: ${fixes}`); } else toast('Inga överlapp att fixa');
+  }
+  function reflowLane(ln){
+    const arr=laneScenes(ln);
+    for(let i=0;i<arr.length;i++){
+      const prev=arr[i-1];
+      if(prev){
+        const minStart=prev.startOffset+durSec(prev)+0.001;
+        if(arr[i].startOffset < minStart && !arr[i].locked){
+          let t=minStart;
+          if(hardGrid) t=quantize(t,'beat',+1);
+          arr[i].startOffset = t;
+          arr[i].updated_at=new Date().toISOString();
         }
       }
+    }
+  }
 
-      .floating-actions {
-        display: none;
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        padding: 0.85rem;
-        background: linear-gradient(180deg, rgba(11, 13, 16, 0) 0%, rgba(11, 13, 16, 0.95) 70%);
-        z-index: 20;
-      }
+  /** Scenes CRUD */
+  function addScene(){
+    const last=scenes[scenes.length-1];
+    const newStart= last ? (last.startOffset+durSec(last)) : 0;
+    scenes.push({
+      id:uid(), scene_number:(scenes[scenes.length-1]?.scene_number||0)+1,
+      title:'', description:'', duration:'5s', camera_angle:'Medium', notes:'',
+      tags:{camera:[],light:[],vfx:[]}, image_key:'', thumbnail:'', thumbnail_webp:'',
+      startOffset:newStart, lane:0, locked:false,
+      created_at:new Date().toISOString(), updated_at:new Date().toISOString(), _durSec:5
+    });
+    if(autoReflow) reflowLane(0);
+    saveDebounced(); scheduleRender({scenes:true, timeline:true, overview:true}); toast('Scen tillagd');
+  }
+  function duplicateScene(s){
+    const c=JSON.parse(JSON.stringify(s)); c.id=uid(); c.created_at=new Date().toISOString(); c.updated_at=c.created_at;
+    c.startOffset = s.startOffset + durSec(s) + 0.001;
+    scenes.push(c);
+    if(autoReflow) reflowLane(c.lane||0);
+    renumberByTime(); saveDebounced(); scheduleRender({scenes:true, timeline:true, overview:true}); toast('Scen duplicerad');
+  }
+  function deleteScene(s){
+    if(!confirm('Ta bort scen?')) return;
+    const ln=s.lane||0;
+    scenes=scenes.filter(x=>x.id!==s.id);
+    if(autoReflow) reflowLane(ln);
+    renumberByTime(); saveDebounced(); scheduleRender({scenes:true, timeline:true, overview:true}); toast('Scen borttagen');
+  }
 
-      .floating-actions .btn-primary {
-        max-width: 480px;
-        margin: 0 auto;
+  /** Bulk */
+  function ensureSelection(){ if(selected.size===0){ alert('Markera minst en scen.'); return false; } return true; }
+  function bulkSetDuration(){ if(!ensureSelection()) return; const val=(el.bulkDur.value||'').trim(); if(!val) return alert('Ange längd.');
+    const lanesChanged=new Set();
+    for(const id of selected){ const s=scenes.find(x=>x.id===id); if(s && !s.locked){ setDuration(s, val); s.updated_at=new Date().toISOString(); lanesChanged.add(s.lane||0); } }
+    saveDebounced(); if(autoReflow) lanesChanged.forEach(reflowLane); renumberByTime(); scheduleRender({scenes:true, timeline:true}); toast('Längd uppdaterad');
+  }
+  function bulkSetCamera(){ if(!ensureSelection()) return; const cam=el.bulkCam.value;
+    for(const id of selected){ const s=scenes.find(x=>x.id===id); if(s && !s.locked){ s.camera_angle=cam; s.updated_at=new Date().toISOString(); } }
+    saveDebounced(); scheduleRender({scenes:true}); toast('Kamera uppdaterad');
+  }
+  function parseTagsInput(str){ return String(str||'').split(',').map(x=>x.trim()).filter(Boolean); }
+  function applyTags(mode){
+    if(!ensureSelection()) return;
+    const cam=parseTagsInput(el.bulkCamTags.value), lig=parseTagsInput(el.bulkLightTags.value), vfx=parseTagsInput(el.bulkVfxTags.value);
+    for(const id of selected){
+      const s=scenes.find(x=>x.id===id); if(!s || s.locked) continue; s.tags=s.tags||{camera:[],light:[],vfx:[]};
+      for(const [cat, incoming] of [['camera',cam],['light',lig],['vfx',vfx]]){
+        if(mode==='add') s.tags[cat]=Array.from(new Set([...(s.tags[cat]||[]),...incoming]));
+        else if(mode==='replace') s.tags[cat]=incoming;
+        else if(mode==='clear') s.tags[cat]=incoming.length? (s.tags[cat]||[]).filter(t=>!incoming.includes(t)) : [];
       }
+      s.updated_at=new Date().toISOString();
+    }
+    saveDebounced(); scheduleRender({scenes:true, overview:true}); toast(mode==='add'?'Taggar tillagda':(mode==='replace'?'Taggar ersatta':'Taggar rensade'));
+  }
+  function bulkDuplicate(){ if(!ensureSelection()) return; const ids=[...selected]; for(const id of ids){ const s=scenes.find(x=>x.id===id); if(s) duplicateScene(s); } selected.clear(); saveDebounced(); renumberByTime(); scheduleRender({scenes:true, timeline:true}); toast('Markerade duplicerade'); }
+  function bulkDelete(){ if(!ensureSelection()) return; if(!confirm('Ta bort markerade scener?')) return;
+    const lanesChanged=new Set();
+    scenes = scenes.filter(s=> { if(selected.has(s.id) && !s.locked){ lanesChanged.add(s.lane||0); return false;} return true; });
+    selected.clear(); if(autoReflow) lanesChanged.forEach(reflowLane); renumberByTime(); saveDebounced(); scheduleRender({scenes:true, timeline:true, overview:true}); toast('Markerade borttagna');
+  }
+  function bulkSetLane(){ if(!ensureSelection()) return; const ln=Number(el.bulkLane.value||0);
+    for(const id of selected){ const s=scenes.find(x=>x.id===id); if(s && !s.locked){ s.lane=ln; s.updated_at=new Date().toISOString(); } }
+    saveDebounced(); if(autoReflow) reflowLane(ln); renumberByTime(); scheduleRender({scenes:true, timeline:true}); toast('Lane satt');
+  }
+  function bulkLockScenes(flag){ if(!ensureSelection()) return; for(const id of selected){ const s=scenes.find(x=>x.id===id); if(s){ s.locked=!!flag; s.updated_at=new Date().toISOString(); } } saveDebounced(); scheduleRender({scenes:true, timeline:true}); toast(flag?'Låsta':'Upplåsta'); }
 
-      .sr-only {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
+  /** Images */
+  async function putPhotoForScene(s,file){ const key='img-'+s.id; await putImage(key,file); s.image_key=key; const {jpeg, webp}=await generateThumb(file,240,135); s.thumbnail=jpeg; s.thumbnail_webp=webp; s.updated_at=new Date().toISOString(); saveDebounced(); }
+  async function generateThumb(file,w=240,h=135){
+    const url=URL.createObjectURL(file); const img=new Image();
+    await new Promise((res,rej)=>{ img.onload=()=>res(); img.onerror=rej; img.src=url; });
+    const c=document.createElement('canvas'); c.width=w; c.height=h; const ctx=c.getContext('2d'); ctx.fillStyle='#0d1319'; ctx.fillRect(0,0,w,h);
+    const r=Math.min(w/img.naturalWidth, h/img.naturalHeight); const iw=img.naturalWidth*r, ih=img.naturalHeight*r;
+    ctx.drawImage(img,(w-iw)/2,(h-ih)/2,iw,ih); URL.revokeObjectURL(url);
+    // JPEG
+    const jpeg=c.toDataURL('image/jpeg',0.82);
+    // Attempt WebP if supported
+    let webp='';
+    try{
+      const webpTest=c.toDataURL('image/webp',0.8);
+      if(webpTest.startsWith('data:image/webp')){
+        webp=webpTest;
       }
-    </style>
-  </head>
-  <body>
-    <div class="app">
-      <header>
-        <h1 id="app-title">Storyboard – Musikvideo Pro</h1>
-        <span class="tag" id="subtitle-tag">Professional Edition</span>
-        <nav class="nav" aria-label="Huvudnavigation">
-          <button id="nav-scenes" aria-current="page">Scener</button>
-          <button id="nav-timeline">Tidslinje</button>
-          <button id="nav-templates">Mallar</button>
-          <button id="show-shortcuts" title="Kortkommandon">⌨️</button>
-          <div class="export" style="position: relative;">
-            <button id="export-btn" title="Exportera storyboard">📤 Export</button>
-            <div class="export-menu" id="export-menu" role="menu">
-              <button id="export-pdf" role="menuitem">📄 PDF Rapport</button>
-              <button id="export-json" role="menuitem">📋 JSON Data</button>
-              <button id="export-txt" role="menuitem">📝 Textfil</button>
+    }catch(e){ webp=''; }
+    return {jpeg, webp};
+  }
+  function batchImportImages(files){
+    let i=0; const next=async()=>{ if(i>=files.length){ scheduleRender({scenes:true, overview:true, timeline:true}); toast('Batch-import klar'); return; } const f=files[i++];
+      const s=scenes.find(x=>!x.image_key)||scenes[scenes.length-1]; await putPhotoForScene(s,f); next(); }; next();
+  }
+
+  /** Nearest marker label <= time */
+  function sectionLabelAt(time){
+    if(markers.length===0) return '';
+    const _ms=markersSorted();
+    let lab=''; for(const m of _ms){ if(m.t<=time) lab=m.label||m.type||''; else break; }
+    return lab;
+  }
+
+  /** Timeline rendering */
+  function renderTimeline(){
+    el.tl.innerHTML='';
+    const totalSec = Math.max(60, ...scenes.map(s=> (s.startOffset||0)+durSec(s)));
+    const beats=Math.ceil((totalSec*1000)/beatMs)+4;
+    for(let i=0;i<=beats;i++){ const x=Math.round((i*beatMs/1000)*timelinePxPerSec);
+      const b=document.createElement('div'); b.className='beat'; b.style.left=x+'px'; el.tl.appendChild(b);
+    }
+    // lanes
+    const laneHeight=86, laneGap=16;
+    const tlHeight=24 + laneCount*(laneHeight+laneGap);
+    el.tl.style.height=(tlHeight+20)+'px';
+    for(let ln=0; ln<laneCount; ln++){
+      const y=30 + ln*(laneHeight+laneGap);
+      const line=document.createElement('div'); line.className='lane-line'; line.style.top=(y-6)+'px'; line.style.background=laneMeta[ln]?.color||'#2a3440'; line.style.opacity='0.35'; el.tl.appendChild(line);
+      const lab=document.createElement('div'); lab.className='lane-label'; lab.style.top=(y-18)+'px'; lab.textContent=(laneMeta[ln]?.name||('Spår '+ln)); lab.style.color=laneMeta[ln]?.color||'#7d8a97'; el.tl.appendChild(lab);
+    }
+    // markers
+    const _ms=markersSorted();
+    for(const m of _ms){ const x=Math.round(m.t*timelinePxPerSec);
+      const mk=document.createElement('div'); mk.className='marker'; mk.style.left=x+'px'; mk.dataset.label=m.label||m.type||'Marker'; el.tl.appendChild(mk);
+    }
+    snapEl=document.createElement('div'); snapEl.className='snap'; snapEl.style.display='none'; el.tl.appendChild(snapEl);
+
+    const overlaps=findOverlaps();
+    for(const s of scenes){
+      const start=(typeof s.startOffset==='number')?s.startOffset:0;
+      const sec=durSec(s)||5; const w=Math.max(80, Math.round(sec*timelinePxPerSec));
+      const ln=Math.max(0, Math.min(laneCount-1, Number(s.lane||0)));
+      const laneY=30 + ln*(laneHeight+laneGap);
+      const block=document.createElement('div'); block.className='block'; block.dataset.id=s.id;
+      if(overlaps.has(s.id)) block.classList.add('overlap');
+      if(s.locked) block.classList.add('locked');
+      block.style.left=Math.round(start*timelinePxPerSec)+'px'; block.style.top=laneY+'px'; block.style.width=w+'px';
+      block.style.borderColor=laneMeta[ln]?.color||'#445';
+      block.innerHTML=`<div class="title">${esc(s.title||'Scen')}</div><div class="dur">${sec.toFixed(2)}s @ ${fmtTime(start)} — ${(laneMeta[ln]?.name||('L'+ln))}</div>`;
+      makeBlockDraggable(block, s);
+      el.tl.appendChild(block);
+    }
+    const o=findOverlaps(); if(o.size>0) toast(`Varning: överlapp (${o.size})`);
+  }
+  function makeBlockDraggable(block, s){
+    if(s.locked) return;
+    let startX=0, origLeft=0;
+    function onDown(ev){
+      if(s.locked) return;
+      ev.preventDefault();
+      block.classList.add('drag');
+      startX=(ev.touches?ev.touches[0].clientX:ev.clientX);
+      const rect=block.getBoundingClientRect(); const tlRect=el.tl.getBoundingClientRect();
+      origLeft=rect.left - tlRect.left + el.tl.scrollLeft;
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('touchmove', onMove, {passive:false});
+      document.addEventListener('mouseup', onUp, {once:true});
+      document.addEventListener('touchend', onUp, {once:true});
+    }
+    function onMove(ev){
+      ev.preventDefault();
+      const x=(ev.touches?ev.touches[0].clientX:ev.clientX);
+      const dx=x-startX;
+      const newLeft=Math.max(0, origLeft+dx);
+      const rawTime=newLeft/timelinePxPerSec;
+      const useMarkers=(ev.shiftKey || snapMode==='marker');
+      const dir = ev.ctrlKey ? +1 : (ev.altKey ? -1 : 0);
+      const snapTime=quantize(rawTime, useMarkers?'marker':'beat', dir);
+      const snapX=Math.round(snapTime*timelinePxPerSec) - el.tl.scrollLeft;
+      snapEl.style.left=snapX+'px'; snapEl.style.display='block';
+      block.style.left=Math.round(newLeft - el.tl.scrollLeft)+'px';
+      block.querySelector('.dur').textContent = `${durSec(s).toFixed(2)}s @ ${fmtTime(snapTime)} — ${(laneMeta[s.lane||0]?.name||('L'+(s.lane||0)))}`;
+      block.dataset._tempTime = snapTime;
+    }
+  function onUp(){
+    block.classList.remove('drag'); snapEl.style.display='none';
+    // Clean up move listeners to restore normal scroll behaviour
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('touchmove', onMove);
+    let t = Number(block.dataset._tempTime||0);
+    if(hardGrid) t = quantize(t, 'beat', 0);
+    s.startOffset=Math.max(0,t);
+    s.updated_at=new Date().toISOString();
+    if(autoReflow) reflowLane(s.lane||0);
+    renumberByTime(); saveDebounced(); scheduleRender({timeline:true, scenes:true});
+  }
+    block.addEventListener('mousedown', onDown);
+    block.addEventListener('touchstart', onDown, {passive:false});
+  }
+
+  /** Markers */
+  function addMarkerAt(time, label, type){ markers.push({t:Math.max(0,Number(time)||0), label:label||type||'Marker', type:type||'Section'}); markDirty(); saveMarkers(); scheduleRender({timeline:true}); toast('Marker tillagd'); }
+  function parseTimeStr(str){ str=String(str||'').trim(); if(/^\d+:\d{1,2}$/.test(str)){ const [m,s]=str.split(':').map(Number); return m*60+s; } if(/^\d+(\.\d+)?$/.test(str)) return Number(str); return null; }
+  function alignScenesToMarkers(){
+    if(markers.length<2 || scenes.length===0) { toast('Behöver minst 2 markers'); return; }
+    const _ms=markersSorted();
+    for(let i=0;i<_ms.length-1 && i<scenes.length;i++){
+      const a=_ms[i].t, b=_ms[i+1].t;
+      const dur=Math.max(0.2, b-a);
+      const s=scenes[i]; if(s && !s.locked){ setDuration(s, (hardGrid ? (Math.round(dur/beatLen())*beatLen()) : dur).toFixed(2)+'s'); s.startOffset=hardGrid?quantize(a,'beat',0):a; }
+    }
+    if(autoReflow) for(let ln=0; ln<laneCount; ln++) reflowLane(ln);
+    renumberByTime(); saveDebounced(); scheduleRender({timeline:true, scenes:true}); toast('Scener justerade till markers');
+  }
+
+  /** Scenes View */
+  function scenesForView(){
+    const arr=[...scenes];
+    if(viewSortBy==='start'){ arr.sort((a,b)=> (a.startOffset-b.startOffset) || (a.title||'').localeCompare(b.title||'')); }
+    if(viewSortBy==='title'){ arr.sort((a,b)=> (a.title||'').localeCompare(b.title||'')); }
+    if(viewSortBy==='duration'){ arr.sort((a,b)=> durSec(a)-durSec(b)); }
+    if(viewSortBy==='camera'){ arr.sort((a,b)=> (a.camera_angle||'').localeCompare(b.camera_angle||'')); }
+    if(viewSortDir==='desc') arr.reverse();
+    return arr;
+  }
+  function renderScenes(){
+    el.grid.innerHTML='';
+    if(!scenes.length){ el.empty.style.display=''; updateSelBar(); return; } else el.empty.style.display='none';
+    const frag=document.createDocumentFragment();
+    const list=scenesForView();
+    for(const s of list){
+      const card=document.createElement('div'); card.className='card'; card.dataset.id=s.id;
+      if(isSelected(s.id)) card.classList.add('selected');
+      if(s.locked) card.classList.add('locked');
+      const ln = s.lane||0; const lname = laneMeta[ln]?.name || ('Spår '+ln);
+      card.innerHTML=`
+        <header>
+          <div class="left">
+            <input type="checkbox" class="sel" ${isSelected(s.id)?'checked':''} title="Markera scenen">
+            <span class="num">Scen #${s.scene_number} — t=${fmtTime(s.startOffset||0)} — ${lname}</span>
+          </div>
+          <div class="actions">
+            <button class="icon" data-act="lock" title="${s.locked?'Lås upp':'Lås'}" aria-label="${s.locked?'Lås upp scen':'Lås scen'}">${s.locked?'🔓':'🔒'}</button>
+            <button class="icon" data-act="dup" title="Duplicera" aria-label="Duplicera scen">📋</button>
+            <button class="icon" data-act="del" title="Ta bort" aria-label="Ta bort scen">🗑️</button>
+          </div>
+        </header>
+        <div class="img"><div class="placeholder">🖼️</div><img loading="lazy" decoding="async" alt=""></div>
+        <div class="body">
+          <div><label>Titel</label><input data-k="title" type="text" value="${esc(s.title)}" ${s.locked?'disabled':''}></div>
+          <div><label>Beskrivning</label><textarea data-k="description" ${s.locked?'disabled':''}>${esc(s.description)}</textarea></div>
+          <div style="display:flex;gap:8px">
+            <div style="flex:1"><label>Längd</label><input data-k="duration" type="text" value="${esc(s.duration)}" ${s.locked?'disabled':''} placeholder="1:30 / 12s / 1.5m"></div>
+            <div style="flex:1"><label>Kamera</label>
+              <select data-k="camera_angle" ${s.locked?'disabled':''}>
+                ${['Wide','Medium','Close','Dutch','Top','Low'].map(v=>`<option ${v===(s.camera_angle||'')?'selected':''}>${v}</option>`).join('')}
+              </select>
             </div>
           </div>
-        </nav>
-      </header>
-      <main id="main-content" aria-live="polite"></main>
-      <footer>
-        Planera musikvideons scener, ritningar och referenser på ett ställe.
-      </footer>
-    </div>
-    <div class="floating-actions" id="floating-actions">
-      <button class="btn-primary" id="floating-save">💾 Spara ändringar</button>
-    </div>
-    <script>
-      const defaultConfig = {
-        app_title: "Storyboard – Musikvideo Pro",
-        subtitle_text: "Professional Edition",
-        project_bpm: "120",
-        background_color: "#0b0d10",
-        surface_color: "#12161b",
-        text_color: "#e6eef6",
-        primary_action_color: "#e63946",
-        secondary_action_color: "#22c55e"
-      };
-
-      const STORAGE_KEY = "storyboard_pro_scenes";
-      const SETTINGS_KEY = "storyboard_pro_settings";
-
-      let currentView = "scenes";
-      let selectedScene = null;
-      let editingScene = null;
-      let allScenes = [];
-      let drawingContext = null;
-      let isDrawing = false;
-      let currentTool = "pen";
-      let currentColor = "#e6eef6";
-      let currentLineWidth = 3;
-      let undoStack = [];
-      let redoStack = [];
-      let searchQuery = "";
-      let projectBPM = 120;
-      let exportMenuOpen = false;
-
-      if (!window.elementSdk) {
-        window.elementSdk = {
-          config: { ...defaultConfig },
-          init({ defaultConfig: defaults, onConfigChange }) {
-            this.config = { ...defaults };
-            this.onConfigChange = onConfigChange;
-            if (typeof this.onConfigChange === "function") {
-              this.onConfigChange(this.config);
-            }
-          },
-          setConfig(update) {
-            this.config = { ...this.config, ...update };
-            if (typeof this.onConfigChange === "function") {
-              this.onConfigChange(this.config);
-            }
-          }
-        };
-      }
-
-      if (!window.dataSdk) {
-        window.dataSdk = createLocalDataSdk();
-      }
-
-      function createLocalDataSdk() {
-        let scenes = loadScenesFromStorage();
-        const listeners = new Set();
-
-        function persist() {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(scenes));
-        }
-
-        function notify() {
-          const ordered = scenes.slice().sort((a, b) => (a.order || 0) - (b.order || 0));
-          listeners.forEach((listener) => listener(ordered));
-        }
-
-        return {
-          async init(handler) {
-            listeners.add(handler.onDataChanged.bind(handler));
-            notify();
-            return { isOk: true };
-          },
-          async create(scene) {
-            const entry = {
-              ...scene,
-              __backendId: scene.__backendId || crypto.randomUUID()
-            };
-            scenes.push(entry);
-            persist();
-            notify();
-            return { isOk: true, data: entry };
-          },
-          async update(scene) {
-            const index = scenes.findIndex((item) => item.__backendId === scene.__backendId);
-            if (index === -1) {
-              return { isOk: false, error: "Scene not found" };
-            }
-            scenes[index] = { ...scenes[index], ...scene };
-            persist();
-            notify();
-            return { isOk: true, data: scenes[index] };
-          },
-          async delete(scene) {
-            const index = scenes.findIndex((item) => item.__backendId === scene.__backendId);
-            if (index === -1) {
-              return { isOk: false, error: "Scene not found" };
-            }
-            scenes.splice(index, 1);
-            scenes = scenes.map((item, order) => ({ ...item, order }));
-            persist();
-            notify();
-            return { isOk: true };
-          }
-        };
-      }
-
-      function loadScenesFromStorage() {
-        try {
-          const raw = localStorage.getItem(STORAGE_KEY);
-          if (!raw) return [];
-          const parsed = JSON.parse(raw);
-          if (!Array.isArray(parsed)) return [];
-          return parsed.map((scene, index) => ({
-            ...scene,
-            __backendId: scene.__backendId || crypto.randomUUID(),
-            order: typeof scene.order === "number" ? scene.order : index
-          }));
-        } catch (error) {
-          console.error("Kunde inte läsa sparade scener", error);
-          return [];
-        }
-      }
-
-      async function onConfigChange(config) {
-        document.getElementById("app-title").textContent = config.app_title || defaultConfig.app_title;
-        document.getElementById("subtitle-tag").textContent = config.subtitle_text || defaultConfig.subtitle_text;
-
-        if (config.project_bpm) {
-          projectBPM = parseInt(config.project_bpm, 10) || projectBPM;
-          const settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
-          settings.project_bpm = projectBPM;
-          localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-        }
-
-        document.documentElement.style.setProperty("--bg", config.background_color || defaultConfig.background_color);
-        document.documentElement.style.setProperty("--panel", config.surface_color || defaultConfig.surface_color);
-        document.documentElement.style.setProperty("--text", config.text_color || defaultConfig.text_color);
-        document.documentElement.style.setProperty("--accent", config.primary_action_color || defaultConfig.primary_action_color);
-        document.documentElement.style.setProperty("--success", config.secondary_action_color || defaultConfig.secondary_action_color);
-      }
-
-      function mapToCapabilities(config) {
-        return {
-          recolorables: ["background_color", "surface_color", "text_color", "primary_action_color", "secondary_action_color"].map((key) => ({
-            get: () => config[key] || defaultConfig[key],
-            set: (value) => updateConfig(key, value)
-          })),
-          borderables: [],
-          fontEditable: undefined,
-          fontSizeable: undefined
-        };
-      }
-
-      function updateConfig(key, value) {
-        if (window.elementSdk && typeof window.elementSdk.setConfig === "function") {
-          window.elementSdk.setConfig({ [key]: value });
-        }
-      }
-
-      function mapToEditPanelValues(config) {
-        return new Map([
-          ["app_title", config.app_title || defaultConfig.app_title],
-          ["subtitle_text", config.subtitle_text || defaultConfig.subtitle_text],
-          ["project_bpm", config.project_bpm || defaultConfig.project_bpm]
-        ]);
-      }
-
-      async function initializeApp() {
-        if (window.elementSdk && typeof window.elementSdk.init === "function") {
-          window.elementSdk.init({
-            defaultConfig,
-            onConfigChange,
-            mapToCapabilities,
-            mapToEditPanelValues
-          });
-        } else {
-          onConfigChange(defaultConfig);
-        }
-
-        const storedSettings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
-        if (storedSettings.project_bpm) {
-          projectBPM = parseInt(storedSettings.project_bpm, 10) || projectBPM;
-        }
-
-        if (window.dataSdk && typeof window.dataSdk.init === "function") {
-          const result = await window.dataSdk.init({
-            onDataChanged(data) {
-              allScenes = data.slice();
-              if (selectedScene) {
-                const updated = allScenes.find((scene) => scene.__backendId === selectedScene.__backendId);
-                selectedScene = updated || null;
-              }
-              if (!selectedScene && allScenes.length > 0) {
-                selectedScene = allScenes[0];
-              }
-              renderCurrentView();
-              updateFloatingActions();
-            }
-          });
-          if (!result.isOk) {
-            showToast("Kunde inte initiera datalagring", "error");
-          }
-        }
-
-        setupNavigation();
-        setupShortcuts();
-        setupExportMenu();
-        setupFloatingSave();
-        renderCurrentView();
-      }
-
-      function setupNavigation() {
-        document.getElementById("nav-scenes").addEventListener("click", () => switchView("scenes"));
-        document.getElementById("nav-timeline").addEventListener("click", () => switchView("timeline"));
-        document.getElementById("nav-templates").addEventListener("click", () => switchView("templates"));
-        document.getElementById("show-shortcuts").addEventListener("click", showKeyboardShortcuts);
-      }
-
-      function setupShortcuts() {
-        document.addEventListener("keydown", (event) => {
-          if (event.target.matches("input, textarea")) return;
-
-          if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "n") {
-            event.preventDefault();
-            handleAddScene();
-          }
-
-          if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
-            event.preventDefault();
-            const form = document.getElementById("scene-form");
-            if (form) form.requestSubmit();
-          }
-
-          if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "f") {
-            event.preventDefault();
-            toggleFullscreen();
-          }
-
-          if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") {
-            event.preventDefault();
-            if (event.shiftKey) redoCanvas();
-            else undoCanvas();
-          }
-
-          if (event.key === "?") {
-            showKeyboardShortcuts();
-          }
-        });
-      }
-
-      function setupExportMenu() {
-        const exportBtn = document.getElementById("export-btn");
-        const exportMenu = document.getElementById("export-menu");
-
-        exportBtn.addEventListener("click", (event) => {
-          event.stopPropagation();
-          exportMenuOpen = !exportMenuOpen;
-          exportMenu.style.display = exportMenuOpen ? "block" : "none";
-        });
-
-        document.addEventListener("click", () => {
-          if (exportMenuOpen) {
-            exportMenuOpen = false;
-            exportMenu.style.display = "none";
-          }
-        });
-
-        document.getElementById("export-pdf").addEventListener("click", exportToPDF);
-        document.getElementById("export-json").addEventListener("click", exportToJSON);
-        document.getElementById("export-txt").addEventListener("click", exportToText);
-      }
-
-      function setupFloatingSave() {
-        document.getElementById("floating-save").addEventListener("click", () => {
-          const form = document.getElementById("scene-form");
-          if (form) form.requestSubmit();
-        });
-      }
-
-      function updateFloatingActions() {
-        const floating = document.getElementById("floating-actions");
-        if (window.innerWidth <= 720 && selectedScene) {
-          floating.style.display = "block";
-        } else {
-          floating.style.display = "none";
-        }
-      }
-
-      window.addEventListener("resize", updateFloatingActions);
-
-      function switchView(view) {
-        currentView = view;
-        document.querySelectorAll(".nav button").forEach((btn) => btn.removeAttribute("aria-current"));
-        document.getElementById(`nav-${view}`).setAttribute("aria-current", "page");
-        renderCurrentView();
-      }
-
-      function renderCurrentView() {
-        const container = document.getElementById("main-content");
-        if (currentView === "scenes") {
-          renderScenesView(container);
-        } else if (currentView === "timeline") {
-          renderTimelineView(container);
-        } else {
-          renderTemplatesView(container);
-        }
-      }
-
-      function renderScenesView(container) {
-        const filtered = allScenes.filter((scene) => {
-          if (!searchQuery) return true;
-          const q = searchQuery.toLowerCase();
-          return [scene.description, scene.sceneType, scene.notes]
-            .filter(Boolean)
-            .some((value) => value.toLowerCase().includes(q));
-        });
-
-        const stats = calculateStats();
-
-        container.innerHTML = `
-          <section class="col" aria-labelledby="scenes-heading">
-            <h2 id="scenes-heading">
-              Scener (${allScenes.length}/999)
-              <button class="row-action" id="refresh-scenes" title="Uppdatera">🔄</button>
-            </h2>
-            <div class="body">
-              ${allScenes.length >= 999 ? '<div class="limit-warning">Maxgräns nådd – ta bort scener för att fortsätta.</div>' : ''}
-              <div class="stats-grid">
-                <div class="stat-card"><div class="value">${stats.totalScenes}</div><div class="label">Scener</div></div>
-                <div class="stat-card"><div class="value">${stats.withDrawings}</div><div class="label">Med ritning</div></div>
-                <div class="stat-card"><div class="value">${stats.bmpSynced}</div><div class="label">BPM-synkade</div></div>
-                <div class="stat-card"><div class="value">${stats.avgDuration}s</div><div class="label">Snitt längd</div></div>
-              </div>
-              <label for="search-scenes" class="sr-only">Sök scener</label>
-              <input id="search-scenes" class="search-box" placeholder="🔍 Sök scener..." value="${searchQuery}" autocomplete="off">
-              <button class="btn-primary" id="add-scene-btn" ${allScenes.length >= 999 ? 'disabled' : ''}>+ Ny scen</button>
-              <div class="list" id="scenes-list" role="list">
-                ${filtered.length === 0 ? '<div class="empty-state">Inga scener matchar sökningen.</div>' : filtered.map(renderSceneRow).join('')}
-              </div>
+          <div style="display:flex;gap:8px">
+            <div style="flex:1"><label>Spår (lane)</label>
+              <select data-k="lane" ${s.locked?'disabled':''}>
+                ${[0,1,2].map(v=>`<option value="${v}" ${v===(s.lane||0)?'selected':''}>${laneMeta[v]?.name||('Spår '+v)}</option>`).join('')}
+              </select>
             </div>
-          </section>
-          <section class="col" aria-labelledby="canvas-heading">
-            <h2 id="canvas-heading">Snabbskiss</h2>
-            <div class="body">
-              <div class="toolbar" role="toolbar" aria-label="Ritverktyg">
-                <button id="tool-pen" class="${currentTool === 'pen' ? 'active' : ''}">✏️ Penna</button>
-                <button id="tool-eraser" class="${currentTool === 'eraser' ? 'active' : ''}">🧹 Sudd</button>
-                <button id="tool-text" class="${currentTool === 'text' ? 'active' : ''}">📝 Text</button>
-                <button id="tool-clear">🗑️ Rensa</button>
-                <button id="tool-undo" title="Ångra (Ctrl+Z)">↶</button>
-                <button id="tool-redo" title="Gör om (Ctrl+Shift+Z)">↷</button>
-                <input type="color" id="color-picker" value="${currentColor}" title="Välj färg">
-                <input type="range" id="line-width" min="1" max="18" value="${currentLineWidth}" title="Pennbredd">
-                <button id="fullscreen-btn" title="Fullskärm (Ctrl+F)">⛶</button>
-              </div>
-              <div class="canvas-wrapper">
-                <canvas id="drawing-canvas" width="640" height="420" aria-label="Rityta"></canvas>
-                <div class="zoom-controls">
-                  <button id="zoom-out">−</button>
-                  <span id="zoom-level">100%</span>
-                  <button id="zoom-in">+</button>
-                  <button id="zoom-reset">⌂</button>
-                </div>
-              </div>
+            <div style="flex:1"><label>Start (sek)</label><input data-k="startOffset" type="number" min="0" step="0.01" value="${Number(s.startOffset||0).toFixed(2)}" ${s.locked?'disabled':''}></div>
+          </div>
+          <div><label>Anteckningar</label><textarea data-k="notes" ${s.locked?'disabled':''}>${esc(s.notes)}</textarea></div>
+          <div>
+            <label>Taggar</label>
+            <div class="chips">
+              ${['camera','light','vfx'].map(cat=>`<span class="chip">${cat}: <input data-tag="${cat}" type="text" ${s.locked?'disabled':''} placeholder="kommaseparerat" value="${esc((s.tags?.[cat]||[]).join(', '))}" style="min-width:140px"></span>`).join('')}
             </div>
-          </section>
-          <section class="col details-column" aria-labelledby="details-heading">
-            <h2 id="details-heading">Scendetaljer</h2>
-            <div class="body" id="details-panel">
-              ${selectedScene ? renderSceneDetails(selectedScene) : '<div class="empty-state">Välj en scen för att se detaljer.</div>'}
-            </div>
-          </section>
-        `;
-
-        document.getElementById("add-scene-btn").addEventListener("click", handleAddScene);
-        document.getElementById("search-scenes").addEventListener("input", (event) => {
-          searchQuery = event.target.value;
-          renderCurrentView();
-        });
-        document.getElementById("refresh-scenes").addEventListener("click", () => {
-          showToast("Listan uppdaterad", "info");
-          renderCurrentView();
-        });
-
-        document.querySelectorAll(".row").forEach((row) => {
-          row.addEventListener("click", (event) => {
-            if (event.target.closest("button")) return;
-            const scene = allScenes.find((item) => item.__backendId === row.dataset.id);
-            selectedScene = scene || null;
-            editingScene = null;
-            renderCurrentView();
-          });
-        });
-
-        document.querySelectorAll(".edit-btn").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            const scene = allScenes.find((item) => item.__backendId === btn.dataset.id);
-            selectedScene = scene || null;
-            editingScene = null;
-            renderCurrentView();
-          });
-        });
-
-        document.querySelectorAll(".quick-edit-btn").forEach((btn) => {
-          btn.addEventListener("click", (event) => {
-            event.stopPropagation();
-            editingScene = allScenes.find((item) => item.__backendId === btn.dataset.id) || null;
-            selectedScene = null;
-            renderCurrentView();
-          });
-        });
-
-        document.querySelectorAll(".duplicate-btn").forEach((btn) => {
-          btn.addEventListener("click", (event) => {
-            event.stopPropagation();
-            handleDuplicateScene(btn.dataset.id);
-          });
-        });
-
-        document.querySelectorAll(".delete-btn").forEach((btn) => {
-          btn.addEventListener("click", (event) => {
-            event.stopPropagation();
-            handleDeleteScene(btn.dataset.id);
-          });
-        });
-
-        setupDrawingCanvas();
-        if (selectedScene && selectedScene.drawing) {
-          loadDrawing(selectedScene.drawing);
-        }
-      }
-
-      function renderSceneRow(scene) {
-        const isEditing = editingScene && editingScene.__backendId === scene.__backendId;
-        const isSelected = selectedScene && selectedScene.__backendId === scene.__backendId;
-
-        if (isEditing) {
-          return `
-            <div class="row editing" data-id="${scene.__backendId}" role="listitem">
-              <div class="scene-thumb">${scene.thumbnail ? `<img src="${scene.thumbnail}" alt="Miniatyr">` : '🎬'}</div>
-              <div>
-                <input id="edit-duration" class="inline-edit" value="${scene.duration || ''}" placeholder="0:00-0:15">
-                <select id="edit-scene-type" class="inline-edit">
-                  ${['Intro', 'Vers', 'Refräng', 'Brygga', 'Outro', 'Övrigt'].map((type) => `<option value="${type}" ${scene.sceneType === type ? 'selected' : ''}>${type}</option>`).join('')}
-                </select>
-                <input id="edit-description" class="inline-edit" value="${scene.description || ''}" placeholder="Beskrivning">
-                <div class="inline-actions">
-                  <button class="save-btn" type="button" onclick="saveInlineEdit()">💾 Spara</button>
-                  <button class="cancel-btn" type="button" onclick="cancelInlineEdit()">Avbryt</button>
-                </div>
-              </div>
-            </div>
-          `;
-        }
-
-        return `
-          <div class="row ${isSelected ? 'active' : ''}" data-id="${scene.__backendId}" role="listitem">
-            <div class="scene-thumb">${scene.thumbnail ? `<img src="${scene.thumbnail}" alt="Miniatyr">` : '🎬'}</div>
-            <div class="scene-info">
-              <div class="scene-title">${scene.duration || '0:00-0:00'} • ${scene.sceneType || 'Okänd'}</div>
-              <div class="scene-meta">${scene.description || 'Ingen beskrivning'}</div>
-              <div class="scene-badges">
-                ${scene.bmpSync ? '<span class="badge">♪ BPM</span>' : ''}
-                ${scene.photos && scene.photos.length ? `<span class="badge">📸 ${scene.photos.length}</span>` : ''}
-                ${scene.drawing ? '<span class="badge">🎨 Ritning</span>' : ''}
-              </div>
-            </div>
-            <div class="actions">
-              <button class="quick-edit-btn" data-id="${scene.__backendId}">✏️</button>
-              <button class="duplicate-btn" data-id="${scene.__backendId}">📋</button>
-              <button class="edit-btn primary" data-id="${scene.__backendId}">Redigera</button>
-              <button class="delete-btn" data-id="${scene.__backendId}">Ta bort</button>
+            <div class="qtags">
+              <span class="badge">Presets:</span>
+              <button class="qt" data-cat="camera" data-val="low angle">camera: low angle</button>
+              <button class="qt" data-cat="camera" data-val="handheld">camera: handheld</button>
+              <button class="qt" data-cat="light" data-val="backlight">light: backlight</button>
+              <button class="qt" data-cat="light" data-val="smoke">light: smoke</button>
+              <button class="qt" data-cat="vfx" data-val="smoke">vfx: smoke</button>
+              <button class="qt" data-cat="vfx" data-val="sparks">vfx: sparks</button>
+              <button class="qt" data-cat="vfx" data-val="particles">vfx: particles</button>
+              <button class="qt" data-cat="vfx" data-val="laser">vfx: laser</button>
             </div>
           </div>
-        `;
+          <div class="toolbar">
+            <button class="btn" data-act="photo" ${s.locked?'disabled':''} aria-label="Ladda upp bild">
+              <span class="material-icons">photo_camera</span> Ladda upp bild
+            </button>
+            <button class="btn" data-act="clearphoto" ${s.locked?'disabled':''} aria-label="Rensa bild">
+              <span class="material-icons">clear</span> Rensa bild
+            </button>
+          </div>
+        </div>`;
+      const img=card.querySelector('img'); const ph=card.querySelector('.placeholder');
+      if(s.image_key){ getImage(s.image_key).then(blob=>{ if(blob){ const url=URL.createObjectURL(blob); // choose webp if stored
+          const srcData=(s.thumbnail_webp && s.thumbnail_webp.startsWith('data:image/webp'))? s.thumbnail_webp : s.thumbnail;
+          // Use srcData for src; fallback to blob if missing
+          if(srcData){ img.src=srcData; } else { img.src=url; }
+          img.alt = s.title ? `Bild för scen ${s.title}` : 'Bild för scen';
+          img.style.display='block'; ph.style.display='none'; img.onload=()=>{ if(url.startsWith('blob:')) URL.revokeObjectURL(url); };
+        } });
+      } else if(s.thumbnail){
+        img.src=s.thumbnail;
+        img.alt = s.title ? `Bild för scen ${s.title}` : 'Bild för scen';
+        img.style.display='block'; ph.style.display='none';
       }
-
-      function renderSceneDetails(scene) {
-        return `
-          <form id="scene-form" class="details-form">
-            <label for="duration">Tidsstämpel</label>
-            <input id="duration" value="${scene.duration || ''}" placeholder="0:00-0:15">
-            <label for="scene-type">Scentyp</label>
-            <select id="scene-type">
-              ${['Intro', 'Vers', 'Refräng', 'Brygga', 'Outro', 'Övrigt'].map((type) => `<option value="${type}" ${scene.sceneType === type ? 'selected' : ''}>${type}</option>`).join('')}
-            </select>
-            <label for="description">Beskrivning</label>
-            <input id="description" value="${scene.description || ''}" placeholder="Kort beskrivning">
-            <label for="camera-movement">Kamera</label>
-            <select id="camera-movement">
-              ${['Statisk', 'Pan Vänster', 'Pan Höger', 'Zoom In', 'Zoom Out', 'Handhållen'].map((move) => `<option value="${move}" ${scene.cameraMovement === move ? 'selected' : ''}>${move}</option>`).join('')}
-            </select>
-            <label for="lighting">Ljussättning</label>
-            <select id="lighting">
-              ${['Naturlig', 'Dramatisk', 'Mjuk', 'Kontrastrik', 'Scenljus', 'Fade'].map((light) => `<option value="${light}" ${scene.lighting === light ? 'selected' : ''}>${light}</option>`).join('')}
-            </select>
-            <label for="costume">Kostym/Makeup</label>
-            <input id="costume" value="${scene.costume || ''}" placeholder="Detaljer">
-            <label><input type="checkbox" id="bmp-sync" ${scene.bmpSync ? 'checked' : ''}> Synka med BPM (${projectBPM})</label>
-            <label for="notes">Anteckningar</label>
-            <textarea id="notes" rows="4">${scene.notes || ''}</textarea>
-            <div class="photo-upload" id="photo-upload" tabindex="0">
-              📤 Klicka eller dra foton hit (PNG, JPG, GIF, WebP)
-              <input type="file" id="photo-input" accept="image/*" multiple hidden>
-            </div>
-            ${scene.photos && scene.photos.length ? `<div class="photo-grid">${scene.photos.map((photo, index) => `<div class="photo-card" data-index="${index}"><img src="${photo.data}" alt="${photo.name}"><button type="button" onclick="removePhoto(${index})">×</button></div>`).join('')}</div>` : ''}
-            <button class="btn-primary" id="save-scene-btn">💾 Spara ändringar</button>
-          </form>
-        `;
-      }
-
-      function renderTimelineView(container) {
-        container.innerHTML = `
-          <section class="col" style="grid-column: 1 / -1;">
-            <h2>Tidslinje</h2>
-            <div class="body">
-              ${allScenes.length === 0 ? '<div class="empty-state">Lägg till scener för att se tidslinjen.</div>' : `<div class="timeline-track" id="timeline-track">${allScenes.map((scene, index) => `<article class="timeline-scene" draggable="true" data-id="${scene.__backendId}" data-order="${index}"><div class="timeline-thumb">${scene.thumbnail ? `<img src="${scene.thumbnail}" alt="Scen ${index + 1}">` : '🎬'}<span style="position:absolute;top:4px;left:6px;background:rgba(0,0,0,0.65);padding:0.15rem 0.4rem;border-radius:0.6rem;font-size:0.7rem;">${index + 1}</span>${scene.bmpSync ? '<span style="position:absolute;top:4px;right:6px;background:var(--success);padding:0.15rem 0.4rem;border-radius:0.6rem;font-size:0.7rem;">♪</span>' : ''}</div><div style="padding:0.55rem;"><strong style="font-size:0.8rem;">${scene.duration}</strong><div style="font-size:0.7rem;color:var(--sub);">${scene.sceneType}</div><div style="font-size:0.7rem;margin-top:0.25rem;">${scene.description || 'Ingen beskrivning'}</div></div></article>`).join('')}</div>`}
-            </div>
-          </section>
-        `;
-        setupTimelineDrag();
-      }
-
-      function renderTemplatesView(container) {
-        const templates = [
-          { name: "Intro Shot", icon: "🎬", type: "Intro", description: "Öppningsscen", camera: "Statisk", lighting: "Dramatisk" },
-          { name: "Close-up", icon: "👤", type: "Vers", description: "Närbild artist", camera: "Zoom In", lighting: "Mjuk" },
-          { name: "Performance", icon: "🎤", type: "Refräng", description: "Scenframträdande", camera: "Handhållen", lighting: "Scenljus" },
-          { name: "Wide Shot", icon: "🌅", type: "Brygga", description: "Miljöbild", camera: "Pan Höger", lighting: "Naturlig" },
-          { name: "Outro", icon: "🎭", type: "Outro", description: "Avslutande scen", camera: "Zoom Out", lighting: "Fade" }
-        ];
-
-        container.innerHTML = `
-          <section class="col" style="grid-column: 1 / -1;">
-            <h2>Mallar</h2>
-            <div class="body">
-              <p style="color: var(--sub); margin-bottom: 0.8rem;">Skapa scener snabbare med färdiga mallar.</p>
-              <div class="template-grid">
-                ${templates.map((template) => `<article class="template-card" data-template="${encodeURIComponent(JSON.stringify(template))}"><div style="font-size:1.8rem;">${template.icon}</div><div style="font-weight:600;margin-top:0.4rem;">${template.name}</div><p style="font-size:0.75rem;color:var(--sub);margin-top:0.3rem;">${template.description}</p></article>`).join('')}
-              </div>
-            </div>
-          </section>
-        `;
-
-        document.querySelectorAll(".template-card").forEach((card) => {
-          card.addEventListener("click", () => {
-            const template = JSON.parse(decodeURIComponent(card.dataset.template));
-            createSceneFromTemplate(template);
-          });
-        });
-      }
-
-      function calculateStats() {
-        const total = allScenes.length;
-        const withDrawings = allScenes.filter((scene) => Boolean(scene.drawing)).length;
-        const bmpSynced = allScenes.filter((scene) => scene.bmpSync).length;
-        const durations = allScenes.map((scene) => {
-          const match = /(?:(\d+):)?(\d+)/.exec(scene.duration || "");
-          if (!match) return 15;
-          const minutes = match[1] ? parseInt(match[1], 10) : 0;
-          const seconds = parseInt(match[2], 10) || 0;
-          return minutes * 60 + seconds;
-        });
-        const avgDuration = durations.length ? Math.round(durations.reduce((sum, value) => sum + value, 0) / durations.length) : 0;
-        return { totalScenes: total, withDrawings, bmpSynced, avgDuration };
-      }
-
-      async function handleAddScene() {
-        if (allScenes.length >= 999) {
-          showToast("Maxgräns för scener uppnådd", "error");
-          return;
-        }
-        const scene = {
-          id: `scene_${Date.now()}`,
-          timestamp: new Date().toISOString(),
-          duration: "0:00-0:15",
-          sceneType: "Intro",
-          description: "",
-          notes: "",
-          drawing: "",
-          order: allScenes.length,
-          cameraMovement: "Statisk",
-          lighting: "Naturlig",
-          costume: "",
-          bmpSync: false,
-          photos: []
-        };
-        const result = await window.dataSdk.create(scene);
-        if (result.isOk) {
-          selectedScene = result.data;
-          showToast("Ny scen skapad", "success");
-        } else {
-          showToast("Kunde inte skapa scen", "error");
-        }
-      }
-
-      async function handleDuplicateScene(id) {
-        const original = allScenes.find((scene) => scene.__backendId === id);
-        if (!original) return;
-        const duplicate = {
-          ...original,
-          __backendId: undefined,
-          id: `scene_${Date.now()}`,
-          description: `${original.description || 'Scen'} (Kopia)`,
-          order: allScenes.length,
-          timestamp: new Date().toISOString()
-        };
-        const result = await window.dataSdk.create(duplicate);
-        showToast(result.isOk ? "Scen duplicerad" : "Kunde inte duplicera scen", result.isOk ? "success" : "error");
-      }
-
-      async function handleDeleteScene(id) {
-        const scene = allScenes.find((item) => item.__backendId === id);
-        if (!scene) return;
-        if (!confirm(`Ta bort scen ${scene.description || ''}?`)) return;
-        const result = await window.dataSdk.delete(scene);
-        if (result.isOk) {
-          if (selectedScene && selectedScene.__backendId === id) {
-            selectedScene = null;
-          }
-          showToast("Scen borttagen", "success");
-        } else {
-          showToast("Kunde inte ta bort scen", "error");
-        }
-      }
-
-      async function createSceneFromTemplate(template) {
-        const scene = {
-          id: `scene_${Date.now()}`,
-          timestamp: new Date().toISOString(),
-          duration: "0:00-0:15",
-          sceneType: template.type,
-          description: template.description,
-          notes: `Mall: ${template.name}`,
-          drawing: "",
-          order: allScenes.length,
-          cameraMovement: template.camera || "Statisk",
-          lighting: template.lighting || "Naturlig",
-          costume: "",
-          bmpSync: false,
-          photos: []
-        };
-        const result = await window.dataSdk.create(scene);
-        if (result.isOk) {
-          selectedScene = result.data;
-          switchView("scenes");
-          showToast(`Scen skapad från mall: ${template.name}`, "success");
-        } else {
-          showToast("Kunde inte skapa scen", "error");
-        }
-      }
-
-      async function saveInlineEdit() {
-        if (!editingScene) return;
-        const duration = document.getElementById("edit-duration").value;
-        const sceneType = document.getElementById("edit-scene-type").value;
-        const description = document.getElementById("edit-description").value;
-        const updated = { ...editingScene, duration, sceneType, description };
-        const result = await window.dataSdk.update(updated);
-        if (result.isOk) {
-          editingScene = null;
-          showToast("Snabbredigering sparad", "success");
-        } else {
-          showToast("Kunde inte spara ändringar", "error");
-        }
-      }
-
-      function cancelInlineEdit() {
-        editingScene = null;
-        renderCurrentView();
-      }
-
-      async function handleSceneFormSubmit(event) {
-        event.preventDefault();
-        if (!selectedScene) {
-          showToast("Ingen scen vald", "error");
-          return;
-        }
-        const canvas = document.getElementById("drawing-canvas");
-        const drawingData = canvas ? canvas.toDataURL() : selectedScene.drawing;
-        const thumbnail = generateThumbnail(canvas);
-
-        const updatedScene = {
-          ...selectedScene,
-          duration: document.getElementById("duration").value,
-          sceneType: document.getElementById("scene-type").value,
-          description: document.getElementById("description").value,
-          notes: document.getElementById("notes").value,
-          cameraMovement: document.getElementById("camera-movement").value,
-          lighting: document.getElementById("lighting").value,
-          costume: document.getElementById("costume").value,
-          bmpSync: document.getElementById("bmp-sync").checked,
-          drawing: drawingData,
-          thumbnail,
-          photos: selectedScene.photos || []
-        };
-
-        const result = await window.dataSdk.update(updatedScene);
-        if (result.isOk) {
-          selectedScene = result.data;
-          showToast("Scen sparad", "success");
-        } else {
-          showToast("Kunde inte spara scen", "error");
-        }
-      }
-
-      function setupDrawingCanvas() {
-        const canvas = document.getElementById("drawing-canvas");
-        if (!canvas) return;
-        drawingContext = canvas.getContext("2d");
-        drawingContext.lineCap = "round";
-        drawingContext.lineJoin = "round";
-        drawingContext.fillStyle = "#0f1419";
-        drawingContext.fillRect(0, 0, canvas.width, canvas.height);
-
-        canvas.addEventListener("mousedown", startDrawing);
-        canvas.addEventListener("mousemove", draw);
-        canvas.addEventListener("mouseup", stopDrawing);
-        canvas.addEventListener("mouseleave", stopDrawing);
-        canvas.addEventListener("touchstart", startDrawing);
-        canvas.addEventListener("touchmove", draw);
-        canvas.addEventListener("touchend", stopDrawing);
-
-        document.getElementById("tool-pen").onclick = () => setTool("pen");
-        document.getElementById("tool-eraser").onclick = () => setTool("eraser");
-        document.getElementById("tool-text").onclick = () => setTool("text");
-        document.getElementById("tool-clear").onclick = () => {
-          drawingContext.fillStyle = "#0f1419";
-          drawingContext.fillRect(0, 0, canvas.width, canvas.height);
-          saveCanvasState();
-          showToast("Ritytan rensad", "info");
-        };
-        document.getElementById("tool-undo").onclick = undoCanvas;
-        document.getElementById("tool-redo").onclick = redoCanvas;
-        document.getElementById("color-picker").addEventListener("change", (event) => (currentColor = event.target.value));
-        document.getElementById("line-width").addEventListener("input", (event) => (currentLineWidth = parseInt(event.target.value, 10)));
-        document.getElementById("fullscreen-btn").onclick = toggleFullscreen;
-        document.getElementById("zoom-in").onclick = () => adjustZoom(1.2);
-        document.getElementById("zoom-out").onclick = () => adjustZoom(1 / 1.2);
-        document.getElementById("zoom-reset").onclick = () => setZoom(1);
-
-        saveCanvasState();
-      }
-
-      function setTool(tool) {
-        currentTool = tool;
-        document.querySelectorAll(".toolbar button").forEach((btn) => btn.classList.remove("active"));
-        document.getElementById(`tool-${tool}`).classList.add("active");
-      }
-
-      function getCanvasCoordinates(canvas, event) {
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        const clientX = event.touches ? event.touches[0].clientX : event.clientX;
-        const clientY = event.touches ? event.touches[0].clientY : event.clientY;
-        return {
-          x: (clientX - rect.left) * scaleX,
-          y: (clientY - rect.top) * scaleY
-        };
-      }
-
-      let lastPoint = null;
-
-      function startDrawing(event) {
-        const canvas = event.currentTarget;
-        if (currentTool === "text") {
-          addTextToCanvas(canvas, event);
-          return;
-        }
-        isDrawing = true;
-        lastPoint = getCanvasCoordinates(canvas, event);
-        event.preventDefault();
-      }
-
-      function draw(event) {
-        if (!isDrawing || currentTool === "text") return;
-        event.preventDefault();
-        const canvas = event.currentTarget;
-        const point = getCanvasCoordinates(canvas, event);
-        drawingContext.beginPath();
-        drawingContext.moveTo(lastPoint.x, lastPoint.y);
-        drawingContext.lineTo(point.x, point.y);
-        if (currentTool === "pen") {
-          drawingContext.globalCompositeOperation = "source-over";
-          drawingContext.strokeStyle = currentColor;
-          drawingContext.lineWidth = currentLineWidth;
-        } else if (currentTool === "eraser") {
-          drawingContext.globalCompositeOperation = "destination-out";
-          drawingContext.lineWidth = currentLineWidth * 1.8;
-        }
-        drawingContext.stroke();
-        lastPoint = point;
-      }
-
-      function stopDrawing(event) {
-        if (!isDrawing) return;
-        isDrawing = false;
-        drawingContext.globalCompositeOperation = "source-over";
-        saveCanvasState();
-        if (selectedScene) {
-          autoSaveDrawing();
-        }
-      }
-
-      function addTextToCanvas(canvas, event) {
-        const point = getCanvasCoordinates(canvas, event);
-        const input = document.createElement("input");
-        input.type = "text";
-        input.placeholder = "Text";
-        input.style.position = "fixed";
-        input.style.left = `${event.clientX}px`;
-        input.style.top = `${event.clientY}px`;
-        input.style.zIndex = "1000";
-        input.style.padding = "0.2rem 0.4rem";
-        input.style.border = "1px solid var(--line)";
-        input.style.borderRadius = "0.5rem";
-        input.style.background = "#1a2128";
-        input.style.color = "var(--text)";
-        document.body.appendChild(input);
-        input.focus();
-
-        function commit() {
-          const text = input.value.trim();
-          if (text) {
-            drawingContext.fillStyle = currentColor;
-            drawingContext.font = `${Math.max(14, currentLineWidth * 4)}px Inter, sans-serif`;
-            drawingContext.fillText(text, point.x, point.y);
-            saveCanvasState();
-            autoSaveDrawing();
-          }
-          document.body.removeChild(input);
-        }
-
-        input.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            commit();
-          } else if (e.key === "Escape") {
-            document.body.removeChild(input);
-          }
-        });
-
-        input.addEventListener("blur", () => {
-          setTimeout(() => {
-            if (document.body.contains(input)) {
-              commit();
-            }
-          }, 100);
-        });
-      }
-
-      function saveCanvasState() {
-        const canvas = document.getElementById("drawing-canvas");
-        if (!canvas) return;
-        undoStack.push(canvas.toDataURL());
-        if (undoStack.length > 25) undoStack.shift();
-        redoStack = [];
-      }
-
-      function undoCanvas() {
-        if (undoStack.length <= 1) {
-          showToast("Inget att ångra", "info");
-          return;
-        }
-        const canvas = document.getElementById("drawing-canvas");
-        redoStack.push(undoStack.pop());
-        loadDrawing(undoStack[undoStack.length - 1]);
-      }
-
-      function redoCanvas() {
-        if (!redoStack.length) {
-          showToast("Inget att göra om", "info");
-          return;
-        }
-        const canvas = document.getElementById("drawing-canvas");
-        const state = redoStack.pop();
-        undoStack.push(state);
-        loadDrawing(state);
-      }
-
-      function loadDrawing(dataUrl) {
-        const canvas = document.getElementById("drawing-canvas");
-        if (!canvas || !dataUrl) return;
-        const img = new Image();
-        img.onload = () => {
-          drawingContext.clearRect(0, 0, canvas.width, canvas.height);
-          drawingContext.drawImage(img, 0, 0);
-        };
-        img.src = dataUrl;
-      }
-
-      function generateThumbnail(canvas) {
-        if (!canvas) return "";
-        const thumb = document.createElement("canvas");
-        thumb.width = 160;
-        thumb.height = 90;
-        thumb.getContext("2d").drawImage(canvas, 0, 0, thumb.width, thumb.height);
-        return thumb.toDataURL();
-      }
-
-      async function autoSaveDrawing() {
-        if (!selectedScene) return;
-        const canvas = document.getElementById("drawing-canvas");
-        const drawingData = canvas ? canvas.toDataURL() : "";
-        const thumbnail = generateThumbnail(canvas);
-        const updated = { ...selectedScene, drawing: drawingData, thumbnail };
-        await window.dataSdk.update(updated);
-      }
-
-      let currentZoom = 1;
-
-      function adjustZoom(factor) {
-        setZoom(Math.min(Math.max(currentZoom * factor, 0.3), 4));
-      }
-
-      function setZoom(value) {
-        currentZoom = value;
-        const canvas = document.getElementById("drawing-canvas");
-        canvas.style.transform = `scale(${currentZoom})`;
-        document.getElementById("zoom-level").textContent = `${Math.round(currentZoom * 100)}%`;
-      }
-
-      function toggleFullscreen() {
-        const canvas = document.getElementById("drawing-canvas");
-        if (!canvas) return;
-        if (!document.fullscreenElement) {
-          canvas.requestFullscreen?.();
-        } else {
-          document.exitFullscreen?.();
-        }
-      }
-
-      function setupTimelineDrag() {
-        const track = document.getElementById("timeline-track");
-        if (!track) return;
-
-        let dragged = null;
-        track.querySelectorAll(".timeline-scene").forEach((scene) => {
-          scene.addEventListener("dragstart", () => {
-            dragged = scene;
-            scene.classList.add("dragging");
-          });
-          scene.addEventListener("dragend", async () => {
-            scene.classList.remove("dragging");
-            dragged = null;
-            await persistTimelineOrder();
-          });
-          scene.addEventListener("dragover", (event) => {
-            event.preventDefault();
-            if (!dragged || dragged === scene) return;
-            const rect = scene.getBoundingClientRect();
-            const isAfter = (event.clientX - rect.left) / rect.width > 0.5;
-            track.insertBefore(dragged, isAfter ? scene.nextSibling : scene);
-          });
-        });
-      }
-
-      async function persistTimelineOrder() {
-        const track = document.getElementById("timeline-track");
-        if (!track) return;
-        const ids = Array.from(track.querySelectorAll(".timeline-scene"), (scene) => scene.dataset.id);
-        for (let i = 0; i < ids.length; i++) {
-          const scene = allScenes.find((item) => item.__backendId === ids[i]);
-          if (scene && scene.order !== i) {
-            await window.dataSdk.update({ ...scene, order: i });
-          }
-        }
-        showToast("Tidslinje uppdaterad", "success");
-      }
-
-      function setupPhotoUpload() {
-        const upload = document.getElementById("photo-upload");
-        const fileInput = document.getElementById("photo-input");
-        if (!upload || !fileInput) return;
-
-        upload.addEventListener("click", () => fileInput.click());
-        upload.addEventListener("keydown", (event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            fileInput.click();
-          }
-        });
-
-        upload.addEventListener("dragover", (event) => {
-          event.preventDefault();
-          upload.classList.add("dragover");
-        });
-
-        upload.addEventListener("dragleave", () => upload.classList.remove("dragover"));
-
-        upload.addEventListener("drop", (event) => {
-          event.preventDefault();
-          upload.classList.remove("dragover");
-          handlePhotoFiles(event.dataTransfer.files);
-        });
-
-        fileInput.addEventListener("change", (event) => {
-          handlePhotoFiles(event.target.files);
-        });
-      }
-
-      async function handlePhotoFiles(fileList) {
-        if (!selectedScene || !fileList.length) {
-          showToast("Ingen scen vald", "error");
-          return;
-        }
-
-        const files = Array.from(fileList);
-        const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-        const maxSize = 5 * 1024 * 1024;
-        let success = 0;
-
-        for (const file of files) {
-          if (!validTypes.includes(file.type)) {
-            showToast(`Filtyp stöds inte: ${file.name}`, "error");
-            continue;
-          }
-          if (file.size > maxSize) {
-            showToast(`Fil för stor: ${file.name}`, "error");
-            continue;
-          }
-          const data = await readFileAsDataURL(file);
-          if (!selectedScene.photos) selectedScene.photos = [];
-          selectedScene.photos.push({
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            data,
-            uploadedAt: new Date().toISOString()
-          });
-          success++;
-        }
-
-        if (success > 0) {
-          const result = await window.dataSdk.update(selectedScene);
-          if (result.isOk) {
-            selectedScene = result.data;
-            showToast(`${success} foto(n) uppladdade`, "success");
-          } else {
-            showToast("Kunde inte spara foton", "error");
-          }
-        }
-      }
-
-      function readFileAsDataURL(file) {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-      }
-
-      async function removePhoto(index) {
-        if (!selectedScene || !selectedScene.photos) return;
-        selectedScene.photos.splice(index, 1);
-        const result = await window.dataSdk.update(selectedScene);
-        if (result.isOk) {
-          selectedScene = result.data;
-          renderCurrentView();
-          showToast("Foto borttaget", "success");
-        } else {
-          showToast("Kunde inte ta bort foto", "error");
-        }
-      }
-
-      function setupDetailsForm() {
-        const form = document.getElementById("scene-form");
-        if (form) {
-          form.addEventListener("submit", handleSceneFormSubmit);
-        }
-        setupPhotoUpload();
-      }
-
-      function showKeyboardShortcuts() {
-        const overlay = document.createElement("div");
-        overlay.style.position = "fixed";
-        overlay.style.inset = "0";
-        overlay.style.background = "rgba(0,0,0,0.65)";
-        overlay.style.zIndex = "1000";
-
-        const modal = document.createElement("div");
-        modal.style.position = "absolute";
-        modal.style.top = "50%";
-        modal.style.left = "50%";
-        modal.style.transform = "translate(-50%, -50%)";
-        modal.style.background = "var(--panel)";
-        modal.style.border = "1px solid var(--line)";
-        modal.style.borderRadius = "1rem";
-        modal.style.padding = "1.2rem";
-        modal.style.width = "min(90vw, 320px)";
-
-        modal.innerHTML = `
-          <h3 style="margin-bottom:0.7rem;color:var(--text);font-size:0.95rem;">⌨️ Kortkommandon</h3>
-          <ul style="list-style:none;display:grid;gap:0.45rem;font-size:0.8rem;color:var(--sub);">
-            <li><strong>Ctrl/⌘ + N</strong> – Ny scen</li>
-            <li><strong>Ctrl/⌘ + S</strong> – Spara scen</li>
-            <li><strong>Ctrl/⌘ + Z</strong> – Ångra ritning</li>
-            <li><strong>Ctrl/⌘ + Shift + Z</strong> – Gör om ritning</li>
-            <li><strong>Ctrl/⌘ + F</strong> – Fullskärm rityta</li>
-            <li><strong>?</strong> – Visa denna hjälp</li>
-          </ul>
-          <button class="btn-primary" style="margin-top:0.9rem;" id="close-shortcuts">Stäng</button>
-        `;
-
-        overlay.appendChild(modal);
-        document.body.appendChild(overlay);
-
-        overlay.addEventListener("click", (event) => {
-          if (event.target === overlay) {
-            overlay.remove();
-          }
-        });
-
-        modal.querySelector("#close-shortcuts").addEventListener("click", () => overlay.remove());
-      }
-
-      function showToast(message, type = "info") {
-        const existing = document.querySelector(".toast");
-        if (existing) existing.remove();
-        const toast = document.createElement("div");
-        toast.className = `toast ${type}`;
-        toast.textContent = message;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 2800);
-      }
-
-      function exportToPDF() {
-        if (!allScenes.length) {
-          showToast("Inga scener att exportera", "error");
-          return;
-        }
-        if (!window.jspdf || !window.jspdf.jsPDF) {
-          showToast("PDF-bibliotek saknas", "error");
-          return;
-        }
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.setFontSize(18);
-        doc.text(document.getElementById("app-title").textContent, 14, 20);
-        doc.setFontSize(12);
-        doc.text(`BPM: ${projectBPM}`, 14, 30);
-        doc.text(`Antal scener: ${allScenes.length}`, 14, 38);
-        let y = 50;
-        allScenes.forEach((scene, index) => {
-          if (y > 270) {
-            doc.addPage();
-            y = 20;
-          }
-          doc.setFont(undefined, "bold");
-          doc.text(`Scen ${index + 1}: ${scene.duration}`, 14, y);
-          y += 6;
-          doc.setFont(undefined, "normal");
-          doc.text(`Typ: ${scene.sceneType}`, 16, y); y += 6;
-          doc.text(`Beskrivning: ${scene.description || 'Ingen'}`, 16, y); y += 6;
-          doc.text(`Kamera: ${scene.cameraMovement || 'Ej angivet'}`, 16, y); y += 6;
-          doc.text(`Ljussättning: ${scene.lighting || 'Ej angivet'}`, 16, y); y += 6;
-          doc.text(`BPM-synkad: ${scene.bmpSync ? 'Ja' : 'Nej'}`, 16, y); y += 6;
-          if (scene.notes) {
-            doc.text(`Anteckningar: ${scene.notes.substring(0, 80)}`, 16, y);
-            y += 6;
-          }
-          doc.text(`Referensfoton: ${scene.photos ? scene.photos.length : 0}`, 16, y);
-          y += 8;
-        });
-        doc.save(`storyboard_${new Date().toISOString().split('T')[0]}.pdf`);
-        showToast("PDF skapad", "success");
-      }
-
-      function exportToJSON() {
-        if (!allScenes.length) {
-          showToast("Inga scener att exportera", "error");
-          return;
-        }
-        const data = {
-          project: {
-            title: document.getElementById("app-title").textContent,
-            subtitle: document.getElementById("subtitle-tag").textContent,
-            bpm: projectBPM,
-            exportedAt: new Date().toISOString()
-          },
-          scenes: allScenes
-        };
-        downloadFile(JSON.stringify(data, null, 2), "application/json", `storyboard_${new Date().toISOString().split('T')[0]}.json`);
-        showToast("JSON exporterad", "success");
-      }
-
-      function exportToText() {
-        if (!allScenes.length) {
-          showToast("Inga scener att exportera", "error");
-          return;
-        }
-        const lines = [
-          "MUSIKVIDEO STORYBOARD",
-          "======================",
-          `Projekt: ${document.getElementById("app-title").textContent}`,
-          `Undertitel: ${document.getElementById("subtitle-tag").textContent}`,
-          `BPM: ${projectBPM}`,
-          `Skapad: ${new Date().toLocaleString('sv-SE')}`,
-          "",
-          "SCENER:"
-        ];
-        allScenes.forEach((scene, index) => {
-          lines.push(`\nScen ${index + 1}: ${scene.duration}`);
-          lines.push(`Typ: ${scene.sceneType}`);
-          lines.push(`Beskrivning: ${scene.description || 'Ingen'}`);
-          lines.push(`Kamera: ${scene.cameraMovement || 'Ej angivet'}`);
-          lines.push(`Ljussättning: ${scene.lighting || 'Ej angivet'}`);
-          lines.push(`BPM-synkad: ${scene.bmpSync ? 'Ja' : 'Nej'}`);
-          lines.push(`Referensfoton: ${scene.photos ? scene.photos.length : 0}`);
-          lines.push(`Anteckningar: ${scene.notes || 'Inga'}`);
-        });
-        downloadFile(lines.join("\n"), "text/plain", `storyboard_${new Date().toISOString().split('T')[0]}.txt`);
-        showToast("Textfil exporterad", "success");
-      }
-
-      function downloadFile(content, type, filename) {
-        const blob = new Blob([content], { type });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      }
-
-      window.saveInlineEdit = saveInlineEdit;
-      window.cancelInlineEdit = cancelInlineEdit;
-      window.removePhoto = removePhoto;
-
-      initializeApp();
-
-      // Post-render hooks
-      const observer = new MutationObserver(() => {
-        setupDetailsForm();
+      // collapse cards by default to reduce vertical footprint
+      card.classList.add('collapsed');
+      // toggle collapse when clicking header (but ignore button clicks inside header)
+      card.querySelector('header').addEventListener('click', (ev) => {
+        // if user clicked a button or checkbox inside header, ignore collapse toggle
+        if(ev.target.closest('button') || ev.target.closest('input')) return;
+        card.classList.toggle('collapsed');
       });
-      observer.observe(document.getElementById("main-content"), { childList: true, subtree: true });
-    </script>
-  </body>
+      // inline
+      card.addEventListener('input', ev=>{
+        if(s.locked) return;
+        const t=ev.target; const k=t.getAttribute('data-k');
+        if(k){
+          if(k==='lane'){ const old=s.lane||0; s.lane=Number(t.value)||0; if(autoReflow){ reflowLane(old); reflowLane(s.lane); } scheduleRender({timeline:true}); }
+          else if(k==='startOffset'){ let val=Math.max(0, Number(t.value)||0); if(hardGrid) val=quantize(val,'beat',0); s.startOffset=val; if(autoReflow) reflowLane(s.lane||0); scheduleRender({timeline:true}); }
+          else if(k==='duration'){ setDuration(s, t.value); if(autoReflow) reflowLane(s.lane||0); scheduleRender({timeline:true}); }
+          else { s[k]=t.value; }
+          s.updated_at=new Date().toISOString(); saveDebounced(); return;
+        }
+        const tag=t.getAttribute('data-tag'); if(tag){ s.tags=s.tags||{}; s.tags[tag]=t.value.split(',').map(x=>x.trim()).filter(Boolean); saveDebounced(); }
+      });
+      // actions
+      card.querySelector('[data-act="dup"]').onclick=()=>duplicateScene(s);
+      card.querySelector('[data-act="del"]').onclick=()=>deleteScene(s);
+      card.querySelector('[data-act="lock"]').onclick=()=>{ s.locked=!s.locked; saveDebounced(); scheduleRender({scenes:true, timeline:true}); };
+      card.querySelector('[data-act="photo"]').onclick=()=>{ el.fileHidden.onchange=async e=>{ const f=e.target.files[0]; if(f){ await putPhotoForScene(s,f); scheduleRender({scenes:true, timeline:true, overview:true}); } el.fileHidden.value=''; }; el.fileHidden.click(); };
+      card.querySelector('[data-act="clearphoto"]').onclick=()=>{ s.image_key=''; s.thumbnail=''; s.thumbnail_webp=''; saveDebounced(); scheduleRender({scenes:true, timeline:true, overview:true}); };
+      // selection
+      card.querySelector('.sel').onchange=(e)=>{ setSelected(s.id, e.target.checked); if(e.target.checked) card.classList.add('selected'); else card.classList.remove('selected'); };
+      // per-card quick presets
+      card.querySelectorAll('.qtags .qt').forEach(q=> q.addEventListener('click', ()=>{
+        if(s.locked) return;
+        const cat=q.dataset.cat, val=q.dataset.val;
+        s.tags=s.tags||{camera:[],light:[],vfx:[]}; const arr=s.tags[cat]||[]; if(!arr.includes(val)) arr.push(val); s.tags[cat]=arr;
+        s.updated_at=new Date().toISOString(); saveDebounced(); scheduleRender({scenes:true, overview:true}); toast(`Preset tillagd: ${cat} ${val}`);
+      }));
+      frag.appendChild(card);
+    }
+    el.grid.appendChild(frag);
+    el.projCount.textContent=String(scenes.length);
+    updateSelBar();
+  // reposition thumbnails after scene rendering
+  updateThumbNavPosition();
+
+    // Update side thumbnail navigation
+    if(el.thumbNav){
+      el.thumbNav.innerHTML='';
+      list.forEach(s=>{
+        const thumbImg=document.createElement('img');
+        // select image source: prefer webp, then jpeg, else fallback solid color svg
+        let srcData = '';
+        if(s.thumbnail_webp && s.thumbnail_webp.startsWith('data:image')) srcData = s.thumbnail_webp;
+        else if(s.thumbnail && s.thumbnail.startsWith('data:image')) srcData = s.thumbnail;
+        else {
+          // dark placeholder svg (16:9 aspect)
+          const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='60' height='34'><rect width='60' height='34' fill='%23232937' rx='4' ry='4'/></svg>`;
+          srcData = 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+        }
+        thumbImg.src = srcData;
+        thumbImg.alt = s.title ? `Miniatyr ${s.title}` : 'Miniatyr';
+        thumbImg.dataset.id = s.id;
+        thumbImg.addEventListener('click', () => {
+          const cardEl = el.grid.querySelector(`[data-id='${s.id}']`);
+          if(cardEl) cardEl.scrollIntoView({behavior:'smooth', block:'center'});
+        });
+        el.thumbNav.appendChild(thumbImg);
+      });
+    }
+  }
+
+  /** Overview with lazy thumbs */
+  let ovPage=1;
+  let _ovObserver=null;
+  function ensureOvObserver(){
+    if(_ovObserver) return _ovObserver;
+    _ovObserver = new IntersectionObserver(async entries=>{
+      for(const e of entries){
+        if(e.isIntersecting){
+          const div=e.target; const sid=div.getAttribute('data-id');
+          const s=scenes.find(x=>x.id===sid); if(!s || !s.image_key) { _ovObserver.unobserve(div); continue; }
+          try{ const blob=await getImage(s.image_key); if(blob){ const url=URL.createObjectURL(blob); const srcData=(s.thumbnail_webp && s.thumbnail_webp.startsWith('data:image/webp'))? s.thumbnail_webp : s.thumbnail; if(srcData){ div.style.backgroundImage=`url('${srcData}')`; } else { div.style.backgroundImage=`url('${url}')`; setTimeout(()=>URL.revokeObjectURL(url),2000); }
+              div.textContent=''; } }
+          catch(_){}
+          _ovObserver.unobserve(div);
+        }
+      }
+    }, {root:el.ovGrid, rootMargin:'200px'});
+    return _ovObserver;
+  }
+  function matchesFilter(s){
+    const cat=el.fCat.value; const q=(el.fText.value||'').trim().toLowerCase();
+    if(!q) return true;
+    if(cat==='title') return (s.title||'').toLowerCase().includes(q);
+    if(cat==='description') return (s.description||'').toLowerCase().includes(q);
+    if(cat==='tags.camera') return (s.tags?.camera||[]).join(',').toLowerCase().includes(q);
+    if(cat==='tags.light') return (s.tags?.light||[]).join(',').toLowerCase().includes(q);
+    if(cat==='tags.vfx') return (s.tags?.vfx||[]).join(',').toLowerCase().includes(q);
+    return true;
+  }
+  function renderOverview(){
+    const per=6;
+    const filtered=scenes.filter(matchesFilter);
+    const pages=Math.max(1, Math.ceil(filtered.length/per));
+    ovPage=Math.max(1, Math.min(ovPage, pages));
+    el.ovPage.textContent=`${ovPage} / ${pages}`;
+    el.ovGrid.innerHTML='';
+    const start=(ovPage-1)*per;
+    const obs=ensureOvObserver();
+    filtered.slice(start, start+per).forEach(s=>{
+      const div=document.createElement('div'); div.className='thumb'; div.textContent='Ingen bild'; div.setAttribute('data-id', s.id);
+      el.ovGrid.appendChild(div);
+      if(s.image_key) obs.observe(div);
+    });
+  }
+
+/**
+ * Update the side thumbnail navigation's vertical position based on the header
+ * and whether bulk selection tools are visible. Keeps thumbnails from
+ * overlapping the top menu on mobile.
+ */
+function updateThumbNavPosition(){
+  if(!el.thumbNav) return;
+  // On narrow screens the thumbnail bar is positioned via CSS at the bottom.
+  if(window.innerWidth < 900){
+    el.thumbNav.style.top = 'auto';
+    return;
+  }
+  const headerRect = document.querySelector('header').getBoundingClientRect();
+  let offset = headerRect.height + 8;
+  // account for selbar if visible
+  if(!el.selbar.classList.contains('hidden')){
+    offset += el.selbar.offsetHeight + 8;
+  }
+  // account for actions menu if visible on small screens (when actions collapsed) – use 900px breakpoint
+  if(window.innerWidth < 900 && !el.actions.classList.contains('hidden')){
+    offset += el.actions.offsetHeight + 8;
+  }
+  el.thumbNav.style.top = offset + 'px';
+}
+
+  /** Audio */
+  async function onAudioFile(file){
+    try{
+      if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+      const arr=await file.arrayBuffer(); audioBuf=await audioCtx.decodeAudioData(arr);
+      el.durTime.textContent=fmtTime(audioBuf.duration); el.scrub.max=''+Math.floor(audioBuf.duration);
+      audioOffset=0; audioStart=0; toast('Audio inläst');
+    }catch(e){ alert('Kunde inte läsa ljudfilen.'); }
+  }
+  function playAudio(){ if(!audioCtx||!audioBuf) return; stopAudio(); audioSrc=audioCtx.createBufferSource(); audioSrc.buffer=audioBuf; audioSrc.connect(audioCtx.destination); audioStart=audioCtx.currentTime-audioOffset; audioSrc.start(0,audioOffset); tick(); }
+  function stopAudio(){ if(audioSrc){ try{audioSrc.stop()}catch(e){} audioSrc.disconnect(); audioSrc=null; } if(rafId) cancelAnimationFrame(rafId); }
+  function pauseAudio(){ if(!audioCtx) return; audioOffset=Math.max(0, audioCtx.currentTime-audioStart); stopAudio(); }
+  function scrubTo(sec){ if(!audioCtx||!audioBuf) return; sec=Math.max(0, Math.min(audioBuf.duration, sec)); audioOffset=sec; if(audioSrc) playAudio(); else { el.curTime.textContent=fmtTime(sec); el.scrub.value=''+Math.floor(sec); } }
+  function tick(){ if(!audioCtx||!audioBuf) return; const t=Math.min(audioBuf.duration, audioCtx.currentTime-audioStart); el.curTime.textContent=fmtTime(t); el.scrub.value=''+Math.floor(t); rafId=requestAnimationFrame(tick); }
+
+  /** Export */
+  function downloadBlob(blob, name){ const a=document.createElement('a'); const url=URL.createObjectURL(blob); a.href=url; a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(url); a.remove();},700); }
+  function exportJSON(){ const data=JSON.stringify({project:'AudioVisual Storyboard',version:'2.1.1',bpm, markers, lanes:laneMeta, scenes}, null,2); downloadBlob(new Blob([data],{type:'application/json'}), `storyboard_${Date.now()}.json`); toast('JSON exporterad'); }
+  async function ensureLib(url){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=url; s.onload=()=>res(); s.onerror=()=>rej(new Error('load fail '+url)); document.head.appendChild(s); }); }
+  async function exportZIP(){
+    if(typeof JSZip==='undefined'){ await ensureLib('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'); }
+    const zip=new JSZip();
+    zip.file('project.json', JSON.stringify({project:'AudioVisual Storyboard',version:'2.1.1',bpm, markers, lanes:laneMeta, scenes}, null,2));
+    const imgFolder=zip.folder('images');
+    for(const s of scenes){ if(s.image_key){ const blob=await getImage(s.image_key); if(blob){ const buf=await blob.arrayBuffer(); imgFolder.file(`${s.id}.jpg`, buf); } } }
+    const out=await zip.generateAsync({type:'blob'}); downloadBlob(out, `AudioVisual_Storyboard_Bundle_${Date.now()}.zip`); toast('ZIP exporterad');
+  }
+  async function exportPDF(){
+    if(!(window.jspdf && window.jspdf.jsPDF)){ await ensureLib('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'); }
+    const { jsPDF } = window.jspdf;
+    const layout=Number(el.pdfLayout.value); const orient=el.pdfOrientation.value;
+    const title=el.pdfTitle.value||'AudioVisual Storyboard — Musikvideo';
+    const withCover=!!el.pdfCover.checked; const withLogo=!!el.pdfLogo.checked; const group=!!el.pdfGroup.checked;
+    const doc=new jsPDF({orientation:orient,unit:'pt',format:'a4'});
+    const pageW=doc.internal.pageSize.getWidth(), pageH=doc.internal.pageSize.getHeight();
+    const cols=(layout>=4)?2:1; const rows=(layout===1?1:(layout===2?2:(layout===4?2: (layout===6?3:4)))); // 6->3 rows, 12->4
+    const cells=cols*rows; const margin=24;
+    function cellRect(ix){ const cw=(pageW-margin*2-(cols-1)*margin)/cols; const ch=(pageH-margin*2-24-(rows-1)*margin)/rows; const c=ix%cells; const col=c%cols; const row=Math.floor(c/cols); const x=margin+col*(cw+margin); const y=margin+row*(ch+margin)+24; return {x,y,w:cw,h:ch}; }
+    function header(text){
+    doc.setFontSize(12); doc.setTextColor(30); doc.text(text, margin, 20);
+      if(withLogo){
+        doc.setDrawColor(200); doc.circle(pageW-margin-14, 16, 8, 'S'); doc.line(pageW-margin-20, 10, pageW-margin-6, 22);
+      }
+      doc.setDrawColor(180); doc.line(margin,26,pageW-margin,26);
+    }
+    function shotListPage(startIndex){
+      header(`${title} — Sammanfattning`);
+      const headY=40, rowH=18; let y=headY;
+      doc.setFontSize(10); doc.setTextColor(80);
+      doc.text('#', margin, y); doc.text('Titel', margin+24, y); doc.text('Start', margin+240, y); doc.text('Längd', margin+300, y); doc.text('Lane', margin+360, y); doc.text('Kamera', margin+420, y);
+      doc.setDrawColor(100); doc.line(margin,y+2,pageW-margin,y+2);
+      y+=10;
+      doc.setTextColor(30);
+      const perPage=Math.floor((pageH - (y+20))/rowH);
+      for(let i=startIndex;i<Math.min(scenes.length,startIndex+perPage);i++){
+        const s=scenes[i]; const ln=s.lane||0;
+        doc.text(String(s.scene_number||i+1), margin, y);
+        doc.text(String(s.title||'').slice(0,30), margin+24, y);
+        doc.text(fmtTime(s.startOffset||0), margin+240, y);
+        doc.text(String(s.duration||''), margin+300, y);
+        doc.text(String(laneMeta[ln]?.name||('L'+ln)), margin+360, y);
+        doc.text(String(s.camera_angle||''), margin+420, y);
+        y+=rowH;
+      }
+      return (startIndex+perPage);
+    }
+    scenes.sort((a,b)=>a.startOffset-b.startOffset);
+    if(withCover){
+      let idx=0;
+      while(idx<scenes.length){
+        idx=shotListPage(idx);
+        if(idx<scenes.length) doc.addPage();
+      }
+      doc.addPage();
+    }
+    function sceneHeaderRect(r, label){
+      if(!label) return;
+      doc.setTextColor(255,209,102); doc.setFontSize(10); doc.text(`Section: ${label}`, r.x, r.y-6);
+    }
+    function addSceneCell(i){
+      if(i%cells===0){ if(i>0) doc.addPage(); header(title); }
+      const s=scenes[i]; const r=cellRect(i);
+      const ih=r.h*0.62;
+      // Use light fill color for PDF cells for better print readability
+      doc.setDrawColor(200);
+      doc.setFillColor(255,255,255);
+      doc.rect(r.x,r.y,r.w,ih,'FD');
+      if(group){ const label=sectionLabelAt(s.startOffset||0); sceneHeaderRect(r,label); }
+      let imgData=null;
+      if(s.thumbnail_webp && s.thumbnail_webp.startsWith('data:image/webp')) imgData=s.thumbnail_webp; else if(s.thumbnail) imgData=s.thumbnail;
+      try{
+        if(imgData){
+          const imgType = imgData.startsWith('data:image/webp') ? 'WEBP' : 'JPEG';
+          // available drawing area within the image rectangle
+          const availW = r.w - 4;
+          const availH = ih - 4;
+          const aspect = 16/9;
+          let imgW = availW;
+          let imgH = imgW / aspect;
+          if(imgH > availH){
+            imgH = availH;
+            imgW = imgH * aspect;
+          }
+          const imgX = r.x + 2 + (availW - imgW)/2;
+          const imgY = r.y + 2 + (availH - imgH)/2;
+          doc.addImage(imgData, imgType, imgX, imgY, imgW, imgH);
+        }
+      }catch(e){}
+      const ln=s.lane||0;
+      const y2=r.y+ih+10;
+      // Primary text: dark for readability on light background
+      doc.setTextColor(30); doc.setFontSize(10);
+      doc.text(`Scen #${s.scene_number||''} — ${s.title||''}`.slice(0,80), r.x, y2);
+      // Secondary metadata text
+      doc.setTextColor(80);
+      doc.text(`Längd: ${s.duration||''}  Kamera: ${s.camera_angle||''}  Start: ${fmtTime(s.startOffset||0)}  ${laneMeta[ln]?.name||('L'+ln)}  ${s.locked?'[LÅST]':''}`, r.x, y2+14);
+      // Description text (dark)
+      doc.setTextColor(30);
+      const desc=(s.description||'').slice(0,260);
+      doc.text(doc.splitTextToSize(desc, r.w), r.x, y2+28);
+    }
+    for(let i=0;i<scenes.length;i++) addSceneCell(i);
+    doc.save(`AudioVisual_Storyboard_${Date.now()}.pdf`); toast('PDF exporterad');
+  }
+
+  /** Import */
+  function importJSON(file){
+    const fr=new FileReader(); fr.onload=()=>{ try{
+      const obj=JSON.parse(fr.result); const incoming=Array.isArray(obj)?obj:(obj.scenes||[]); const incMarkers=obj.markers||[]; const incLanes=obj.lanes||[];
+      scenes = incoming.map(x=>({ id:x.id||uid(), scene_number:Number(x.scene_number||0), title:x.title||'', description:x.description||'', duration:x.duration||'5s', camera_angle:x.camera_angle||'Medium', notes:x.notes||'', tags:x.tags||{camera:[],light:[],vfx:[]}, image_key:x.image_key||'', thumbnail:x.thumbnail||'', thumbnail_webp:x.thumbnail_webp||'', startOffset: (typeof x.startOffset==='number')?x.startOffset:null, lane: (typeof x.lane==='number')?x.lane:0, locked: !!x.locked, created_at:x.created_at||new Date().toISOString(), updated_at:x.updated_at||new Date().toISOString(), _durSec: parseSec(x.duration||'0') }));
+      markers = incMarkers.map(m=>({ t:Number(m.t)||0, label:m.label||m.type||'Marker', type:m.type||'Section' }));
+      laneMeta = Array.isArray(incLanes)&&incLanes.length? incLanes : laneMeta;
+      ensureDefaults(); renumberByTime(); save(); saveMarkers(); saveLanes(); selected.clear(); scheduleRender({scenes:true, timeline:true, overview:true}); toast('JSON importerad');
+    }catch(e){ alert('Ogiltig JSON: '+e.message); } }; fr.readAsText(file);
+  }
+
+  /** Wiring */
+  function switchView(name){ for(const [k,v] of Object.entries(el.view)) v.style.display=(k===name)?'block':'none'; for(const [k,b] of Object.entries(el.nav)) b.setAttribute('aria-current', k===name?'page':'false'); if(name==='timeline') renderTimeline(); if(name==='overview') renderOverview(); }
+  function renderLaneSettings(){
+    el.lanesBox.innerHTML='';
+    for(let ln=0; ln<laneCount; ln++){
+      const wrap=document.createElement('div'); wrap.className='toolbar';
+      wrap.innerHTML=`<span class="badge">Lane ${ln}</span>
+        <input type="text" value="${esc(laneMeta[ln]?.name||('Spår '+ln))}" data-ln="${ln}" data-k="name" style="width:140px">
+        <input type="color" value="${laneMeta[ln]?.color||'#8899aa'}" data-ln="${ln}" data-k="color" style="width:60px;height:40px;padding:0;border:none;border-radius:8px">
+        `;
+      wrap.querySelectorAll('input').forEach(inp=> inp.addEventListener('input', e=>{
+        const i=Number(e.target.getAttribute('data-ln')); const k=e.target.getAttribute('data-k'); laneMeta[i]=laneMeta[i]||{name:'Spår '+i, color:'#8899aa'}; laneMeta[i][k]=e.target.value; saveLanes(); scheduleRender({timeline:true, scenes:true});
+      }));
+      el.lanesBox.appendChild(wrap);
+    }
+  }
+  function wire(){
+    el.nav.scenes.onclick=()=>switchView('scenes'); el.nav.timeline.onclick=()=>switchView('timeline'); el.nav.overview.onclick=()=>switchView('overview'); el.nav.export.onclick=()=>switchView('export');
+    el.add.onclick=addScene;
+    // selection & bulk
+    el.selAll.onclick=()=>{ selected = new Set(scenes.map(s=>s.id)); updateSelBar(); scheduleRender({scenes:true}); };
+    el.selNone.onclick=()=>{ selected.clear(); updateSelBar(); scheduleRender({scenes:true}); };
+    el.bulkSetDur.onclick=bulkSetDuration; el.bulkSetCam.onclick=bulkSetCamera; el.bulkSetLane.onclick=bulkSetLane;
+    el.bulkDup.onclick=bulkDuplicate; el.bulkDel.onclick=bulkDelete;
+    el.bulkLock.onclick=()=>bulkLockScenes(true); el.bulkUnlock.onclick=()=>bulkLockScenes(false);
+    el.bulkAddTags.onclick=()=>applyTags('add'); el.bulkReplaceTags.onclick=()=>applyTags('replace'); el.bulkClearTags.onclick=()=>applyTags('clear');
+    // global quick tags
+    el.qtags.querySelectorAll('.qt').forEach(btn=> btn.addEventListener('click', ()=>{
+      const cat=btn.dataset.cat, val=btn.dataset.val;
+      const targets = selected.size? scenes.filter(s=>selected.has(s.id)) : scenes;
+      targets.forEach(s=>{ if(!s.locked){ s.tags=s.tags||{camera:[],light:[],vfx:[]}; const arr=s.tags[cat]||[]; if(!arr.includes(val)) arr.push(val); s.tags[cat]=arr; s.updated_at=new Date().toISOString(); }});
+      saveDebounced(); scheduleRender({scenes:true, overview:true}); toast(`Preset '${val}' applicerad (${targets.length})`);
+    }));
+    // timeline toolbar
+    el.tlFit.onclick=()=>{ const target=Math.max(1, Math.min(12, Math.floor(120/Math.max(1,scenes.length)))); scenes.forEach(s=>{ if(!s.locked) setDuration(s, `${target}s`); }); if(autoReflow) for(let ln=0; ln<laneCount; ln++) reflowLane(ln); saveDebounced(); scheduleRender({timeline:true}); toast('Auto-fit klart'); };
+    el.tlResolve.onclick=resolveOverlaps;
+    el.tlSnapToggle.onclick=()=>{ snapMode=(snapMode==='beat'?'marker':'beat'); el.tlSnapToggle.textContent='Snap: '+(snapMode==='beat'?'Beat':'Marker'); toast('Snap-läge: '+(snapMode==='beat'?'Beat':'Marker')); };
+    el.tlZoomIn.onclick=()=>{ timelinePxPerSec=Math.min(120, timelinePxPerSec+5); scheduleRender({timeline:true}); };
+    el.tlZoomOut.onclick=()=>{ timelinePxPerSec=Math.max(8, timelinePxPerSec-5); scheduleRender({timeline:true}); };
+    el.gridHard.onchange=()=>{ hardGrid=!!el.gridHard.checked; toast('Grid: '+(hardGrid?'Hard':'Soft')); };
+    el.gridQuant.onchange=()=>{ quantDiv = Number(el.gridQuant.value); toast('Quantize: '+(quantDiv===1?'1 beat':(quantDiv===0.5?'1/2':'1/4'))); };
+    el.reflowToggle.onchange=()=>{ autoReflow=!!el.reflowToggle.checked; toast('Auto-reflow: '+(autoReflow?'På':'Av')); };
+    // audio
+    el.bpm.oninput=()=>{ bpm=Number(el.bpm.value||120); beatMs=60000/Math.max(1,bpm); scheduleRender({timeline:true}); };
+    el.audioFile.onchange=e=>{ const f=e.target.files[0]; if(f) onAudioFile(f); };
+    el.play.onclick=()=>{ if(!audioSrc) playAudio(); else pauseAudio(); }; el.stop.onclick=()=>{ pauseAudio(); audioOffset=0; el.scrub.value='0'; el.curTime.textContent='0:00'; }; el.scrub.oninput=()=>scrubTo(Number(el.scrub.value||0));
+    // overview
+    el.fCat.oninput=()=>scheduleRender({overview:true}); el.fText.oninput=()=>{ ovPage=1; scheduleRender({overview:true}); };
+    el.ovPrev.onclick=()=>{ ovPage=Math.max(1,ovPage-1); scheduleRender({overview:true}); }; el.ovNext.onclick=()=>{ ovPage=ovPage+1; scheduleRender({overview:true}); };
+    // export
+    el.exportJson.onclick=exportJSON; el.exportJsonTop.onclick=exportJSON; el.exportZip.onclick=exportZIP; el.exportPdf.onclick=exportPDF;
+    // import
+    el.importJsonBtn.onclick=()=> el.importJsonFile.click(); el.importJsonFile.onchange=e=>{ const f=e.target.files[0]; if(f) importJSON(f); e.target.value=''; };
+    // images
+    el.importImages.onclick=()=> el.fileImages.click(); el.fileImages.onchange=e=>{ const files=[...(e.target.files||[])]; if(files.length) batchImportImages(files); e.target.value=''; };
+    // lanes
+    renderLaneSettings();
+    // markers clear & add
+    el.clearMarkers.onclick=()=>{ if(!markers.length) return toast('Inga markers'); if(!confirm('Rensa alla markers?')) return; markers.length=0; markDirty(); saveMarkers(); scheduleRender({timeline:true}); };
+    el.addAtCur.onclick=()=>{ const t=Number(el.scrub.value||0); const label=(el.mLabel.value||''); const type=(el.mType.value||'Section'); addMarkerAt(t,label,type); };
+    el.addManual.onclick=()=>{ const t=parseTimeStr(el.mTime.value); if(t==null) return alert('Ogiltig tid'); const label=(el.mLabel.value||''); const type=(el.mType.value||'Section'); addMarkerAt(t,label,type); };
+    el.alignMarkers.onclick=alignScenesToMarkers;
+
+  // Toggle selection bar visibility. This helps declutter the UI on small screens.
+  el.toggleSelbar.onclick=()=>{
+    el.selbar.classList.toggle('hidden');
+    updateThumbNavPosition();
+  };
+
+  // Auto-hide the selection bar on narrow viewports (e.g. mobile) at initial load
+  if(window.innerWidth < 900){
+    el.selbar.classList.add('hidden');
+  }
+
+  // Toggle actions menu visibility (mobile). Also reposition thumb nav.
+  el.toggleActions.onclick=()=>{
+    el.actions.classList.toggle('hidden');
+    updateThumbNavPosition();
+  };
+  // Auto-hide the actions menu on narrow viewports at initial load
+  if(window.innerWidth < 900){
+    el.actions.classList.add('hidden');
+  }
+
+  // Update thumbnail navigation when window is resized
+  window.addEventListener('resize', updateThumbNavPosition);
+  }
+
+  /** Init */
+  async function init(){
+    idb = await openDB();
+    scenes=load(); markers=loadMarkers(); laneMeta=loadLanes();
+    ensureDefaults(); renumberByTime(); renderScenes(); renderTimeline(); renderOverview(); wire();
+    bpm=Number(el.bpm.value||120); beatMs=60000/Math.max(1,bpm);
+  // position thumbnail navigation after initial render
+  updateThumbNavPosition();
+  }
+  document.addEventListener('DOMContentLoaded', init);
+})();
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function() {
+    navigator.serviceWorker.register("service-worker.js");
+  });
+}
+</script>
+
+</body>
 </html>

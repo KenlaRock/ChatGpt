@@ -1,10 +1,23 @@
 {
-  "name": "Storyboard – Musikvideo Pro",
-  "short_name": "Storyboard",
-  "description": "Offline-ready storyboard workspace for Musikvideo Pro planning and scene management.",
-  "start_url": "./",
-  "scope": "./",
+  "name": "AudioVisual Storyboard",
+  "short_name": "AV Storyboard",
+  "description": "Professional storyboard creation tool for audiovisual projects",
+  "start_url": ".",
+  "scope": ".",
   "display": "standalone",
-  "background_color": "#0b0d10",
-  "theme_color": "#0b0d10"
+  "display_override": ["fullscreen", "standalone"],
+  "background_color": "#0f1117",
+  "theme_color": "#1a1d29",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
