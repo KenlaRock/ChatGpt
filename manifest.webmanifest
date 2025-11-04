@@ -1,0 +1,10 @@
+{
+  "name": "Storyboard – Musikvideo Pro",
+  "short_name": "Storyboard",
+  "description": "Offline-ready storyboard workspace for Musikvideo Pro planning and scene management.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0d10",
+  "theme_color": "#0b0d10"
+}
