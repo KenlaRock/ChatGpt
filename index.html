@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
     <title>Storyboard – Musikvideo Pro</title>
     <meta name="theme-color" content="#0b0d10">
+    <link rel="manifest" href="./manifest.webmanifest">
     <script src="./apps/storyboard/dist/vendor/jspdf.umd.min.js" defer></script>
     <style>
       :root {
@@ -725,12 +726,15 @@
           config: { ...defaultConfig },
           init({ defaultConfig: defaults, onConfigChange }) {
             this.config = { ...defaults };
-            onConfigChange(this.config);
+            this.onConfigChange = onConfigChange;
+            if (typeof this.onConfigChange === "function") {
+              this.onConfigChange(this.config);
+            }
           },
           setConfig(update) {
             this.config = { ...this.config, ...update };
-            if (typeof onConfigChange === "function") {
-              onConfigChange(this.config);
+            if (typeof this.onConfigChange === "function") {
+              this.onConfigChange(this.config);
             }
           }
         };

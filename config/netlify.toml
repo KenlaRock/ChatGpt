@@ -5,11 +5,21 @@
   [build.environment]
     NODE_VERSION = "20"
 
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+  external_node_modules = ["@netlify/neon"]
+
 [context.deploy-preview]
   publish = "apps/storyboard/dist"
 
 [context.branch-deploy]
   publish = "apps/storyboard/dist"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self' blob: data:; img-src 'self' blob: data:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; script-src 'self' 'unsafe-inline' blob:; worker-src 'self' blob:; connect-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'self'"
 
 [[headers]]
   for = "/app.html"
@@ -18,5 +28,5 @@
 
 [[redirects]]
   from = "/*"
-  to = "/app.html"
+  to = "/index.html"
   status = 200
