@@ -1786,16 +1786,36 @@ el.btnExportCsv.onclick=()=>{
 el.audioFile.onchange=async e=>{
   const file=e.target.files?.[0];
   if(!file)return;
-  
-  const url=URL.createObjectURL(file);
-  el.audio.src=url;
-  
-  if(state.currentProject){
-    state.currentProject.audio=url;
-    saveProjectDebounced();
+
+  setStatus('Laddar ljud…');
+
+  try{
+    const dataUrl=await new Promise((resolve,reject)=>{
+      const reader=new FileReader();
+      reader.onerror=()=>reject(reader.error||new Error('Kunde inte läsa filen'));
+      reader.onload=()=>resolve(reader.result);
+      reader.readAsDataURL(file);
+    });
+
+    if(typeof dataUrl==='string'){
+      el.audio.src=dataUrl;
+
+      if(state.currentProject){
+        state.currentProject.audio=dataUrl;
+        saveProjectDebounced();
+      }
+
+      setStatus('Ljud laddat');
+    }else{
+      throw new Error('Okänt filformat');
+    }
+  }catch(err){
+    console.error('Audio load failed:',err);
+    setStatus('Ljudfel');
+    alert('Misslyckades läsa ljudfilen: '+(err?.message||err));
+  }finally{
+    el.audioFile.value='';
   }
-  
-  setStatus('Ljud laddat');
 };
 
 function ensureAudioGraph(){
