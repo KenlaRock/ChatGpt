@@ -1,5 +1,10 @@
 # CHANGELOG — v2.2
 
+## 2025-11-04 — Musikvideo Pro storyboard overhaul
+- Added a standalone `index.html` prototype that consolidates the latest scene management, export, and drawing improvements with Android-friendly breakpoints.
+- Refined export flows (PDF/JSON/TXT) to generate downloadable assets directly from the prototype UI.
+- Hardened photo upload, timeline drag/drop, and inline editing behaviours with clearer toast feedback for success and failure paths.
+
 ## 2025-11-03 — Netlify workflow helpers
 - Added CLI helpers (`npm run netlify:trigger:*`) for quickly firing the Storyboard Netlify build and preview hooks.
 - Documented the new commands in the repository README for easy discovery.
