@@ -1,5 +1,9 @@
 # CHANGELOG — v2.2
 
+## 2025-11-04 — Offline-ready sandbox index
+- Bundled jsPDF 2.5.1 locally so the sandbox PDF export works without network access.
+- Removed external SDK script references from `index.html` to avoid 404s in offline usage.
+
 ## 2025-11-03 — Netlify workflow helpers
 - Added CLI helpers (`npm run netlify:trigger:*`) for quickly firing the Storyboard Netlify build and preview hooks.
 - Documented the new commands in the repository README for easy discovery.

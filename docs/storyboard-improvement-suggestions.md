@@ -1,9 +1,8 @@
 # Storyboard Improvement Suggestions — 2025-02-14
 
 ## 1. Restore offline parity for the sandbox index
-- `index.html` currently depends on CDN-hosted jsPDF and two `/_sdk/...` scripts that are not tracked in the repository, which breaks the offline promise described in the README and causes 404s when the page is opened from `file://`.【F:index.html†L8-L35】
-- Bundle the SDK helpers inside the repo (for example under `apps/storyboard/dist/vendor/`) and inline or locally host jsPDF so that the sandbox remains functional without network access.
-- Mirror the packaging approach used by `apps/storyboard/dist/app.html` by documenting the offline assets in `docs/` and adding a regression check that fails when the sandbox references external URLs.
+- ✅ Addressed in 2025-11-04 update: `index.html` now loads jsPDF 2.5.1 from `apps/storyboard/dist/vendor/`, eliminating the CDN dependency and preventing 404s in offline usage.【F:index.html†L8-L11】【F:apps/storyboard/dist/vendor/jspdf.umd.min.js†L1-L7】
+- Remaining enhancement: add automated regression checks that fail when the sandbox references external URLs.
 
 ## 2. Expand automated coverage beyond the sanity test
 - The Jest suite only asserts `true === true`, offering no protection for the storyboard UI, packaging scripts, or Netlify helper CLI.【F:tests/app.test.js†L1-L3】
