@@ -7,7 +7,8 @@
     "test": "jest",
     "netlify:trigger": "node tools/netlify/trigger.js",
     "netlify:trigger:build": "node tools/netlify/trigger.js build",
-    "netlify:trigger:preview": "node tools/netlify/trigger.js preview"
+    "netlify:trigger:preview": "node tools/netlify/trigger.js preview",
+    "netlify:db:init": "npx --yes netlify db init"
   },
   "devDependencies": {
     "jest": "^29.7.0"

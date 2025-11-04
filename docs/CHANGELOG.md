@@ -1,5 +1,9 @@
 # CHANGELOG — v2.2
 
+## 2025-11-04 — Netlify Database bootstrap
+- Added a Netlify Database schema and seed files (`netlify/db/schema.sql`, `netlify/db/seed.sql`) so `npx netlify db init` provisions the posts table used by the `fetch-posts` function.
+- Documented the CLI helper for initializing the Netlify Database in `package.json` for consistent local setup.
+
 ## 2025-11-04 — Netlify Neon data access
 - Added a Netlify Function (`netlify/functions/fetch-posts.mjs`) that queries the Neon database via `@netlify/neon` and exposes the latest posts as JSON for the standalone index to consume during deployments.
 - Configured Netlify to bundle the functions directory with esbuild and ship the Neon client dependency.
