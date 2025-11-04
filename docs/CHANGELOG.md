@@ -1,5 +1,9 @@
 # CHANGELOG — v2.2
 
+## 2025-11-04 — Netlify Neon data access
+- Added a Netlify Function (`netlify/functions/fetch-posts.mjs`) that queries the Neon database via `@netlify/neon` and exposes the latest posts as JSON for the standalone index to consume during deployments.
+- Configured Netlify to bundle the functions directory with esbuild and ship the Neon client dependency.
+
 ## 2025-11-04 — Offline-ready sandbox index
 - Bundled jsPDF 2.5.1 locally so the sandbox PDF export works without network access.
 - Removed external SDK script references from `index.html` to avoid 404s in offline usage.
