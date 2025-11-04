@@ -1005,6 +1005,7 @@
     let projectBPM = 120;
     let searchQuery = '';
     let exportMenuOpen = false;
+    let offlineWarningShown = false;
 
     const HTML_ESCAPE_LOOKUP = {
       '&': '&amp;',
@@ -1111,6 +1112,111 @@
       }
     };
 
+    function isDataSdkReady() {
+      const sdk = window.dataSdk;
+      return !!(sdk && typeof sdk.create === 'function' && typeof sdk.update === 'function' && typeof sdk.delete === 'function');
+    }
+
+    function getSceneKey(scene) {
+      if (!scene) return null;
+      return scene.__backendId || scene.id || null;
+    }
+
+    function ensureSceneIdentity(scene) {
+      const sceneCopy = deepClone(scene);
+      if (!sceneCopy.id) {
+        sceneCopy.id = 'scene_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+      }
+      if (!sceneCopy.__backendId) {
+        sceneCopy.__backendId = sceneCopy.id;
+      }
+      return sceneCopy;
+    }
+
+    function notifyOfflineMode() {
+      if (!offlineWarningShown) {
+        showToast('Offline-läge: scener sparas endast under denna session', 'warning');
+        offlineWarningShown = true;
+      }
+    }
+
+    function refreshSceneReferences() {
+      const selectedKey = getSceneKey(selectedScene);
+      const editingKey = getSceneKey(editingScene);
+
+      if (selectedKey) {
+        const updatedSelected = allScenes.find(scene => getSceneKey(scene) === selectedKey);
+        selectedScene = updatedSelected || null;
+      }
+
+      if (editingKey) {
+        const updatedEditing = allScenes.find(scene => getSceneKey(scene) === editingKey);
+        editingScene = updatedEditing || null;
+      }
+    }
+
+    function propagateSceneChanges(updatedScenes) {
+      dataHandler.onDataChanged(updatedScenes.map(scene => deepClone(scene)));
+      refreshSceneReferences();
+    }
+
+    async function persistSceneCreate(scene) {
+      if (isDataSdkReady()) {
+        return window.dataSdk.create(scene);
+      }
+
+      notifyOfflineMode();
+
+      const sceneCopy = ensureSceneIdentity(scene);
+      const sceneKey = getSceneKey(sceneCopy);
+      const updatedScenes = [...allScenes, sceneCopy];
+      propagateSceneChanges(updatedScenes);
+      const storedScene = allScenes.find(existingScene => getSceneKey(existingScene) === sceneKey);
+      return { isOk: true, data: storedScene || sceneCopy };
+    }
+
+    async function persistSceneUpdate(scene) {
+      if (isDataSdkReady()) {
+        return window.dataSdk.update(scene);
+      }
+
+      notifyOfflineMode();
+
+      const sceneCopy = ensureSceneIdentity(scene);
+      const sceneKey = getSceneKey(sceneCopy);
+      let found = false;
+
+      const updatedScenes = allScenes.map(existingScene => {
+        if (getSceneKey(existingScene) === sceneKey) {
+          found = true;
+          return sceneCopy;
+        }
+        return existingScene;
+      });
+
+      if (!found) {
+        updatedScenes.push(sceneCopy);
+      }
+
+      propagateSceneChanges(updatedScenes);
+      const storedScene = allScenes.find(existingScene => getSceneKey(existingScene) === sceneKey);
+      return { isOk: true, data: storedScene || sceneCopy };
+    }
+
+    async function persistSceneDelete(scene) {
+      if (isDataSdkReady()) {
+        return window.dataSdk.delete(scene);
+      }
+
+      notifyOfflineMode();
+
+      const sceneKey = getSceneKey(scene);
+      const updatedScenes = allScenes.filter(existingScene => getSceneKey(existingScene) !== sceneKey);
+
+      propagateSceneChanges(updatedScenes);
+      return { isOk: true };
+    }
+
     // Element SDK Implementation
     async function onConfigChange(config) {
       document.getElementById('app-title').textContent = config.app_title || defaultConfig.app_title;
@@ -1201,7 +1307,7 @@
         });
       }
 
-      if (window.dataSdk) {
+      if (window.dataSdk && typeof window.dataSdk.init === 'function') {
         const result = await window.dataSdk.init(dataHandler);
         if (!result.isOk) {
           showToast('Kunde inte initiera datalagring', 'error');
@@ -1905,7 +2011,7 @@
         description
       };
 
-      const result = await window.dataSdk.update(updatedScene);
+      const result = await persistSceneUpdate(updatedScene);
       
       if (result.isOk) {
         showToast('Scen uppdaterad!', 'success');
@@ -1948,7 +2054,7 @@
         photos: []
       };
 
-      const result = await window.dataSdk.create(newScene);
+      const result = await persistSceneCreate(newScene);
       
       if (result.isOk) {
         showToast(`Scen skapad från mall: ${template.name}`, 'success');
@@ -1985,7 +2091,7 @@
         photos: []
       };
 
-      const result = await window.dataSdk.create(newScene);
+      const result = await persistSceneCreate(newScene);
       
       if (result.isOk) {
         showToast('Scen skapad!', 'success');
@@ -2018,7 +2124,7 @@
         duplicatedScene.photos = [];
       }
 
-      const result = await window.dataSdk.create(duplicatedScene);
+      const result = await persistSceneCreate(duplicatedScene);
       
       if (result.isOk) {
         showToast('Scen duplicerad!', 'success');
@@ -2073,11 +2179,11 @@
           photos: selectedScene.photos || []
         };
 
-        const result = await window.dataSdk.update(updatedScene);
+        const result = await persistSceneUpdate(updatedScene);
         
         if (result.isOk) {
           showToast('Scen uppdaterad!', 'success');
-          selectedScene = updatedScene;
+          selectedScene = result.data || updatedScene;
         } else {
           showToast('Kunde inte spara ändringar', 'error');
           console.error('Save scene error:', result.error);
@@ -2122,7 +2228,7 @@
         deleteBtn.disabled = true;
         deleteBtn.textContent = 'Tar bort...';
 
-        const result = await window.dataSdk.delete(scene);
+        const result = await persistSceneDelete(scene);
         
         if (result.isOk) {
           if (selectedScene && selectedScene.__backendId === id) {
@@ -2154,7 +2260,7 @@
       for (let i = 0; i < reorderedScenes.length; i++) {
         if (reorderedScenes[i].order !== i) {
           const updatedScene = { ...reorderedScenes[i], order: i };
-          await window.dataSdk.update(updatedScene);
+          await persistSceneUpdate(updatedScene);
         }
       }
 
@@ -2559,7 +2665,7 @@
         thumbnail: thumbnail
       };
 
-      await window.dataSdk.update(updatedScene);
+      await persistSceneUpdate(updatedScene);
     }
 
     // Export Functions
@@ -2943,8 +3049,9 @@ Exportdatum: ${new Date().toLocaleString('sv-SE')}
         renderCurrentView();
         
         // Auto-save the scene with new photos
-        const result = await window.dataSdk.update(selectedScene);
+        const result = await persistSceneUpdate(selectedScene);
         if (result.isOk) {
+          selectedScene = result.data || selectedScene;
           showToast(`${successCount} foto(n) uppladdade!`, 'success');
         } else {
           showToast('Foton uppladdade men kunde inte sparas', 'error');
@@ -2972,9 +3079,10 @@ Exportdatum: ${new Date().toLocaleString('sv-SE')}
       selectedScene.photos.splice(index, 1);
 
       // Update scene in database
-      const result = await window.dataSdk.update(selectedScene);
-      
+      const result = await persistSceneUpdate(selectedScene);
+
       if (result.isOk) {
+        selectedScene = result.data || selectedScene;
         renderCurrentView();
         showToast(`Foto borttaget: ${photo.name}`, 'success');
       } else {
