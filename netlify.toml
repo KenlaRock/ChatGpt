@@ -1,0 +1,4 @@
+# Netlify expects the configuration file at the project root, but we keep the
+# canonical settings in config/netlify.toml. Import that file so the existing
+# layout continues to work without duplicating the configuration.
+import = ["config/netlify.toml"]

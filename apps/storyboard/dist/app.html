@@ -351,6 +351,67 @@ function uuid(){
 
 const $=id=>document.getElementById(id);
 
+// Output sanitization helpers
+const HTML_ESCAPE_LOOKUP={
+  '&':'&amp;',
+  '<':'&lt;',
+  '>':'&gt;',
+  '"':'&quot;',
+  "'":'&#39;',
+  '`':'&#96;'
+};
+
+const HTML_ESCAPE_REGEX=/[&<>"'`]/g;
+
+function escapeHtml(value){
+  if(value==null){
+    return '';
+  }
+
+  return String(value).replace(HTML_ESCAPE_REGEX,char=>HTML_ESCAPE_LOOKUP[char]||char);
+}
+
+function escapeAttribute(value){
+  return escapeHtml(value);
+}
+
+function sanitizeUrl(url){
+  if(typeof url!=='string'){
+    return '';
+  }
+
+  const trimmed=url.trim();
+  if(!trimmed){
+    return '';
+  }
+
+  if(/^data:image\//i.test(trimmed)){
+    return trimmed;
+  }
+
+  if(/^(https?:)?\/\//i.test(trimmed)){
+    try{
+      const parsed=new URL(trimmed,window.location.origin);
+      if(parsed.protocol==='http:'||parsed.protocol==='https:'){
+        return parsed.href;
+      }
+    }catch(err){
+      return '';
+    }
+    return '';
+  }
+
+  if(trimmed.startsWith('/')){
+    return trimmed;
+  }
+
+  if(/^[A-Za-z0-9_\-./]+$/.test(trimmed)){
+    return trimmed;
+  }
+
+  return '';
+}
+
 // Elements
 const el={
   tabProjects:$('#tab-projects'),
@@ -571,10 +632,14 @@ async function refreshProjects(){
   for(const p of state.projects){
     const row=document.createElement('div');
     row.className='row';
+    const safeName=escapeHtml(p.name||'Namnlöst projekt');
+    const safeAspect=escapeHtml(p.aspect||'16:9');
+    const updatedAt=p.updatedAt?new Date(p.updatedAt):new Date();
+    const safeUpdated=escapeHtml(updatedAt.toLocaleString());
     row.innerHTML=`
       <div style="flex:1">
-        <div><strong>${p.name}</strong></div>
-        <small>${p.aspect} • ${new Date(p.updatedAt).toLocaleString()}</small>
+        <div><strong>${safeName}</strong></div>
+        <small>${safeAspect} • ${safeUpdated}</small>
       </div>
       <button class="btn" data-open>Öppna</button>
       <button class="btn danger" data-del>Radera</button>
@@ -679,10 +744,12 @@ function renderScenes(){
   p.scenes.forEach(sc=>{
     const row=document.createElement('div');
     row.className='row'+(sc.id===state.currentSceneId?' active':'');
+    const safeName=escapeHtml(sc.name||'');
+    const safeMeta=escapeHtml(`${sc.frames.length} rutor • ${sc.bpm} BPM`);
     row.innerHTML=`
       <div style="flex:1">
-        <strong>${sc.name}</strong>
-        <div class="muted">${sc.frames.length} rutor • ${sc.bpm} BPM</div>
+        <strong>${safeName}</strong>
+        <div class="muted">${safeMeta}</div>
       </div>
     `;
     row.onclick=()=>{
@@ -954,14 +1021,15 @@ function drawFrameComposite(fr,c,W,H,opts={}){
       }
     };
 
-    if(fr.bgImage){
+    const safeBg=sanitizeUrl(fr.bgImage||'');
+    if(safeBg){
       const img=new Image();
       img.onload=()=>{
         c.drawImage(img,0,0,W,H);
         finish();
       };
       img.onerror=finish;
-      img.src=fr.bgImage;
+      img.src=safeBg;
       if(img.complete){
         if(img.naturalWidth>0){
           img.onload();
@@ -1148,13 +1216,26 @@ el.toggleBpmGrid.onchange=()=>{
 el.imgUpload.onchange=e=>{
   const file=e.target.files?.[0];
   if(!file)return;
-  
+
+  if(!file.type?.startsWith('image/')){
+    alert('Endast bildfiler kan laddas upp.');
+    e.target.value='';
+    return;
+  }
+
   const reader=new FileReader();
   reader.onload=ev=>{
     const fr=currentFrame();
     if(!fr)return;
-    
-    fr.bgImage=ev.target.result;
+
+    const result=typeof ev.target?.result==='string'?ev.target.result:'';
+    const safeImage=sanitizeUrl(result);
+    if(!safeImage){
+      alert('Bildkällan kunde inte verifieras. Försök med en annan fil.');
+      return;
+    }
+
+    fr.bgImage=safeImage;
     saveProjectDebounced();
     renderCanvas();
     renderFrames();
