@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "cd apps/storyboard/dist && rm -f app.zip && zip -q app.zip app.html README.md CHANGELOG.md QA-rapport.md",
+    "build": "cd apps/storyboard/dist && rm -f app.zip && zip -qr app.zip app.html README.md CHANGELOG.md QA-rapport.md vendor",
     "test": "jest",
     "netlify:trigger": "node tools/netlify/trigger.js",
     "netlify:trigger:build": "node tools/netlify/trigger.js build",
