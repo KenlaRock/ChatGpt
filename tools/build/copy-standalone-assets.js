@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-const { mkdir, copyFile, stat } = require('node:fs/promises');
+const { mkdir, copyFile, stat, readFile, writeFile } = require('node:fs/promises');
 const path = require('node:path');
 
 async function pathExists(target) {
@@ -20,8 +20,15 @@ async function ensureDirectory(target) {
   await mkdir(target, { recursive: true });
 }
 
-async function copyWithLog(source, destination) {
-  await copyFile(source, destination);
+async function copyWithLog({ source, destination, transform }) {
+  if (transform) {
+    const contents = await readFile(source, 'utf8');
+    const transformed = await transform(contents, { source, destination });
+    await writeFile(destination, transformed);
+  } else {
+    await copyFile(source, destination);
+  }
+
   process.stdout.write(`Copied ${path.relative(process.cwd(), source)} → ${path.relative(process.cwd(), destination)}\n`);
 }
 
@@ -32,7 +39,10 @@ async function main() {
   const files = [
     {
       source: path.join(repoRoot, 'index.html'),
-      destination: path.join(distDir, 'index.html')
+      destination: path.join(distDir, 'index.html'),
+      transform(contents) {
+        return contents.replace(/\.\/apps\/storyboard\/dist\//g, './');
+      }
     },
     {
       source: path.join(repoRoot, 'manifest.webmanifest'),
@@ -50,7 +60,7 @@ async function main() {
     if (!(await pathExists(file.source))) {
       throw new Error(`Required asset not found: ${path.relative(repoRoot, file.source)}`);
     }
-    await copyWithLog(file.source, file.destination);
+    await copyWithLog(file);
   }
 
   process.stdout.write('Standalone assets prepared for Netlify publish folder.\n');
