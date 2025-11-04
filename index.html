@@ -725,12 +725,15 @@
           config: { ...defaultConfig },
           init({ defaultConfig: defaults, onConfigChange }) {
             this.config = { ...defaults };
-            onConfigChange(this.config);
+            this.onConfigChange = onConfigChange;
+            if (typeof this.onConfigChange === "function") {
+              this.onConfigChange(this.config);
+            }
           },
           setConfig(update) {
             this.config = { ...this.config, ...update };
-            if (typeof onConfigChange === "function") {
-              onConfigChange(this.config);
+            if (typeof this.onConfigChange === "function") {
+              this.onConfigChange(this.config);
             }
           }
         };
