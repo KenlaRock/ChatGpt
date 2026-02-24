@@ -1,9 +1,0 @@
-{
-  "name": "Signe",
-  "score": 99.5,
-  "tags": ["alpha", "beta"],
-  "nested": {
-    "key": "värde",
-    "flag": true
-  }
-}
