@@ -1,5 +1,14 @@
 # CHANGELOG — v2.2
 
+## 2026-02-24 — Build packaging fix for Netlify deploys
+- Updated the `npm run build` packaging command to archive the entire `apps/storyboard/dist` directory (`zip -qr app.zip .`) instead of hard-coding legacy filenames (`app.html`, `README.md`, `CHANGELOG.md`, `QA-rapport.md`, `vendor`).
+- This prevents Netlify build failures with `zip error: Nothing to do!` when those legacy files are absent and keeps packaging aligned with current dist contents.
+
+## 2026-02-24 — North Star release deck component
+- Added `apps/storyboard/dist/ReleasePlanDeck.jsx`, a React presentation component for the North Star Rising release and social media plan with slide navigation, keyboard controls, image upload support, and PDF export using `html2canvas` + `jsPDF`.
+- Enforced runtime-safe colors by centralizing hex/rgba theme tokens and avoiding Tailwind color utility classes that can compile to `oklch(...)` in constrained runtimes.
+- Included lightweight self-tests (`runSelfTests`) to assert non-`oklch` theme values and protect against future regressions.
+
 ## 2025-11-04 — Netlify Database bootstrap
 - Added a Netlify Database schema and seed files (`netlify/db/schema.sql`, `netlify/db/seed.sql`) so `npx netlify db init` provisions the posts table used by the `fetch-posts` function.
 - Documented the CLI helper for initializing the Netlify Database in `package.json` for consistent local setup.
