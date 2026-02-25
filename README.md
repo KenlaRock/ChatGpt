@@ -126,7 +126,7 @@ npm run netlify:build:secondary
 npm run netlify:preview:start
 npm run netlify:preview:start:secondary
 ```
-Current operational note: if any of these return `404 Not Found`, regenerate the hook in Netlify before retrying.
+Current operational note: hooks are currently healthy (2xx expected). If any call regresses to `404 Not Found` or non-2xx, regenerate the affected hook in Netlify and retry.
 
 Local development note:
 - Prefer `npm run dev` for day-to-day work.

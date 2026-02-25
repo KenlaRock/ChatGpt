@@ -43,3 +43,15 @@ Prefer `npx` over global installs to avoid version drift:
 ```bash
 npx netlify dev
 ```
+
+## Verified relation matrix (2026-02-25)
+- Site slug: `northstarrising`
+- Badge UUID: `679b85e1-7631-44b3-a3af-72d258120832`
+- Netlify deploys page: `https://app.netlify.com/projects/northstarrising/deploys`
+- Badge URL: `https://api.netlify.com/api/v1/badges/679b85e1-7631-44b3-a3af-72d258120832/deploy-status`
+
+Hook relation mapping used by `scripts/netlify-hook-trigger.mjs`:
+- `primary` -> `NETLIFY_BUILD_HOOK_PRIMARY`
+- `secondary` -> `NETLIFY_BUILD_HOOK_SECONDARY`
+- `preview` -> `NETLIFY_PREVIEW_SERVER_HOOK`
+- `preview:secondary` -> `NETLIFY_PREVIEW_SERVER_HOOK_SECONDARY`
