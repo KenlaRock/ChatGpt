@@ -134,6 +134,10 @@ See: `docs/SECURITY_DEPENDENCY_PLAN.md` and `docs/SECURITY_UPGRADE_PR_CHECKLIST.
 For the structured mobile adaptation, PWA install flow, and web-push notification plan, see:
 - `docs/MOBILE_PWA_NOTIFICATION_PLAN.md`
 
+## Web app evolution plan (editable content, images, online persistence)
+For a concrete phased plan to support editable text/fields, image uploads, online saving, and robust PDF export, see:
+- `docs/WEBAPP_EVOLUTION_PLAN.md`
+
 
 Netlify Deploy Permalink:
 https://699e5a8da7a48f000826d79c--av-stb.netlify.app/
