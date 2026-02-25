@@ -75,10 +75,10 @@ Helpful Netlify links:
 
 
 ## Project Netlify endpoints
-- Site URL: https://av-stb.netlify.app/?netlify_hud=679b85e1-7631-44b3-a3af-72d258120832
-- Build hook (primary): `https://api.netlify.com/build_hooks/68c5145c373799bfa07a2d69`
-- Build hook (secondary): `https://api.netlify.com/build_hooks/6908472cbe9f34c6bb2b1675`
-- Preview server hook: `https://api.netlify.com/preview_server_hooks/68c5147a6f867751dd5ab91c`
+- Site URL: https://av-stb.netlify.app/
+- Build hook (primary): set as `NETLIFY_BUILD_HOOK_PRIMARY` in your local shell or CI secret manager
+- Build hook (secondary): set as `NETLIFY_BUILD_HOOK_SECONDARY` in your local shell or CI secret manager
+- Preview server hook: set as `NETLIFY_PREVIEW_SERVER_HOOK` in your local shell or CI secret manager
 
 Quick triggers:
 ```bash
@@ -87,9 +87,11 @@ npm run netlify:build:secondary
 npm run netlify:preview:start
 ```
 
-If you prefer raw curl:
+Example environment setup (do not commit real hook URLs):
 ```bash
-curl -X POST -d '{}' https://api.netlify.com/preview_server_hooks/68c5147a6f867751dd5ab91c
+export NETLIFY_BUILD_HOOK_PRIMARY='https://api.netlify.com/build_hooks/<primary-token>'
+export NETLIFY_BUILD_HOOK_SECONDARY='https://api.netlify.com/build_hooks/<secondary-token>'
+export NETLIFY_PREVIEW_SERVER_HOOK='https://api.netlify.com/preview_server_hooks/<preview-token>'
 ```
 
 ## Security note

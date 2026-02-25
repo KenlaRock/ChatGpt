@@ -1,20 +1,33 @@
 # Netlify access details
 
 ## Site
-- https://av-stb.netlify.app/?netlify_hud=679b85e1-7631-44b3-a3af-72d258120832
+- https://av-stb.netlify.app/
 
 ## Build hooks
-- Primary: https://api.netlify.com/build_hooks/68c5145c373799bfa07a2d69
-- Secondary: https://api.netlify.com/build_hooks/6908472cbe9f34c6bb2b1675
+- Primary hook URL is managed as the `NETLIFY_BUILD_HOOK_PRIMARY` secret.
+- Secondary hook URL is managed as the `NETLIFY_BUILD_HOOK_SECONDARY` secret.
 
 ## Preview server hook
-- https://api.netlify.com/preview_server_hooks/68c5147a6f867751dd5ab91c
+- Preview hook URL is managed as the `NETLIFY_PREVIEW_SERVER_HOOK` secret.
 
-Trigger command:
+Trigger commands (with env vars set):
 
 ```bash
-curl -X POST -d '{}' https://api.netlify.com/preview_server_hooks/68c5147a6f867751dd5ab91c
+npm run netlify:build:primary
+npm run netlify:build:secondary
+npm run netlify:preview:start
 ```
+
+Example local setup (never commit real tokenized URLs):
+
+```bash
+export NETLIFY_BUILD_HOOK_PRIMARY='https://api.netlify.com/build_hooks/<primary-token>'
+export NETLIFY_BUILD_HOOK_SECONDARY='https://api.netlify.com/build_hooks/<secondary-token>'
+export NETLIFY_PREVIEW_SERVER_HOOK='https://api.netlify.com/preview_server_hooks/<preview-token>'
+```
+
+## Secret rotation note
+If hook URLs were previously committed to git history or shared in docs/comments, rotate all impacted hooks in Netlify and replace them in your secret manager.
 
 ## SSH public key
 
