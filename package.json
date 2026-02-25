@@ -10,7 +10,10 @@
     "audit:prod": "npm audit --omit=dev",
     "netlify:build:primary": "curl -X POST -d '{}' https://api.netlify.com/build_hooks/68c5145c373799bfa07a2d69",
     "netlify:build:secondary": "curl -X POST -d '{}' https://api.netlify.com/build_hooks/6908472cbe9f34c6bb2b1675",
-    "netlify:preview:start": "curl -X POST -d '{}' https://api.netlify.com/preview_server_hooks/68c5147a6f867751dd5ab91c"
+    "netlify:preview:start": "curl -X POST -d '{}' https://api.netlify.com/preview_server_hooks/68c5147a6f867751dd5ab91c",
+    "smoke:postdeploy": "node ./scripts/post-deploy-smoke.mjs",
+    "dev:clean": "./scripts/normalize-npm-env.sh npm run dev",
+    "build:clean": "./scripts/normalize-npm-env.sh npm run build"
   },
   "dependencies": {
     "framer-motion": "^11.0.0",

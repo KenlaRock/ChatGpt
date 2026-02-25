@@ -84,3 +84,63 @@ Results:
 1. Clean npm config in CI/dev environments to remove `http-proxy` warning noise.
 2. Keep `npm run build` + `npm run audit:prod` in CI as release gates.
 3. Add optional post-deploy smoke script (`/` + key route + bundle fetch) for continuous deploy confidence.
+
+---
+
+## Update: 2026-02-25 (CI/dev npm config + automated smoke + UX verification)
+
+### Changes implemented
+1. Invalid npm env key mitigation landed:
+   - Added `scripts/normalize-npm-env.sh` to remove `npm_config_http-proxy` and map standard proxy vars to npm-compatible keys.
+   - Wired into GitHub CI and Netlify build command.
+2. Automated production smoke checks added:
+   - Added `scripts/post-deploy-smoke.mjs` to verify `/`, `/boards`, and active bundle fetch.
+   - Added `.github/workflows/post-deploy-smoke.yml` with `workflow_dispatch` + 30-minute schedule.
+3. Documentation updated:
+   - README now documents smoke-check command and npm env normalization guard.
+
+### Verification run summary
+- Local build: passed.
+- Production smoke check (`https://av-stb.netlify.app`): passed (root + key route + bundle fetch).
+- Manual browser pass (local app):
+  - Layout/design renders correctly.
+  - Open/import image flow works via upload input.
+  - Export function triggers PDF generation flow without runtime errors.
+
+### Mobile optimization and app install recommendation
+A phased implementation plan is documented in `docs/MOBILE_PWA_NOTIFICATION_PLAN.md`, covering:
+- Mobile-first responsive hardening.
+- PWA installability (manifest + service worker + install prompt UX).
+- Web push phased rollout.
+
+To install the app from the website on phones (recommended approach):
+1. Implement PWA manifest + service worker (Phase 2).
+2. Expose an in-app install CTA via `beforeinstallprompt` where available.
+3. Add iOS Safari instructions (`Share` → `Add to Home Screen`) as fallback guidance.
+
+### Updated remaining tasks
+- [ ] Implement full PWA assets/manifests/service worker and ship install UX.
+- [ ] Add persistent telemetry/alerting for smoke-check failures (Slack/email/webhook).
+
+
+
+## Update: 2026-02-25 (layout fixes + PWA installability + alerting)
+
+### Inline feedback addressed
+1. **Layout/design cleanup (mobile + compact widths):**
+   - Slide grid now collapses to a single column on compact viewports.
+   - Pill blocks and header action regions now wrap correctly to prevent overlap/misalignment.
+   - Action controls use touch-friendly heights and improved spacing.
+2. **Phone installability completed:**
+   - Added `public/manifest.webmanifest`, app icons, and `public/sw.js`.
+   - Added service worker registration in `src/main.jsx` (production only).
+   - Added in-app install CTA (`beforeinstallprompt`) and iOS fallback install guidance.
+3. **Smoke-check alerting added:**
+   - `post-deploy-smoke.yml` now posts to `SMOKE_ALERT_WEBHOOK_URL` on failure.
+   - Includes fallback log guidance when webhook secret is not configured.
+
+### Current status
+- CI build gate remains active.
+- Scheduled post-deploy smoke workflow remains active.
+- Production smoke checks remain in place for `/`, `/boards`, and bundle fetch.
+
