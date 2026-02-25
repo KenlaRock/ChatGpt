@@ -153,3 +153,18 @@ The plan is structured so each phase can ship independently with measurable Defi
 - QA test matrix includes Android Chrome, iOS Safari, desktop Chrome/Edge.
 - Product copy for install/push prompts approved.
 - Observability dashboards created before broad rollout.
+
+
+## 7) Phone install solution (website -> app)
+Once Phase 2 ships, use this implementation pattern:
+1. Add a manifest (`manifest.webmanifest`) with app metadata + icons (including maskable icons).
+2. Register service worker and verify HTTPS hosting in production.
+3. Handle `beforeinstallprompt` and show a user-facing install button in the app shell.
+4. After install, detect standalone mode and hide redundant install prompts.
+5. iOS fallback: show contextual instructions: **Safari > Share > Add to Home Screen**.
+
+### Acceptance checks for install flow
+- Android Chrome: install prompt shown and app opens in standalone mode.
+- iOS Safari: Add-to-Home-Screen instructions visible and tested.
+- Desktop Chrome/Edge: install option available from omnibox/app menu.
+

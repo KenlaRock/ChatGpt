@@ -52,6 +52,7 @@ export const styles = {
     background: THEME.panel2,
     color: THEME.text2,
     padding: "12px 16px",
+    minHeight: 44,
     fontSize: 14,
     cursor: "pointer",
     userSelect: "none",

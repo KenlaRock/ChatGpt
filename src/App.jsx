@@ -33,12 +33,54 @@ function runSelfTests() {
 export default function App() {
   const [idx, setIdx] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [isCompact, setIsCompact] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth <= 900 : false
+  );
+  const [installPromptEvent, setInstallPromptEvent] = useState(null);
+  const [isStandalone, setIsStandalone] = useState(false);
   const img = useLocalImage();
   const hiddenRefs = useRef([]);
+
+  const isIOS =
+    typeof navigator !== "undefined" && /iphone|ipad|ipod/i.test(navigator.userAgent);
 
   useEffect(() => {
     runSelfTests();
   }, []);
+
+  useEffect(() => {
+    const onResize = () => setIsCompact(window.innerWidth <= 900);
+    const onBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setInstallPromptEvent(e);
+    };
+
+    const standalone =
+      window.matchMedia?.("(display-mode: standalone)")?.matches ||
+      window.navigator?.standalone === true;
+    setIsStandalone(Boolean(standalone));
+
+    window.addEventListener("resize", onResize);
+    window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
+    };
+  }, []);
+
+  const layout = useMemo(
+    () => ({
+      grid12: {
+        ...styles.grid12,
+        marginTop: 24,
+        gridTemplateColumns: isCompact ? "1fr" : styles.grid12.gridTemplateColumns,
+      },
+      mainCol: { gridColumn: isCompact ? "1 / -1" : "span 7" },
+      sideCol: { gridColumn: isCompact ? "1 / -1" : "span 5" },
+    }),
+    [isCompact]
+  );
 
   const slides = useMemo(
     () => [
@@ -49,12 +91,13 @@ export default function App() {
         subtitle:
           "En körbar deck som styr tonalitet, tempo och publicerings-tryck. Ingen förklaring. Bara signal.",
         body: (img) => (
-          <div style={{ ...styles.grid12, marginTop: 24 }}>
-            <div style={{ gridColumn: "span 7" }}>
+          <div style={layout.grid12}>
+            <div style={layout.mainCol}>
               <Card style={{ padding: 24 }}>
                 <div
                   style={{
                     display: "flex",
+                    flexWrap: isCompact ? "wrap" : "nowrap",
                     alignItems: "center",
                     justifyContent: "space-between",
                     gap: 16,
@@ -110,7 +153,7 @@ export default function App() {
                     marginTop: 18,
                     display: "grid",
                     gap: 14,
-                    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                    gridTemplateColumns: isCompact ? "1fr" : "repeat(2, minmax(0, 1fr))",
                   }}
                 >
                   <Pill icon={Target} title="Mål (hårt)">
@@ -161,7 +204,7 @@ export default function App() {
               </Card>
             </div>
 
-            <div style={{ gridColumn: "span 5" }}>
+            <div style={layout.sideCol}>
               <Card style={{ padding: 12 }}>
                 <div
                   style={{
@@ -231,8 +274,8 @@ export default function App() {
         subtitle:
           "Det här är ert “style police”-slide. Om ett inlägg inte följer detta: kasta det. Hellre få stenhårda posts än mycket brus.",
         body: () => (
-          <div style={{ ...styles.grid12, marginTop: 24 }}>
-            <div style={{ gridColumn: "span 7" }}>
+          <div style={layout.grid12}>
+            <div style={layout.mainCol}>
               <Card style={{ padding: 24 }}>
                 <div style={{ display: "grid", gap: 14 }}>
                   <Pill icon={Snowflake} title="Visuellt språk">
@@ -250,7 +293,7 @@ export default function App() {
                 </div>
               </Card>
             </div>
-            <div style={{ gridColumn: "span 5" }}>
+            <div style={layout.sideCol}>
               <Card style={{ padding: 24 }}>
                 <div style={{ fontSize: 11, letterSpacing: "0.2em", color: THEME.text4 }}>
                   COPY BANK (KORT & KALL)
@@ -364,8 +407,8 @@ export default function App() {
         subtitle:
           "Ni är inte här för att ‘vara sociala’. Ni är här för att skicka en kall signal, om och om igen, tills folk lyssnar.",
         body: () => (
-          <div style={{ ...styles.grid12, marginTop: 24 }}>
-            <div style={{ gridColumn: "span 7" }}>
+          <div style={layout.grid12}>
+            <div style={layout.mainCol}>
               <Card style={{ padding: 24 }}>
                 <div style={{ display: "grid", gap: 14 }}>
                   <Pill icon={Radio} title="Instagram (huvudplattform)">
@@ -383,7 +426,7 @@ export default function App() {
                 </div>
               </Card>
             </div>
-            <div style={{ gridColumn: "span 5" }}>
+            <div style={layout.sideCol}>
               <Card style={{ padding: 24 }}>
                 <div style={{ fontSize: 11, letterSpacing: "0.2em", color: THEME.text4 }}>
                   FORMAT-MALLAR
@@ -434,8 +477,8 @@ export default function App() {
         subtitle:
           "Det här är den tråkiga delen som gör att den coola delen fungerar. Gör detta en gång, så blir allt lätt.",
         body: () => (
-          <div style={{ ...styles.grid12, marginTop: 24 }}>
-            <div style={{ gridColumn: "span 7" }}>
+          <div style={layout.grid12}>
+            <div style={layout.mainCol}>
               <Card style={{ padding: 24 }}>
                 <div style={{ fontSize: 11, letterSpacing: "0.2em", color: THEME.text4 }}>
                   FÖRBERED 7 DAGAR INNAN VECKA −3
@@ -453,7 +496,7 @@ export default function App() {
                 </div>
               </Card>
             </div>
-            <div style={{ gridColumn: "span 5" }}>
+            <div style={layout.sideCol}>
               <Card style={{ padding: 24 }}>
                 <div style={{ fontSize: 11, letterSpacing: "0.2em", color: THEME.text4 }}>
                   48H KPI (HÅRD MÄTNING)
@@ -502,8 +545,8 @@ export default function App() {
         subtitle:
           "Ni har ett starkt språk. Nu handlar det om repetition och tajming. Folk behöver höra signalen fler gånger än du tror — och de kommer tacka dig efteråt.",
         body: (img) => (
-          <div style={{ ...styles.grid12, marginTop: 24 }}>
-            <div style={{ gridColumn: "span 7" }}>
+          <div style={layout.grid12}>
+            <div style={layout.mainCol}>
               <Card style={{ padding: 24 }}>
                 <div style={{ fontSize: 11, letterSpacing: "0.2em", color: THEME.text4 }}>
                   EN ENKEL REGLA
@@ -556,7 +599,7 @@ export default function App() {
               </Card>
             </div>
 
-            <div style={{ gridColumn: "span 5" }}>
+            <div style={layout.sideCol}>
               <Card style={{ padding: 12 }}>
                 <div
                   style={{
@@ -604,7 +647,7 @@ export default function App() {
         ),
       },
     ],
-    []
+    [isCompact, layout]
   );
 
   const clamp = (n) => Math.max(0, Math.min(slides.length - 1, n));
@@ -642,11 +685,18 @@ export default function App() {
     }
   };
 
+  const installApp = async () => {
+    if (!installPromptEvent) return;
+    installPromptEvent.prompt();
+    await installPromptEvent.userChoice;
+    setInstallPromptEvent(null);
+  };
+
   return (
     <div style={styles.shell}>
-      <div style={styles.container}>
+      <div style={{ ...styles.container, padding: isCompact ? "24px 16px 40px" : styles.container.padding }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          <div style={styles.topbar}>
+          <div style={{ ...styles.topbar, alignItems: isCompact ? "flex-start" : "center" }}>
             <div style={styles.badge}>
               <div style={styles.badgeIcon}>
                 <Radio size={20} color={THEME.text2} />
@@ -659,10 +709,10 @@ export default function App() {
               </div>
             </div>
 
-            <div style={styles.row}>
+            <div style={{ ...styles.row, width: isCompact ? "100%" : "auto" }}>
               <button
                 onClick={exportPdf}
-                style={{ ...styles.button, ...(busy ? styles.buttonDisabled : {}) }}
+                style={{ ...styles.button, ...(isCompact ? { minHeight: 46 } : {}), ...(busy ? styles.buttonDisabled : {}) }}
                 disabled={busy}
                 title={img.dataUrl ? "Exportera hela presentationen till PDF" : "Ladda upp nyckelbilden först"}
               >
@@ -672,7 +722,7 @@ export default function App() {
 
               <button
                 onClick={prev}
-                style={{ ...styles.button, ...(idx === 0 ? styles.buttonDisabled : {}) }}
+                style={{ ...styles.button, ...(isCompact ? { minHeight: 46 } : {}), ...(idx === 0 ? styles.buttonDisabled : {}) }}
                 disabled={idx === 0}
               >
                 <ChevronLeft size={16} color={THEME.text2} />
@@ -681,16 +731,31 @@ export default function App() {
 
               <button
                 onClick={next}
-                style={{ ...styles.button, ...(idx === slides.length - 1 ? styles.buttonDisabled : {}) }}
+                style={{ ...styles.button, ...(isCompact ? { minHeight: 46 } : {}), ...(idx === slides.length - 1 ? styles.buttonDisabled : {}) }}
                 disabled={idx === slides.length - 1}
               >
                 Nästa
                 <ChevronRight size={16} color={THEME.text2} />
               </button>
+
+              {!isStandalone && installPromptEvent ? (
+                <button onClick={installApp} style={{ ...styles.button, ...(isCompact ? { minHeight: 46 } : {}) }}>
+                  <Link2 size={16} color={THEME.text2} />
+                  Installera app
+                </button>
+              ) : null}
             </div>
           </div>
 
-          <div style={styles.metaBar}>
+          {!isStandalone && isIOS ? (
+            <Card style={{ padding: 12 }}>
+              <div style={{ fontSize: 12, color: THEME.text3 }}>
+                iPhone/iPad: öppna i Safari och välj <strong>Dela → Lägg till på hemskärmen</strong> för att installera appen.
+              </div>
+            </Card>
+          ) : null}
+
+          <div style={{ ...styles.metaBar, flexDirection: isCompact ? "column" : "row", alignItems: isCompact ? "flex-start" : "center" }}>
             <div style={{ fontSize: 13, color: THEME.text3 }}>
               Slide <span style={{ fontWeight: 800, color: THEME.text }}>{idx + 1}</span> / {slides.length}
             </div>
@@ -705,7 +770,7 @@ export default function App() {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.25 }}
             >
-              <SlideBody slide={slides[idx]} img={img} />
+              <SlideBody slide={slides[idx]} img={img} compact={isCompact} />
             </motion.div>
           </AnimatePresence>
 
@@ -731,7 +796,7 @@ export default function App() {
                 <div style={{ fontSize: 11, color: THEME.text4 }}>{new Date().toISOString().slice(0, 10)}</div>
               </div>
 
-              <SlideBody slide={s} img={img} />
+              <SlideBody slide={s} img={img} compact={false} />
 
               <div style={{ marginTop: 18, display: "flex", justifyContent: "space-between", fontSize: 11, color: THEME.text4 }}>
                 <div>Cold Protocol • Active</div>

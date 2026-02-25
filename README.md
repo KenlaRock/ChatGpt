@@ -30,10 +30,40 @@ npm run audit:prod
 - PDF export uses html2canvas + jsPDF.
 - Upload your 3×3 image, then hit **Exportera PDF**.
 
+## Post-deploy smoke check
+Run the production smoke test locally or in CI:
+```bash
+npm run smoke:postdeploy -- https://av-stb.netlify.app
+```
+This validates:
+- `/` responds with HTML
+- key route `/boards` responds with HTML
+- current JS bundle is discoverable and fetchable
+
+## npm env compatibility hygiene
+If your shell/runner exports invalid dashed npm env keys (for example `npm_config_http-proxy`), run npm through the compatibility wrapper:
+```bash
+./scripts/normalize-npm-env.sh npm ci
+./scripts/normalize-npm-env.sh npm run build
+```
+CI workflows and the Netlify build command already use this guard.
+
+## PWA installability (implemented)
+The app now ships with:
+- `manifest.webmanifest`
+- a production service worker (`/sw.js`) registration
+- install CTA support via `beforeinstallprompt` (when available)
+- iOS fallback guidance (`Safari -> Share -> Add to Home Screen`)
+
+## Smoke failure alerting
+The scheduled smoke workflow supports webhook alerts on failure.
+Configure repository secret:
+- `SMOKE_ALERT_WEBHOOK_URL` (Slack/Teams/custom webhook)
+
 ## CI
 This repository includes a GitHub Actions workflow that validates every push/PR by running:
-- `npm ci`
-- `npm run build`
+- `./scripts/normalize-npm-env.sh npm ci`
+- `./scripts/normalize-npm-env.sh npm run build`
 
 Workflow file: `.github/workflows/ci.yml`.
 
@@ -59,7 +89,7 @@ This app is a static Vite SPA and can be deployed to Netlify, Vercel, Cloudflare
 1. Sign in to Netlify and choose **Add new site** → **Import an existing project**.
 2. Connect your Git provider and select this repo/branch.
 3. Use these settings:
-   - Build command: `npm run build`
+   - Build command: `./scripts/normalize-npm-env.sh npm run build`
    - Publish directory: `dist`
    - Node version: `22`
 4. Trigger deploy and validate `/` plus PDF export.

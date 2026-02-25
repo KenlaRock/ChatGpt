@@ -1,0 +1,45 @@
+name: Post-deploy smoke
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/30 * * * *"
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      SMOKE_BASE_URL: https://av-stb.netlify.app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run production smoke check
+        run: ./scripts/normalize-npm-env.sh npm run smoke:postdeploy -- "$SMOKE_BASE_URL"
+
+      - name: Alert webhook on failure
+        if: failure() && secrets.SMOKE_ALERT_WEBHOOK_URL != ''
+        run: |
+          payload=$(cat <<JSON
+          {
+            "text": "🚨 Post-deploy smoke check failed for ${SMOKE_BASE_URL} on ${GITHUB_REPOSITORY} (${GITHUB_WORKFLOW} #${GITHUB_RUN_NUMBER}). Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          }
+JSON
+          )
+          curl -sS -X POST \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$SMOKE_ALERT_WEBHOOK_URL"
+        env:
+          SMOKE_ALERT_WEBHOOK_URL: ${{ secrets.SMOKE_ALERT_WEBHOOK_URL }}
+
+      - name: Alert email fallback (log guidance)
+        if: failure() && secrets.SMOKE_ALERT_WEBHOOK_URL == ''
+        run: |
+          echo "Smoke check failed and no SMOKE_ALERT_WEBHOOK_URL secret is configured." >&2
+          echo "Recommended: configure a Slack/Teams/webhook endpoint in repository secret SMOKE_ALERT_WEBHOOK_URL." >&2

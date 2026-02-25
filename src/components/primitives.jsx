@@ -41,7 +41,7 @@ export const Pill = ({ icon: Icon, title, children }) => (
   </div>
 );
 
-export const SectionTitle = ({ kicker, title, subtitle }) => (
+export const SectionTitle = ({ kicker, title, subtitle, compact = false }) => (
   <div>
     {kicker ? (
       <div
@@ -66,7 +66,7 @@ export const SectionTitle = ({ kicker, title, subtitle }) => (
 
     <div
       style={{
-        fontSize: 34,
+        fontSize: compact ? 28 : 34,
         fontWeight: 700,
         letterSpacing: -0.4,
         color: THEME.text,
@@ -80,7 +80,7 @@ export const SectionTitle = ({ kicker, title, subtitle }) => (
         style={{
           marginTop: 12,
           maxWidth: 880,
-          fontSize: 16,
+          fontSize: compact ? 14 : 16,
           lineHeight: 1.65,
           color: THEME.text3,
         }}
@@ -193,9 +193,9 @@ export const TimelineRow = ({ week, purpose, items, microcopy }) => (
   </Card>
 );
 
-export const SlideBody = ({ slide, img }) => (
-  <div style={styles.slideFrame}>
-    <SectionTitle kicker={slide.kicker} title={slide.title} subtitle={slide.subtitle} />
+export const SlideBody = ({ slide, img, compact = false }) => (
+  <div style={{ ...styles.slideFrame, padding: compact ? 16 : styles.slideFrame.padding }}>
+    <SectionTitle kicker={slide.kicker} title={slide.title} subtitle={slide.subtitle} compact={compact} />
     {slide.body(img)}
   </div>
 );

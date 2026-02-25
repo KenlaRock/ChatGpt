@@ -18,7 +18,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: ./scripts/normalize-npm-env.sh npm ci
 
       - name: Build
-        run: npm run build
+        run: ./scripts/normalize-npm-env.sh npm run build
