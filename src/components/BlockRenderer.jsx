@@ -3,6 +3,8 @@ import { THEME } from "../theme";
 
 function ImageBlock({ block, media }) {
   const image = media.find((item) => item.id === block.props.imageId);
+  const fitMode = block.props.fit === "cover" ? "cover" : "contain";
+  const aspect = fitMode === "cover" ? "56.25%" : "62%";
 
   return (
     <Card style={{ padding: 14 }}>
@@ -18,7 +20,7 @@ function ImageBlock({ block, media }) {
           position: "relative",
         }}
       >
-        <div style={{ paddingTop: "100%" }} />
+        <div style={{ paddingTop: aspect }} />
         {image ? (
           <img
             src={image.dataUrl}
@@ -28,7 +30,7 @@ function ImageBlock({ block, media }) {
               inset: 0,
               width: "100%",
               height: "100%",
-              objectFit: "contain",
+              objectFit: fitMode,
               objectPosition: "center",
               background: "rgba(0,0,0,0.25)",
             }}

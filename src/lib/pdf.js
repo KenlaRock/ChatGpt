@@ -6,7 +6,7 @@ export async function loadPdfDeps() {
   return { html2canvas, jsPDF };
 }
 
-export async function exportSlidesToPdf({ nodes, fileName, bgColor }) {
+export async function exportSlidesToPdf({ nodes, fileName, bgColor, onProgress = () => {} }) {
   const { html2canvas, jsPDF } = await loadPdfDeps();
 
   const pdf = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
@@ -21,6 +21,7 @@ export async function exportSlidesToPdf({ nodes, fileName, bgColor }) {
 
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
+    onProgress(Math.round((i / Math.max(nodes.length, 1)) * 100));
     // eslint-disable-next-line no-await-in-loop
     await new Promise((r) => setTimeout(r, 50));
 
@@ -63,6 +64,8 @@ export async function exportSlidesToPdf({ nodes, fileName, bgColor }) {
       align: "right",
     });
   }
+
+  onProgress(100);
 
   pdf.save(`NorthStarRising_ReleaseDeck_${new Date().toISOString().slice(0, 10)}.pdf`);
 }
