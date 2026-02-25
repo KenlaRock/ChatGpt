@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, FileDown, Link2, Pencil, Save, Upload, Plus, Trash2, ArrowUp, ArrowDown, CopyPlus, Settings2, Menu, X, SlidersHorizontal } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileDown, Link2, Pencil, Save, Upload, Plus, Trash2, ArrowUp, ArrowDown, CopyPlus, Settings2 } from "lucide-react";
 import { THEME, styles } from "./theme";
 import { Card, SectionTitle } from "./components/primitives";
 import { exportSlidesToPdf } from "./lib/pdf";
@@ -41,10 +41,7 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
   const [isCompact, setIsCompact] = useState(() => (typeof window !== "undefined" ? window.innerWidth <= 900 : false));
-  const [isPhone, setIsPhone] = useState(() => (typeof window !== "undefined" ? window.innerWidth <= 680 : false));
   const [isEditing, setIsEditing] = useState(false);
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [showMobileEditor, setShowMobileEditor] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [saveState, setSaveState] = useState("sparad");
   const [saveProgress, setSaveProgress] = useState(0);
@@ -117,10 +114,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const onResize = () => {
-      setIsCompact(window.innerWidth <= 900);
-      setIsPhone(window.innerWidth <= 680);
-    };
+    const onResize = () => setIsCompact(window.innerWidth <= 900);
     const onBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setInstallPromptEvent(e);
@@ -136,13 +130,6 @@ export default function App() {
       window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
     };
   }, []);
-
-  useEffect(() => {
-    if (!isPhone) {
-      setShowMobileMenu(false);
-      setShowMobileEditor(false);
-    }
-  }, [isPhone]);
 
   useEffect(() => {
     const toSave = { ...deck, media };
@@ -337,84 +324,48 @@ export default function App() {
 
   const mediaCountLabel = useMemo(() => `${media.length} bild${media.length === 1 ? "" : "er"} i biblioteket`, [media.length]);
   const telemetry = useMemo(() => getTelemetrySnapshot(), [saveState, saveStorage, syncState]);
-  const showEditorPanel = isEditing && (!isPhone || showMobileEditor);
 
   return (
     <div style={styles.shell}>
-      <div style={{ ...styles.container, padding: isPhone ? "16px 12px 120px" : isCompact ? "24px 16px 40px" : styles.container.padding }}>
+      <div style={{ ...styles.container, padding: isCompact ? "24px 16px 40px" : styles.container.padding }}>
         <div style={{ display: "flex", flexDirection: "column", gap: denseMode ? 14 : 20 }}>
-          <div style={{ ...styles.topbar, alignItems: isCompact ? "flex-start" : "center", gap: isPhone ? 10 : 16 }}>
-            <div style={{ ...styles.badge, flex: isPhone ? 1 : "initial", minWidth: 0 }}>
-              <div style={{ ...styles.badgeIcon, padding: isPhone ? 10 : 12 }}>
-                <AppLogo alt="App-logotyp" width={isPhone ? 30 : 36} height={20} invertForDarkBg opacity={0.9} />
+          <div style={{ ...styles.topbar, alignItems: isCompact ? "flex-start" : "center" }}>
+            <div style={styles.badge}>
+              <div style={styles.badgeIcon}>
+                <AppLogo alt="App-logotyp" width={36} height={20} invertForDarkBg opacity={0.9} />
               </div>
-              <div style={{ ...styles.badgeText, minWidth: 0 }}>
-                <div style={{ fontSize: isPhone ? 12 : 13, color: THEME.text3, fontWeight: 700 }}>Datadriven strategiapp</div>
-                <div style={{ fontSize: 11, color: THEME.text4 }}>{isPhone ? "Snabb mobilvy med fokusläge." : "Visning/redigering + lokal autosave."}</div>
+              <div style={styles.badgeText}>
+                <div style={{ fontSize: 13, color: THEME.text3 }}>Datadriven strategiapp</div>
+                <div style={{ fontSize: 11, color: THEME.text4 }}>Visning/redigering + lokal autosave.</div>
               </div>
             </div>
 
-            {isPhone ? (
-              <div style={{ display: "flex", gap: 6, marginLeft: "auto" }}>
-                <button onClick={() => setIsEditing((v) => !v)} style={{ ...miniBtn, padding: "9px 10px", borderRadius: 12 }} aria-label="Växla redigering">
-                  <Pencil size={15} />
+            <div style={{ ...styles.toolbar, width: isCompact ? "100%" : "auto" }}>
+              <button onClick={() => setIsEditing((v) => !v)} style={{ ...styles.button, ...(isCompact ? { minHeight: 46 } : {}) }}>
+                <Pencil size={16} color={THEME.text2} />
+                {isEditing ? "Visningsläge" : "Redigeringsläge"}
+              </button>
+              <button onClick={() => setShowSettings((v) => !v)} style={styles.button}>
+                <Settings2 size={16} color={THEME.text2} />
+                {showSettings ? "Dölj inställningar" : "Inställningar"}
+              </button>
+              <button onClick={exportPdf} style={{ ...styles.button, ...(busy ? styles.buttonDisabled : {}) }} disabled={busy}>
+                <FileDown size={16} color={THEME.text2} />
+                {busy ? "Exporterar…" : "Exportera PDF"}
+              </button>
+              <button onClick={prev} style={{ ...styles.button, ...(idx === 0 ? styles.buttonDisabled : {}) }} disabled={idx === 0}>
+                <ChevronLeft size={16} color={THEME.text2} /> Föregående
+              </button>
+              <button onClick={next} style={{ ...styles.button, ...(idx === slides.length - 1 ? styles.buttonDisabled : {}) }} disabled={idx === slides.length - 1}>
+                Nästa <ChevronRight size={16} color={THEME.text2} />
+              </button>
+              {!isStandalone && installPromptEvent ? (
+                <button onClick={installApp} style={styles.button}>
+                  <Link2 size={16} color={THEME.text2} /> Installera app
                 </button>
-                <button onClick={() => setShowMobileMenu((v) => !v)} style={{ ...miniBtn, padding: "9px 10px", borderRadius: 12 }} aria-label="Meny">
-                  {showMobileMenu ? <X size={15} /> : <Menu size={15} />}
-                </button>
-              </div>
-            ) : (
-              <div style={{ ...styles.toolbar, width: isCompact ? "100%" : "auto" }}>
-                <button onClick={() => setIsEditing((v) => !v)} style={{ ...styles.button, ...(isCompact ? { minHeight: 46 } : {}) }}>
-                  <Pencil size={16} color={THEME.text2} />
-                  {isEditing ? "Visningsläge" : "Redigeringsläge"}
-                </button>
-                <button onClick={() => setShowSettings((v) => !v)} style={styles.button}>
-                  <Settings2 size={16} color={THEME.text2} />
-                  {showSettings ? "Dölj inställningar" : "Inställningar"}
-                </button>
-                <button onClick={exportPdf} style={{ ...styles.button, ...(busy ? styles.buttonDisabled : {}) }} disabled={busy}>
-                  <FileDown size={16} color={THEME.text2} />
-                  {busy ? "Exporterar…" : "Exportera PDF"}
-                </button>
-                <button onClick={prev} style={{ ...styles.button, ...(idx === 0 ? styles.buttonDisabled : {}) }} disabled={idx === 0}>
-                  <ChevronLeft size={16} color={THEME.text2} /> Föregående
-                </button>
-                <button onClick={next} style={{ ...styles.button, ...(idx === slides.length - 1 ? styles.buttonDisabled : {}) }} disabled={idx === slides.length - 1}>
-                  Nästa <ChevronRight size={16} color={THEME.text2} />
-                </button>
-                {!isStandalone && installPromptEvent ? (
-                  <button onClick={installApp} style={styles.button}>
-                    <Link2 size={16} color={THEME.text2} /> Installera app
-                  </button>
-                ) : null}
-              </div>
-            )}
+              ) : null}
+            </div>
           </div>
-
-          {isPhone && showMobileMenu ? (
-            <Card style={{ padding: 10 }}>
-              <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
-                <button onClick={() => setShowSettings((v) => !v)} style={{ ...miniBtn, justifyContent: "center", padding: "10px 12px" }}>
-                  <SlidersHorizontal size={15} /> {showSettings ? "Dölj" : "Inställn."}
-                </button>
-                <button onClick={exportPdf} style={{ ...miniBtn, justifyContent: "center", ...(busy ? styles.buttonDisabled : {}), padding: "10px 12px" }} disabled={busy}>
-                  <FileDown size={15} /> PDF
-                </button>
-                <button onClick={prev} style={{ ...miniBtn, justifyContent: "center", ...(idx === 0 ? styles.buttonDisabled : {}), padding: "10px 12px" }} disabled={idx === 0}>
-                  <ChevronLeft size={15} /> Föreg.
-                </button>
-                <button onClick={next} style={{ ...miniBtn, justifyContent: "center", ...(idx === slides.length - 1 ? styles.buttonDisabled : {}), padding: "10px 12px" }} disabled={idx === slides.length - 1}>
-                  Nästa <ChevronRight size={15} />
-                </button>
-                {!isStandalone && installPromptEvent ? (
-                  <button onClick={installApp} style={{ ...miniBtn, justifyContent: "center", padding: "10px 12px", gridColumn: "1 / -1" }}>
-                    <Link2 size={15} /> Installera app
-                  </button>
-                ) : null}
-              </div>
-            </Card>
-          ) : null}
 
           {!isStandalone && isIOS ? (
             <Card style={{ padding: 12 }}>
@@ -424,13 +375,13 @@ export default function App() {
             </Card>
           ) : null}
 
-          <div style={{ ...styles.metaBar, ...(isPhone ? { gridTemplateColumns: "repeat(2, minmax(0, 1fr))", padding: "10px 12px", gap: 8 } : isCompact ? { gridTemplateColumns: "1fr" } : {}) }}>
-            <div style={{ fontSize: 12, color: THEME.text3 }}>Slide <strong style={{ color: THEME.text }}>{idx + 1}</strong> / {slides.length}</div>
-            <div style={{ fontSize: 11, color: THEME.text4, textAlign: isPhone ? "right" : "left" }}>{mediaCountLabel}</div>
+          <div style={{ ...styles.metaBar, ...(isCompact ? { gridTemplateColumns: "1fr" } : {}) }}>
+            <div style={{ fontSize: 13, color: THEME.text3 }}>Slide <strong style={{ color: THEME.text }}>{idx + 1}</strong> / {slides.length}</div>
+            <div style={{ fontSize: 11, color: THEME.text4 }}>{mediaCountLabel}</div>
             <div style={{ fontSize: 11, color: THEME.text4, display: "inline-flex", alignItems: "center", gap: 6 }}>
-              <Save size={13} /> {saveIndicator}
+              <Save size={14} /> {saveIndicator}
             </div>
-            <div style={{ fontSize: 11, color: THEME.text4, textAlign: isPhone ? "right" : "left" }}>Sync: {syncState}</div>
+            <div style={{ fontSize: 11, color: THEME.text4 }}>Sync: {syncState}</div>
           </div>
 
           {(saveState === "sparar" || saveProgress > 0) ? (
@@ -548,7 +499,7 @@ export default function App() {
               </motion.div>
             </AnimatePresence>
 
-            {showEditorPanel ? (
+            {isEditing ? (
               <Card style={{ padding: 16, height: "fit-content" }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: THEME.text2 }}>Editorpanel</div>
                 <div style={{ marginTop: 12, display: "grid", gap: 8 }}>
@@ -629,21 +580,6 @@ export default function App() {
           {uiPrefs.showHints ? <div style={styles.footerTip}>Tips: lägg till/ta bort block i redigeringsläge. Ändringar sparas lokalt automatiskt.</div> : null}
         </div>
       </div>
-
-
-          {isPhone ? (
-            <div style={{ position: "fixed", left: 10, right: 10, bottom: 10, zIndex: 50 }}>
-              <Card style={{ padding: 8, borderRadius: 18, backdropFilter: "blur(10px)", background: "rgba(10,10,12,0.88)" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: 6 }}>
-                  <button onClick={prev} style={{ ...miniBtn, justifyContent: "center", padding: "9px 6px", ...(idx === 0 ? styles.buttonDisabled : {}) }} disabled={idx === 0}><ChevronLeft size={15} /></button>
-                  <button onClick={next} style={{ ...miniBtn, justifyContent: "center", padding: "9px 6px", ...(idx === slides.length - 1 ? styles.buttonDisabled : {}) }} disabled={idx === slides.length - 1}><ChevronRight size={15} /></button>
-                  <button onClick={() => setIsEditing((v) => !v)} style={{ ...miniBtn, justifyContent: "center", padding: "9px 6px" }}><Pencil size={15} /></button>
-                  <button onClick={() => setShowMobileEditor((v) => !v)} style={{ ...miniBtn, justifyContent: "center", padding: "9px 6px", ...(isEditing ? {} : styles.buttonDisabled) }} disabled={!isEditing}><Settings2 size={15} /></button>
-                  <button onClick={() => setShowMobileMenu((v) => !v)} style={{ ...miniBtn, justifyContent: "center", padding: "9px 6px" }}>{showMobileMenu ? <X size={15} /> : <Menu size={15} />}</button>
-                </div>
-              </Card>
-            </div>
-          ) : null}
 
       <div style={{ position: "fixed", left: -10000, top: 0, width: 1200 }} aria-hidden="true">
         {slides.map((slide, i) => (
