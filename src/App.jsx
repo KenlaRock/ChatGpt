@@ -6,6 +6,8 @@ import { Card, SectionTitle } from "./components/primitives";
 import { exportSlidesToPdf } from "./lib/pdf";
 import { DEFAULT_DECK } from "./data/initialDeck";
 import { clearDeckStorage, loadDeckFromStorage, saveDeckToStorage } from "./lib/deckStorage";
+import { getTelemetrySnapshot } from "./lib/telemetry";
+import { isSyncEnabled, pullDeckFromServer, pushDeckToServer } from "./lib/deckSync";
 import { BlockRenderer } from "./components/BlockRenderer";
 
 const makeId = () => (globalThis.crypto?.randomUUID?.() ? globalThis.crypto.randomUUID() : `id-${Date.now()}-${Math.random().toString(16).slice(2)}`);
@@ -29,6 +31,7 @@ export default function App() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState("idle");
   const [uploadMessage, setUploadMessage] = useState("");
+  const [syncState, setSyncState] = useState(isSyncEnabled() ? "synk väntar" : "lokal endast");
   const [deck, setDeck] = useState(DEFAULT_DECK);
   const [media, setMedia] = useState(() => DEFAULT_DECK.media || []);
   const hiddenRefs = useRef([]);
@@ -39,9 +42,23 @@ export default function App() {
   useEffect(() => {
     const boot = async () => {
       const persisted = await loadDeckFromStorage();
-      if (!persisted) return;
-      setDeck(persisted);
-      setMedia(persisted.media || []);
+      if (persisted) {
+        setDeck(persisted);
+        setMedia(persisted.media || []);
+      }
+
+      if (isSyncEnabled()) {
+        const remote = await pullDeckFromServer((persisted || DEFAULT_DECK).id || "active");
+        if (remote.ok && remote.deck) {
+          setDeck(remote.deck);
+          setMedia(remote.deck.media || []);
+          setSyncState("synkad (server)");
+        } else if (remote.reason === "not_found") {
+          setSyncState("ingen server-deck");
+        } else {
+          setSyncState("synk offline/fel");
+        }
+      }
     };
     boot();
   }, []);
@@ -74,6 +91,22 @@ export default function App() {
           onProgress: (progress) => setSaveProgress(progress),
         });
         setSaveStorage(result?.storage || "local");
+
+        if (isSyncEnabled()) {
+          const syncResult = await pushDeckToServer(toSave);
+          if (syncResult.ok) {
+            setSyncState("synkad (server)");
+          } else if (syncResult.reason === "conflict") {
+            setSyncState(`konflikt löst (${syncResult.winner})`);
+            if (syncResult.deck) {
+              setDeck(syncResult.deck);
+              setMedia(syncResult.deck.media || []);
+            }
+          } else {
+            setSyncState("synk offline/fel");
+          }
+        }
+
         setSaveState("sparad");
       } catch (error) {
         console.error(error);
@@ -217,6 +250,7 @@ export default function App() {
   const saveStorageLabel = saveStorage === "indexeddb" ? "IndexedDB (stora bilder)" : "LocalStorage";
 
   const mediaCountLabel = useMemo(() => `${media.length} bild${media.length === 1 ? "" : "er"} i biblioteket`, [media.length]);
+  const telemetry = useMemo(() => getTelemetrySnapshot(), [saveState, saveStorage, syncState]);
 
   return (
     <div style={styles.shell}>
@@ -270,6 +304,7 @@ export default function App() {
             <div style={{ fontSize: 11, color: THEME.text4, display: "inline-flex", alignItems: "center", gap: 6 }}>
               <Save size={14} /> {saveIndicator}
             </div>
+            <div style={{ fontSize: 11, color: THEME.text4 }}>Sync: {syncState}</div>
           </div>
 
           {(saveState === "sparar" || saveProgress > 0) ? (
@@ -335,6 +370,16 @@ export default function App() {
                   ))}
                 </div>
 
+
+                <Card style={{ marginTop: 12, padding: 10 }}>
+                  <div style={{ fontSize: 12, color: THEME.text2, fontWeight: 700 }}>Drift/telemetri (lokal)</div>
+                  <div style={{ marginTop: 6, fontSize: 11, color: THEME.text4 }}>
+                    local saves: {telemetry.counters?.storage_save_local_success || 0} •
+                    indexeddb fallback: {telemetry.counters?.storage_save_indexeddb_fallback || 0} •
+                    sync ok: {telemetry.counters?.sync_push_success || 0} •
+                    sync konflikt: {telemetry.counters?.sync_conflict || 0}
+                  </div>
+                </Card>
                 <div style={{ marginTop: 12, display: "grid", gap: 8 }}>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     {Object.keys(newBlockTemplate).map((type) => (

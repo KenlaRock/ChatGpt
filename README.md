@@ -145,3 +145,23 @@ For a concrete phased plan to support editable text/fields, image uploads, onlin
 
 Netlify Deploy Permalink:
 https://699e5a8da7a48f000826d79c--av-stb.netlify.app/
+
+## Optional server sync (web ↔ mobile)
+The app now supports optional remote sync if a backend endpoint is configured:
+- Set `VITE_SYNC_ENDPOINT` to your API base URL.
+- Client expects REST endpoints:
+  - `GET /decks/:id`
+  - `PUT /decks/:id`
+- Conflict handling is client-side (last-updated merge fallback) and exposes sync status in UI.
+
+Without `VITE_SYNC_ENDPOINT`, behavior remains local-only (localStorage/IndexedDB).
+
+## Storage/sync telemetry
+The app records local telemetry counters in browser storage (quota fallback frequency, sync success/conflicts/errors) to help regression analysis.
+
+## E2E regression (media persistence)
+To run the upload → autosave → reload regression script:
+```bash
+npm run test:e2e:media -- http://127.0.0.1:4173
+```
+(Requires `playwright` and an active app instance.)

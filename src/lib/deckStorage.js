@@ -1,3 +1,5 @@
+import { trackTelemetry } from "./telemetry";
+
 const DECK_STORAGE_KEY = "northstar.deck.v1";
 const DECK_STORAGE_META_KEY = "northstar.deck.meta.v1";
 const DB_NAME = "northstar-deck-db";
@@ -55,15 +57,31 @@ async function clearDeckIndexedDb() {
 
 export async function loadDeckFromStorage() {
   try {
-    const parsed = parseDeck(localStorage.getItem(DECK_STORAGE_KEY));
-    if (parsed) return parsed;
-
     const metaRaw = localStorage.getItem(DECK_STORAGE_META_KEY);
     const meta = metaRaw ? JSON.parse(metaRaw) : null;
-    if (meta?.storage !== "indexeddb") return null;
+
+    if (meta?.storage === "indexeddb") {
+      const dbDeck = await loadDeckFromIndexedDb();
+      if (dbDeck?.slides && Array.isArray(dbDeck.slides)) {
+        trackTelemetry("storage_load_indexeddb", { reason: "meta" });
+        return dbDeck;
+      }
+    }
+
+    const parsed = parseDeck(localStorage.getItem(DECK_STORAGE_KEY));
+    if (parsed) {
+      trackTelemetry("storage_load_local", { reason: "available" });
+      return parsed;
+    }
+
     const dbDeck = await loadDeckFromIndexedDb();
-    return dbDeck?.slides && Array.isArray(dbDeck.slides) ? dbDeck : null;
-  } catch {
+    if (dbDeck?.slides && Array.isArray(dbDeck.slides)) {
+      trackTelemetry("storage_load_indexeddb", { reason: "fallback" });
+      return dbDeck;
+    }
+    return null;
+  } catch (error) {
+    trackTelemetry("storage_load_error", { message: error?.message || "unknown" });
     return null;
   }
 }
@@ -77,11 +95,17 @@ export async function saveDeckToStorage(deck, opts = {}) {
   try {
     localStorage.setItem(DECK_STORAGE_KEY, payload);
     localStorage.setItem(DECK_STORAGE_META_KEY, JSON.stringify({ storage: "local", savedAt: Date.now() }));
+    trackTelemetry("storage_save_local_success");
     onProgress(100);
     return { ok: true, storage: "local" };
   } catch (error) {
     await saveDeckToIndexedDb(deck);
+    localStorage.removeItem(DECK_STORAGE_KEY);
     localStorage.setItem(DECK_STORAGE_META_KEY, JSON.stringify({ storage: "indexeddb", savedAt: Date.now() }));
+    trackTelemetry("storage_save_indexeddb_fallback", {
+      name: error?.name || "Error",
+      message: error?.message || "unknown",
+    });
     onProgress(100);
     return { ok: true, storage: "indexeddb", warning: error };
   }

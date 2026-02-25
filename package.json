@@ -13,7 +13,8 @@
     "netlify:preview:start": "curl -X POST -H 'Content-Type: application/json' -d '{}' https://api.netlify.com/preview_server_hooks/68c5147a6f867751dd5ab91c",
     "smoke:postdeploy": "node ./scripts/post-deploy-smoke.mjs",
     "dev:clean": "./scripts/normalize-npm-env.sh npm run dev",
-    "build:clean": "./scripts/normalize-npm-env.sh npm run build"
+    "build:clean": "./scripts/normalize-npm-env.sh npm run build",
+    "test:e2e:media": "node ./scripts/e2e-media-persistence.mjs"
   },
   "dependencies": {
     "framer-motion": "^11.0.0",
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.1.4",
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "playwright": "^1.55.0"
   }
 }
