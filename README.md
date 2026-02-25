@@ -100,6 +100,10 @@ A forced auto-fix upgrades Vite to a newer major version, so this should be vali
 
 See: `docs/SECURITY_DEPENDENCY_PLAN.md` and `docs/SECURITY_UPGRADE_PR_CHECKLIST.md`.
 
+## Mobile/PWA roadmap
+For the structured mobile adaptation, PWA install flow, and web-push notification plan, see:
+- `docs/MOBILE_PWA_NOTIFICATION_PLAN.md`
+
 
 Netlify Deploy Permalink:
 https://699e5a8da7a48f000826d79c--av-stb.netlify.app/
