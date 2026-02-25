@@ -80,3 +80,6 @@ Current `npm audit --omit=dev` is clean (`found 0 vulnerabilities`) for producti
 A forced auto-fix upgrades Vite to a newer major version, so this should be validated in a dedicated dependency PR before adoption.
 
 See: `docs/SECURITY_DEPENDENCY_PLAN.md` and `docs/SECURITY_UPGRADE_PR_CHECKLIST.md`.
+## Mobil/PWA roadmap
+- Se `docs/MOBILE_PWA_NOTIFICATION_PLAN.md` för stegvis plan för mobilanpassning, app-installation (PWA) och aviseringar.
+
