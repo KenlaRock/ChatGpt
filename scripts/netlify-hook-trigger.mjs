@@ -13,10 +13,10 @@ const HOOK_ENV = {
 
 
 const DEFAULT_HOOK_URL = {
-  primary: 'https://api.netlify.com/build_hooks/699f04659adb693fea055cc0',
-  secondary: 'https://api.netlify.com/build_hooks/699f04869662fb3d15b13d18',
-  preview: 'https://api.netlify.com/preview_server_hooks/699f04f7bcd708545509329f',
-  'preview:secondary': 'https://api.netlify.com/preview_server_hooks/699f050e9adb693f160565c9',
+  primary: 'https://api.netlify.com/build_hooks/699f69191cda8ca13efd3832',
+  secondary: '',
+  preview: 'https://api.netlify.com/preview_server_hooks/699f699f162a30a4836c4747',
+  'preview:secondary': 'https://api.netlify.com/preview_server_hooks/699f69c15673bfa8b7826282',
 };
 
 const LABEL = {

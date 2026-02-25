@@ -108,18 +108,19 @@ Helpful Netlify links:
 
 
 ## Project Netlify endpoints
-- Site URL: https://northstarrising.netlify.app
-- Build hook (primary): `https://api.netlify.com/build_hooks/699f04659adb693fea055cc0`
-- Build hook (secondary): `https://api.netlify.com/build_hooks/699f04869662fb3d15b13d18`
-- Preview server hook (primary): `https://api.netlify.com/preview_server_hooks/699f04f7bcd708545509329f`
-- Preview server hook (secondary): `https://api.netlify.com/preview_server_hooks/699f050e9adb693f160565c9`
+- Site URL: https://storyboard-app.netlify.app
+- Netlify HUD URL: https://storyboard-app.netlify.app/?netlify_hud=66a4ee6c-ce0b-4d08-ae98-adf7c519c274
+- Build hook (main branch): `https://api.netlify.com/build_hooks/699f69191cda8ca13efd3832`
+- Preview server hook (primary): `https://api.netlify.com/preview_server_hooks/699f699f162a30a4836c4747`
+- Preview server hook (secondary): `https://api.netlify.com/preview_server_hooks/699f69c15673bfa8b7826282`
 
 Quick triggers (uses committed defaults but can be overridden by env vars):
 ```bash
-export NETLIFY_BUILD_HOOK_PRIMARY='https://api.netlify.com/build_hooks/699f04659adb693fea055cc0'
-export NETLIFY_BUILD_HOOK_SECONDARY='https://api.netlify.com/build_hooks/699f04869662fb3d15b13d18'
-export NETLIFY_PREVIEW_SERVER_HOOK='https://api.netlify.com/preview_server_hooks/699f04f7bcd708545509329f'
-export NETLIFY_PREVIEW_SERVER_HOOK_SECONDARY='https://api.netlify.com/preview_server_hooks/699f050e9adb693f160565c9'
+export NETLIFY_BUILD_HOOK_PRIMARY='https://api.netlify.com/build_hooks/699f69191cda8ca13efd3832'
+# Optional only if you have a second build hook configured:
+# export NETLIFY_BUILD_HOOK_SECONDARY='https://api.netlify.com/build_hooks/<your-secondary-hook-id>'
+export NETLIFY_PREVIEW_SERVER_HOOK='https://api.netlify.com/preview_server_hooks/699f699f162a30a4836c4747'
+export NETLIFY_PREVIEW_SERVER_HOOK_SECONDARY='https://api.netlify.com/preview_server_hooks/699f69c15673bfa8b7826282'
 
 npm run netlify:build:primary
 npm run netlify:build:secondary
@@ -134,7 +135,7 @@ Local development note:
 
 If you prefer raw curl:
 ```bash
-curl -X POST -H 'Content-Type: application/json' -d '{}' https://api.netlify.com/preview_server_hooks/699f04f7bcd708545509329f
+curl -X POST -H 'Content-Type: application/json' -d '{}' https://api.netlify.com/preview_server_hooks/699f69c15673bfa8b7826282
 ```
 
 ## Security note
@@ -155,7 +156,7 @@ For a concrete phased plan to support editable text/fields, image uploads, onlin
 
 
 Netlify Deploy Permalink:
-- Use the latest successful deploy URL from the Netlify Deploys tab for `northstarrising` (permalink changes per deploy).
+- Use the latest successful deploy URL from the Netlify Deploys tab for `storyboard-app` (permalink changes per deploy).
 
 ## Optional server sync (web ↔ mobile)
 The app now supports optional remote sync if a backend endpoint is configured:
