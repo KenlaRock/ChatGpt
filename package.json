@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "audit:prod": "npm audit --omit=dev"
+    "audit:prod": "npm audit --omit=dev",
+    "netlify:build:primary": "curl -X POST -d '{}' https://api.netlify.com/build_hooks/68c5145c373799bfa07a2d69",
+    "netlify:build:secondary": "curl -X POST -d '{}' https://api.netlify.com/build_hooks/6908472cbe9f34c6bb2b1675",
+    "netlify:preview:start": "curl -X POST -d '{}' https://api.netlify.com/preview_server_hooks/68c5147a6f867751dd5ab91c"
   },
   "dependencies": {
     "framer-motion": "^11.0.0",
