@@ -9,7 +9,7 @@ jobs:
   smoke:
     runs-on: ubuntu-latest
     env:
-      SMOKE_BASE_URL: https://av-stb.netlify.app
+      SMOKE_BASE_URL: https://northstarrising.netlify.app
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -33,7 +33,7 @@ npm run audit:prod
 ## Post-deploy smoke check
 Run the production smoke test locally or in CI:
 ```bash
-npm run smoke:postdeploy -- https://av-stb.netlify.app
+npm run smoke:postdeploy -- https://northstarrising.netlify.app
 ```
 This validates:
 - `/` responds with HTML
@@ -105,13 +105,17 @@ Helpful Netlify links:
 
 
 ## Project Netlify endpoints
-- Site URL: https://av-stb.netlify.app
-- Build hook (primary): `https://api.netlify.com/build_hooks/68c5145c373799bfa07a2d69`
-- Build hook (secondary): `https://api.netlify.com/build_hooks/6908472cbe9f34c6bb2b1675`
-- Preview server hook: `https://api.netlify.com/preview_server_hooks/68c5147a6f867751dd5ab91c`
+- Site URL: https://northstarrising.netlify.app
+- Build hook (primary): set env var `NETLIFY_BUILD_HOOK_PRIMARY`
+- Build hook (secondary): set env var `NETLIFY_BUILD_HOOK_SECONDARY`
+- Preview server hook: set env var `NETLIFY_PREVIEW_SERVER_HOOK`
 
-Quick triggers:
+Quick triggers (after exporting the corresponding hook URL env vars):
 ```bash
+export NETLIFY_BUILD_HOOK_PRIMARY='https://api.netlify.com/build_hooks/<new-primary-id>'
+export NETLIFY_BUILD_HOOK_SECONDARY='https://api.netlify.com/build_hooks/<new-secondary-id>'
+export NETLIFY_PREVIEW_SERVER_HOOK='https://api.netlify.com/preview_server_hooks/<new-preview-id>'
+
 npm run netlify:build:primary
 npm run netlify:build:secondary
 npm run netlify:preview:start
@@ -123,7 +127,7 @@ Local development note:
 
 If you prefer raw curl:
 ```bash
-curl -X POST -H 'Content-Type: application/json' -d '{}' https://api.netlify.com/preview_server_hooks/68c5147a6f867751dd5ab91c
+curl -X POST -H 'Content-Type: application/json' -d '{}' "$NETLIFY_PREVIEW_SERVER_HOOK"
 ```
 
 ## Security note
@@ -144,7 +148,7 @@ For a concrete phased plan to support editable text/fields, image uploads, onlin
 
 
 Netlify Deploy Permalink:
-https://699e5a8da7a48f000826d79c--av-stb.netlify.app/
+- Use the latest successful deploy URL from the Netlify Deploys tab for `northstarrising` (permalink changes per deploy).
 
 ## Optional server sync (web ↔ mobile)
 The app now supports optional remote sync if a backend endpoint is configured:

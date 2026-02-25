@@ -3,7 +3,7 @@
 Date: 2026-02-25 07:01 UTC  
 Environment: Local verification + active Netlify production URL checks  
 Target URL:  
-- https://av-stb.netlify.app/
+- https://northstarrising.netlify.app/
 
 ## Executive status
 Deployment readiness is **GREEN** based on passing local build/audit checks, validated SPA route behavior on the live Netlify URL, and explicit Netlify config hardening for Node runtime consistency.
@@ -46,8 +46,8 @@ Result:
 ### 4) Live site availability + route handling (production)
 Commands:
 ```bash
-curl -sS -o /tmp/site_root.html -w '%{http_code}' https://av-stb.netlify.app/
-curl -sS -o /tmp/site_route.html -w '%{http_code}' https://av-stb.netlify.app/boards
+curl -sS -o /tmp/site_root.html -w '%{http_code}' https://northstarrising.netlify.app/
+curl -sS -o /tmp/site_route.html -w '%{http_code}' https://northstarrising.netlify.app/boards
 ```
 Results:
 - Both checks returned `200`.
@@ -57,7 +57,7 @@ Results:
 Commands:
 ```bash
 ROOT_ASSET=$(rg -o 'assets/index-[^" ]+\.js' -m 1 /tmp/site_root.html)
-curl -sS -o /tmp/site_asset.js -w '%{http_code}' "https://av-stb.netlify.app/${ROOT_ASSET}"
+curl -sS -o /tmp/site_asset.js -w '%{http_code}' "https://northstarrising.netlify.app/${ROOT_ASSET}"
 wc -c /tmp/site_asset.js
 ```
 Results:
@@ -101,7 +101,7 @@ Results:
 
 ### Verification run summary
 - Local build: passed.
-- Production smoke check (`https://av-stb.netlify.app`): passed (root + key route + bundle fetch).
+- Production smoke check (`https://northstarrising.netlify.app`): passed (root + key route + bundle fetch).
 - Manual browser pass (local app):
   - Layout/design renders correctly.
   - Open/import image flow works via upload input.
@@ -144,3 +144,29 @@ To install the app from the website on phones (recommended approach):
 - Scheduled post-deploy smoke workflow remains active.
 - Production smoke checks remain in place for `/`, `/boards`, and bundle fetch.
 
+
+## Update: 2026-02-25 (Netlify project rename incident response)
+
+### What failed
+- New canonical site URL (`https://northstarrising.netlify.app`) returned `503` with body:
+  - `{"error":"usage_exceeded","message":"Usage exceeded"}`
+- Legacy site URL (`https://av-stb.netlify.app`) returned `404`.
+- Previously committed build hook URL returned `Not Found`.
+
+### Troubleshooting conclusion
+The project rename/site migration changed operational Netlify identifiers (site/hook linkage), and the prior hard-coded hook IDs are no longer valid for this repo workflow.
+
+### Fixes applied in repo
+1. Updated documented canonical URL references to `https://northstarrising.netlify.app`.
+2. Replaced hard-coded Netlify hook URLs in npm scripts with env-driven hook execution:
+   - `scripts/netlify-hook-trigger.mjs`
+   - `NETLIFY_BUILD_HOOK_PRIMARY`
+   - `NETLIFY_BUILD_HOOK_SECONDARY`
+   - `NETLIFY_PREVIEW_SERVER_HOOK`
+3. Improved smoke diagnostics:
+   - `scripts/post-deploy-smoke.mjs` now surfaces a specific message for Netlify `usage_exceeded` responses.
+4. Updated scheduled smoke workflow base URL to `https://northstarrising.netlify.app`.
+
+### Required Netlify-side follow-up
+- Regenerate build hooks in Netlify for the renamed project and store them as CI/repo secrets/environment variables.
+- Resolve Netlify usage quota overage before expecting `200` responses from the new site URL.

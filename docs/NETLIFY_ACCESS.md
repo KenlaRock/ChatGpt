@@ -1,21 +1,25 @@
 # Netlify access details
 
 ## Site
-- Canonical URL: https://av-stb.netlify.app
-- Optional debug URL (Netlify HUD): https://av-stb.netlify.app/?netlify_hud=679b85e1-7631-44b3-a3af-72d258120832
+- Canonical URL: https://northstarrising.netlify.app
+- Optional debug URL (Netlify HUD): https://northstarrising.netlify.app/?netlify_hud=679b85e1-7631-44b3-a3af-72d258120832
 
-## Build hooks
-- Primary: https://api.netlify.com/build_hooks/68c5145c373799bfa07a2d69
-- Secondary: https://api.netlify.com/build_hooks/6908472cbe9f34c6bb2b1675
+## Build/preview hooks (after project rename)
+The previously hard-coded hook IDs no longer resolve for this repository/site pairing.
+Use environment variables instead of committing hook IDs in source:
+- `NETLIFY_BUILD_HOOK_PRIMARY`
+- `NETLIFY_BUILD_HOOK_SECONDARY`
+- `NETLIFY_PREVIEW_SERVER_HOOK`
 
-## Preview server hook
-- https://api.netlify.com/preview_server_hooks/68c5147a6f867751dd5ab91c
-
-Trigger command:
+Project scripts now read those variables:
 
 ```bash
-curl -X POST -H 'Content-Type: application/json' -d '{}' https://api.netlify.com/preview_server_hooks/68c5147a6f867751dd5ab91c
+npm run netlify:build:primary
+npm run netlify:build:secondary
+npm run netlify:preview:start
 ```
+
+If a variable is missing, the script fails fast with a clear message.
 
 ## Optional local Netlify tooling
 
