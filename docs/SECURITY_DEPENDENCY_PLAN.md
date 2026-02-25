@@ -1,26 +1,23 @@
 # Security dependency follow-up plan
 
-## Current finding
-- `npm audit --omit=dev` is currently clean (`found 0 vulnerabilities`).
-- `npm audit` (including dev dependencies) reports moderate vulnerabilities in the Vite/esbuild development chain.
+## Current finding (post-upgrade)
+- `npm audit --omit=dev` is clean (`found 0 vulnerabilities`).
+- `npm audit` (including dev dependencies) is also clean (`found 0 vulnerabilities`).
 
-Advisory example:
+Resolved advisory path:
 - esbuild dev-server request vulnerability: GHSA-67mh-4wv8-2f99.
 
-## Why this is not auto-fixed immediately
-`npm audit fix --force` proposes upgrading Vite to a newer major version.
-That can affect local development behavior and plugin compatibility, so it should be handled in a dedicated upgrade PR.
+## What changed
+- Upgraded `vite` from `^5.4.0` to `^7.3.1`.
+- Upgraded `@vitejs/plugin-react` from `^4.3.1` to `^5.1.4` to stay on the supported plugin path for Vite 7.
+- Regenerated `package-lock.json` to pin the non-vulnerable toolchain (`esbuild@0.27.3` via Vite).
 
-## Action plan
-1. Create a dedicated upgrade PR for Vite/esbuild major update.
-2. Validate local development and build behavior after upgrade:
-   - `npm run dev` works locally,
-   - `npm run build` output is valid,
-   - SPA routing still works in target hosting environment.
-3. Regression-check PDF export workflow before and after dependency update.
-4. If successful, merge upgrade and re-run:
-   - `npm audit`
-   - `npm audit --omit=dev`
+## Remaining advisories
+- None currently reported by `npm audit`.
+
+## Risk and rollback
+- Primary risk: Vite major-version compatibility in local/dev workflows.
+- Rollback path: revert this PR commit to restore previous `package.json` + `package-lock.json` versions, then re-run `npm ci`.
 
 ## Owner checklist
 - [ ] Run `npm audit --omit=dev` on default branch weekly.
