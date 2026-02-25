@@ -24,10 +24,33 @@ function fetchWithCurl(url) {
 function checkHtml(pathname) {
   const url = `${baseUrl}${pathname}`;
   const { body, status } = fetchWithCurl(url);
-  if (status < 200 || status >= 300) throw new Error(`${url} returned ${status}`);
+  if (status < 200 || status >= 300) {
+    const details = summarizeFailure(status, body);
+    throw new Error(`${url} returned ${status}${details ? ` (${details})` : ''}`);
+  }
   if (!body.toLowerCase().includes('<html')) throw new Error(`${url} did not return HTML`);
   console.log(`PASS ${url} -> ${status}`);
   return body;
+}
+
+function summarizeFailure(status, body) {
+  const trimmed = (body || '').trim();
+  if (!trimmed) return '';
+
+  try {
+    const parsed = JSON.parse(trimmed);
+    if (status === 503 && parsed.error === 'usage_exceeded') {
+      return 'Netlify site usage quota exceeded; increase plan/quota, wait for reset, or reduce transfer usage';
+    }
+    if (status === 404 && parsed.message && typeof parsed.message === 'string') {
+      return parsed.message;
+    }
+  } catch {
+    // Non-JSON body: keep fallback below.
+  }
+
+  const snippet = trimmed.replace(/\s+/g, ' ').slice(0, 140);
+  return `response snippet: ${snippet}`;
 }
 
 function extractBundlePath(html) {

@@ -1,5 +1,8 @@
 # North Star Rising — Release Deck (React/Vite)
 
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/679b85e1-7631-44b3-a3af-72d258120832/deploy-status)](https://app.netlify.com/projects/northstarrising/deploys)
+
 ## What this is
 A runnable, single-page presentation app with:
 - Slide navigation (buttons + arrow keys)
@@ -33,7 +36,7 @@ npm run audit:prod
 ## Post-deploy smoke check
 Run the production smoke test locally or in CI:
 ```bash
-npm run smoke:postdeploy -- https://av-stb.netlify.app
+npm run smoke:postdeploy -- https://northstarrising.netlify.app
 ```
 This validates:
 - `/` responds with HTML
@@ -105,17 +108,25 @@ Helpful Netlify links:
 
 
 ## Project Netlify endpoints
-- Site URL: https://av-stb.netlify.app
-- Build hook (primary): `https://api.netlify.com/build_hooks/68c5145c373799bfa07a2d69`
-- Build hook (secondary): `https://api.netlify.com/build_hooks/6908472cbe9f34c6bb2b1675`
-- Preview server hook: `https://api.netlify.com/preview_server_hooks/68c5147a6f867751dd5ab91c`
+- Site URL: https://northstarrising.netlify.app
+- Build hook (primary): `https://api.netlify.com/build_hooks/699f04659adb693fea055cc0`
+- Build hook (secondary): `https://api.netlify.com/build_hooks/699f04869662fb3d15b13d18`
+- Preview server hook (primary): `https://api.netlify.com/preview_server_hooks/699f04f7bcd708545509329f`
+- Preview server hook (secondary): `https://api.netlify.com/preview_server_hooks/699f050e9adb693f160565c9`
 
-Quick triggers:
+Quick triggers (uses committed defaults but can be overridden by env vars):
 ```bash
+export NETLIFY_BUILD_HOOK_PRIMARY='https://api.netlify.com/build_hooks/699f04659adb693fea055cc0'
+export NETLIFY_BUILD_HOOK_SECONDARY='https://api.netlify.com/build_hooks/699f04869662fb3d15b13d18'
+export NETLIFY_PREVIEW_SERVER_HOOK='https://api.netlify.com/preview_server_hooks/699f04f7bcd708545509329f'
+export NETLIFY_PREVIEW_SERVER_HOOK_SECONDARY='https://api.netlify.com/preview_server_hooks/699f050e9adb693f160565c9'
+
 npm run netlify:build:primary
 npm run netlify:build:secondary
 npm run netlify:preview:start
+npm run netlify:preview:start:secondary
 ```
+Current operational note: if any of these return `404 Not Found`, regenerate the hook in Netlify before retrying.
 
 Local development note:
 - Prefer `npm run dev` for day-to-day work.
@@ -123,7 +134,7 @@ Local development note:
 
 If you prefer raw curl:
 ```bash
-curl -X POST -H 'Content-Type: application/json' -d '{}' https://api.netlify.com/preview_server_hooks/68c5147a6f867751dd5ab91c
+curl -X POST -H 'Content-Type: application/json' -d '{}' https://api.netlify.com/preview_server_hooks/699f04f7bcd708545509329f
 ```
 
 ## Security note
@@ -144,7 +155,7 @@ For a concrete phased plan to support editable text/fields, image uploads, onlin
 
 
 Netlify Deploy Permalink:
-https://699e5a8da7a48f000826d79c--av-stb.netlify.app/
+- Use the latest successful deploy URL from the Netlify Deploys tab for `northstarrising` (permalink changes per deploy).
 
 ## Optional server sync (web ↔ mobile)
 The app now supports optional remote sync if a backend endpoint is configured:
