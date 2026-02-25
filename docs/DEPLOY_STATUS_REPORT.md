@@ -1,46 +1,58 @@
 # Deploy Status Report
 
-Date: 2026-02-25  
+Date: 2026-02-25 05:36 UTC  
 Environment: Netlify production  
 Target URL: https://699e5a8da7a48f000826d79c--av-stb.netlify.app/
 
-## Deploy verification summary
-The latest production deployment is reachable and renders the SPA shell correctly. Local verification (`npm ci`, `npm run build`, `npm run audit:prod`) and a browser smoke pass indicate the release is in a healthy state with no immediate release blockers.
+## Executive status
+Deployment readiness remains **GREEN** based on local build and production dependency audit checks. There are no immediate release blockers for the current codebase.
 
-## Scope
-This verification pass covered:
-- Endpoint availability and baseline HTTP response validation.
-- SPA shell render checks and core UI controls visibility.
-- Local build and production dependency audit.
-- Repository deployment configuration spot-check (`netlify.toml`, CI workflow assumptions).
+## What was re-verified in this pass
+- Production build integrity.
+- Production dependency vulnerability posture.
+- Alignment between documented deployment assumptions and current repository configuration.
 
-Out of scope:
-- Deep cross-browser regression suite.
-- Long-session performance profiling.
-- End-to-end PDF visual diff validation.
+## Verification evidence
 
-## Results
+### 1) Build
+Command:
+```bash
+npm run build
+```
+Result:
+- Passed (`vite build` completed successfully).
+- Dist artifacts were generated as expected.
 
-### 1) Availability and routing
-- `GET /` returns `HTTP 200`.
-- `index.html` includes expected root mount node and built asset references.
-- SPA redirect behavior remains aligned with static-hosting expectations.
+### 2) Production dependency audit
+Command:
+```bash
+npm run audit:prod
+```
+Result:
+- Passed (`found 0 vulnerabilities`).
 
-### 2) Functional smoke checks
-- Landing page renders with expected title and slide framework.
-- Navigation controls are present and transition slide index as expected.
-- Primary export/upload controls are visible in smoke scenario.
+### 3) Full dependency audit (informational)
+Command:
+```bash
+npm audit
+```
+Result:
+- Fails with known dev-toolchain advisories (`esbuild` via `vite`), severity **moderate**.
+- Remediation still requires a breaking major upgrade path (`npm audit fix --force` proposes `vite@7.x`).
 
-### 3) Build and dependency checks
-- `npm ci`: passed.
-- `npm run build`: passed; production assets emitted.
-- `npm run audit:prod`: passed; no production dependency vulnerabilities reported.
+## Findings and implications
+1. **Runtime/deploy risk is low** for current production dependencies.
+2. **Development toolchain risk remains tracked** and should be handled in a dedicated dependency PR.
+3. Repeated npm warning detected during command execution:
+   - `npm warn Unknown env config "http-proxy"`
+   - Not currently blocking, but should be cleaned up in CI/local shell configuration to avoid future npm behavior changes.
 
-### 4) Deployment configuration checks
-- `netlify.toml` retains expected build command, publish directory, and SPA redirect behavior.
-- CI still validates install/build on push/PR, supporting baseline release confidence.
+## Remaining tasks
+- [ ] Execute dedicated Vite/esbuild major-upgrade PR with compatibility validation.
+- [ ] Re-run and document `npm audit` after upgrade.
+- [ ] Add a lightweight automated smoke check for key runtime flows (navigation + PDF export guard path).
 
-## Follow-up notes
-- Continue planned dependency maintenance for dev-toolchain advisories (Vite/esbuild) in a dedicated upgrade PR.
-- Add periodic smoke automation against production URL to reduce manual verification overhead.
-- Align this report with upcoming mobile/PWA/web-push roadmap milestones to track deployment readiness by phase.
+## Suggested next actions
+1. Open a focused upgrade branch only for Vite/esbuild chain updates.
+2. Validate: `npm run build`, `npm run audit:prod`, and manual app smoke.
+3. If all checks pass, merge and refresh this deploy report with post-upgrade audit results.
