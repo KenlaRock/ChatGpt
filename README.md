@@ -21,6 +21,11 @@ npm run build
 npm run preview
 ```
 
+## Production dependency audit
+```bash
+npm run audit:prod
+```
+
 ## Notes
 - PDF export uses html2canvas + jsPDF.
 - Upload your 3×3 image, then hit **Exportera PDF**.
@@ -54,4 +59,4 @@ This app is a static Vite SPA and can be deployed to Netlify, Vercel, Cloudflare
 Current `npm audit --omit=dev` reports transitive vulnerabilities via `jspdf` -> `dompurify`.
 A forced auto-fix requires a **major** `jspdf` upgrade, so it is handled in a dedicated follow-up track to avoid silent PDF export regressions.
 
-See: `docs/SECURITY_DEPENDENCY_PLAN.md`.
+See: `docs/SECURITY_DEPENDENCY_PLAN.md` and `docs/SECURITY_UPGRADE_PR_CHECKLIST.md`.
