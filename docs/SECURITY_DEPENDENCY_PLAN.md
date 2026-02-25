@@ -1,13 +1,15 @@
 # Security dependency follow-up plan
 
+Date: 2026-02-25 06:05 UTC
+
 ## Current status after upgrade
-- `npm audit --omit=dev` is clean (`found 0 vulnerabilities`).
-- `npm audit` (including dev dependencies) is now also clean (`found 0 vulnerabilities`).
+- `npm run audit:prod` is clean (`found 0 vulnerabilities`).
+- `npm audit` (including dev dependencies) is clean (`found 0 vulnerabilities`).
 - Vite/esbuild dev-toolchain path is upgraded to a non-vulnerable route:
   - `vite@7.3.1`
   - `esbuild@0.27.3` (transitive via Vite)
 
-## What changed in this upgrade PR
+## What changed in the security upgrade
 1. Upgraded Vite and React plugin to current compatible majors for the security fix path.
 2. Regenerated lockfile with `npm ci`.
 3. Re-validated local behavior and production build output.
