@@ -18,11 +18,13 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
-  const isNavigationRequest = event.request.mode === "navigate";
+  const acceptsHtml = event.request.headers.get("accept")?.includes("text/html");
+  const isHtmlRequest =
+    event.request.mode === "navigate" || event.request.destination === "document" || acceptsHtml;
 
   event.respondWith(
     (async () => {
-      if (isNavigationRequest) {
+      if (isHtmlRequest) {
         try {
           const response = await fetch(event.request);
           if (response && response.status === 200 && response.type === "basic") {
@@ -31,7 +33,11 @@ self.addEventListener("fetch", (event) => {
           }
           return response;
         } catch {
-          return (await caches.match(event.request)) || caches.match("/offline.html");
+          return (
+            (await caches.match(event.request)) ||
+            (await caches.match("/index.html")) ||
+            caches.match("/offline.html")
+          );
         }
       }
 
