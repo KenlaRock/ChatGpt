@@ -105,7 +105,7 @@ Helpful Netlify links:
 
 
 ## Project Netlify endpoints
-- Site URL: https://av-stb.netlify.app/?netlify_hud=679b85e1-7631-44b3-a3af-72d258120832
+- Site URL: https://av-stb.netlify.app
 - Build hook (primary): `https://api.netlify.com/build_hooks/68c5145c373799bfa07a2d69`
 - Build hook (secondary): `https://api.netlify.com/build_hooks/6908472cbe9f34c6bb2b1675`
 - Preview server hook: `https://api.netlify.com/preview_server_hooks/68c5147a6f867751dd5ab91c`
@@ -117,9 +117,13 @@ npm run netlify:build:secondary
 npm run netlify:preview:start
 ```
 
+Local development note:
+- Prefer `npm run dev` for day-to-day work.
+- Use `npx netlify dev` only when you specifically need Netlify local emulation.
+
 If you prefer raw curl:
 ```bash
-curl -X POST -d '{}' https://api.netlify.com/preview_server_hooks/68c5147a6f867751dd5ab91c
+curl -X POST -H 'Content-Type: application/json' -d '{}' https://api.netlify.com/preview_server_hooks/68c5147a6f867751dd5ab91c
 ```
 
 ## Security note
