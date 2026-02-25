@@ -14,24 +14,37 @@ const newBlockTemplate = {
   text: () => ({ id: makeId(), type: "text", props: { heading: "Ny rubrik", body: "Ny text" } }),
   checklist: () => ({ id: makeId(), type: "checklist", props: { heading: "Ny checklista", items: ["Punkt 1"] } }),
   quote: () => ({ id: makeId(), type: "quote", props: { text: "Ny quote", subtext: "Underrad" } }),
-  image: () => ({ id: makeId(), type: "image", props: { heading: "Ny bild", imageId: null, caption: "Bildtext" } }),
+  image: () => ({ id: makeId(), type: "image", props: { heading: "Ny bild", imageId: null, caption: "Bildtext", fit: "contain" } }),
 };
 
 export default function App() {
   const [idx, setIdx] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [exportProgress, setExportProgress] = useState(0);
   const [isCompact, setIsCompact] = useState(() => (typeof window !== "undefined" ? window.innerWidth <= 900 : false));
   const [isEditing, setIsEditing] = useState(false);
   const [saveState, setSaveState] = useState("sparad");
+  const [saveProgress, setSaveProgress] = useState(0);
+  const [saveStorage, setSaveStorage] = useState("local");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState("idle");
   const [uploadMessage, setUploadMessage] = useState("");
-  const [deck, setDeck] = useState(() => loadDeckFromStorage() || DEFAULT_DECK);
-  const [media, setMedia] = useState(() => deck.media || []);
+  const [deck, setDeck] = useState(DEFAULT_DECK);
+  const [media, setMedia] = useState(() => DEFAULT_DECK.media || []);
   const hiddenRefs = useRef([]);
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
   const [isStandalone, setIsStandalone] = useState(false);
   const isIOS = typeof navigator !== "undefined" && /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+  useEffect(() => {
+    const boot = async () => {
+      const persisted = await loadDeckFromStorage();
+      if (!persisted) return;
+      setDeck(persisted);
+      setMedia(persisted.media || []);
+    };
+    boot();
+  }, []);
 
   useEffect(() => {
     const onResize = () => setIsCompact(window.innerWidth <= 900);
@@ -54,10 +67,21 @@ export default function App() {
   useEffect(() => {
     const toSave = { ...deck, media };
     setSaveState("sparar");
-    const t = setTimeout(() => {
-      saveDeckToStorage(toSave);
-      setSaveState("sparad");
-    }, 250);
+    setSaveProgress(5);
+    const t = setTimeout(async () => {
+      try {
+        const result = await saveDeckToStorage(toSave, {
+          onProgress: (progress) => setSaveProgress(progress),
+        });
+        setSaveStorage(result?.storage || "local");
+        setSaveState("sparad");
+      } catch (error) {
+        console.error(error);
+        setSaveState("fel");
+      } finally {
+        setTimeout(() => setSaveProgress(0), 600);
+      }
+    }, 280);
     return () => clearTimeout(t);
   }, [deck, media]);
 
@@ -164,18 +188,21 @@ export default function App() {
 
   const exportPdf = async () => {
     setBusy(true);
+    setExportProgress(2);
     try {
       const nodes = hiddenRefs.current.filter(Boolean);
       await exportSlidesToPdf({
         nodes,
         fileName: deck.name,
         bgColor: THEME.bg,
+        onProgress: (progress) => setExportProgress(progress),
       });
     } catch (error) {
       console.error(error);
       alert("PDF-export misslyckades.\n\n" + (error?.message || ""));
     } finally {
       setBusy(false);
+      setTimeout(() => setExportProgress(0), 800);
     }
   };
 
@@ -186,7 +213,8 @@ export default function App() {
     setInstallPromptEvent(null);
   };
 
-  const saveIndicator = saveState === "sparar" ? "Sparar…" : "Sparat";
+  const saveIndicator = saveState === "sparar" ? "Sparar…" : saveState === "fel" ? "Sparfel" : "Sparat";
+  const saveStorageLabel = saveStorage === "indexeddb" ? "IndexedDB (stora bilder)" : "LocalStorage";
 
   const mediaCountLabel = useMemo(() => `${media.length} bild${media.length === 1 ? "" : "er"} i biblioteket`, [media.length]);
 
@@ -243,6 +271,30 @@ export default function App() {
               <Save size={14} /> {saveIndicator}
             </div>
           </div>
+
+          {(saveState === "sparar" || saveProgress > 0) ? (
+            <div style={progressWrapStyle}>
+              <div style={progressHeaderStyle}>
+                <span>Sparar innehåll ({saveStorageLabel})</span>
+                <span>{saveProgress}%</span>
+              </div>
+              <div style={uploadTrackStyle}>
+                <div style={{ ...uploadFillStyle, width: `${saveProgress}%`, background: "#22c55e" }} />
+              </div>
+            </div>
+          ) : null}
+
+          {(busy || exportProgress > 0) ? (
+            <div style={progressWrapStyle}>
+              <div style={progressHeaderStyle}>
+                <span>Exporterar PDF</span>
+                <span>{exportProgress}%</span>
+              </div>
+              <div style={uploadTrackStyle}>
+                <div style={{ ...uploadFillStyle, width: `${exportProgress}%`, background: "#60a5fa" }} />
+              </div>
+            </div>
+          ) : null}
 
           <div style={{ display: "grid", gap: 16, gridTemplateColumns: isEditing && !isCompact ? "2fr 1fr" : "1fr" }}>
             <AnimatePresence mode="wait">
@@ -306,7 +358,14 @@ export default function App() {
                       </div>
                     </div>
                   ) : null}
-                  <button style={{ ...miniBtn, justifyContent: "center" }} onClick={() => { setDeck(DEFAULT_DECK); setMedia([]); clearDeckStorage(); }}>
+                  <button
+                    style={{ ...miniBtn, justifyContent: "center" }}
+                    onClick={async () => {
+                      setDeck(DEFAULT_DECK);
+                      setMedia([]);
+                      await clearDeckStorage();
+                    }}
+                  >
                     Återställ till standard
                   </button>
                 </div>
@@ -394,6 +453,10 @@ function BlockFields({ block, onChange, media }) {
             <option key={item.id} value={item.id}>{item.fileName}</option>
           ))}
         </select>
+        <select value={block.props.fit || "contain"} onChange={(e) => setProps("fit", e.target.value)} style={inputStyle}>
+          <option value="contain">Anpassa hela bilden (contain)</option>
+          <option value="cover">Fyll ytan (cover)</option>
+        </select>
         <input value={block.props.caption || ""} onChange={(e) => setProps("caption", e.target.value)} style={inputStyle} placeholder="Bildtext" />
       </div>
     );
@@ -420,6 +483,23 @@ const uploadWrapStyle = {
   padding: "8px 10px",
   display: "grid",
   gap: 6,
+};
+
+const progressWrapStyle = {
+  borderRadius: 10,
+  border: `1px solid ${THEME.border}`,
+  background: THEME.panel2,
+  padding: "8px 10px",
+  display: "grid",
+  gap: 6,
+};
+
+const progressHeaderStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: 10,
+  fontSize: 11,
+  color: THEME.text3,
 };
 
 const uploadTrackStyle = {
