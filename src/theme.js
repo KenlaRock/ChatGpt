@@ -1,0 +1,93 @@
+export const THEME = {
+  bg: "#050507",
+  panel: "rgba(15, 15, 18, 0.55)",
+  panel2: "rgba(10, 10, 12, 0.55)",
+  border: "rgba(255, 255, 255, 0.10)",
+  border2: "rgba(255, 255, 255, 0.14)",
+  text: "#F4F4F5",
+  text2: "#D4D4D8",
+  text3: "#A1A1AA",
+  text4: "#71717A",
+  shadow: "0 20px 70px -30px rgba(0,0,0,0.85)",
+};
+
+export const styles = {
+  shell: {
+    minHeight: "100vh",
+    width: "100%",
+    background: THEME.bg,
+    color: THEME.text,
+  },
+  container: {
+    maxWidth: 1152,
+    margin: "0 auto",
+    padding: "40px 24px 56px",
+  },
+  topbar: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 16,
+  },
+  badge: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+  },
+  badgeIcon: {
+    borderRadius: 16,
+    border: `1px solid ${THEME.border}`,
+    background: THEME.panel2,
+    padding: 12,
+  },
+  badgeText: { display: "flex", flexDirection: "column", gap: 2 },
+  row: { display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" },
+  button: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 8,
+    borderRadius: 16,
+    border: `1px solid ${THEME.border}`,
+    background: THEME.panel2,
+    color: THEME.text2,
+    padding: "12px 16px",
+    fontSize: 14,
+    cursor: "pointer",
+    userSelect: "none",
+  },
+  buttonDisabled: { opacity: 0.45, cursor: "not-allowed" },
+  metaBar: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    borderRadius: 16,
+    border: `1px solid ${THEME.border}`,
+    background: THEME.panel2,
+    padding: "12px 20px",
+  },
+  slideFrame: {
+    borderRadius: 24,
+    border: `1px solid ${THEME.border}`,
+    padding: 28,
+    backgroundImage:
+      "linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%)",
+  },
+  footerTip: {
+    color: THEME.text4,
+    fontSize: 12,
+    lineHeight: 1.6,
+  },
+  grid12: {
+    display: "grid",
+    gridTemplateColumns: "repeat(12, minmax(0, 1fr))",
+    gap: 16,
+  },
+  card: {
+    borderRadius: 16,
+    border: `1px solid ${THEME.border}`,
+    background: THEME.panel,
+    boxShadow: THEME.shadow,
+  },
+};
