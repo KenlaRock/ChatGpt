@@ -9,14 +9,15 @@ Given this local clone currently has only branch `work` (no local `main` or remo
 This pass used:
 - local merge/commit history inspection,
 - codebase structure inspection,
-- fresh command verification (`npm run build`, `npm run audit:prod`, `npm audit`).
+- fresh command verification (`npm run build`, `npm run audit:prod`, `npm audit`),
+- explicit deployed-site checks on active Netlify previews (root + `/boards` route + JS asset fetch).
 
 ## 2) Current status matrix
 
 | Workstream | Status | Evidence | Notes |
 |---|---|---|---|
 | App modular refactor (theme/primitives/hook/pdf split) | ✅ done | files present in `src/components`, `src/hooks`, `src/lib` | `src/App.jsx` still large but reduced from earlier 1000+ baseline. |
-| Netlify deployment setup/docs | ✅ done | `netlify.toml`, README deploy sections, deploy docs | No new blockers found in this pass. |
+| Netlify deployment setup/docs | ✅ done | `netlify.toml`, README deploy sections, deploy docs, deployed-site checks (`curl` 200s for preview root + `/boards` + JS asset) | No new blockers found in this pass. |
 | Production dependency posture | ✅ done | `npm run audit:prod` -> 0 vulnerabilities | Suitable for current release posture. |
 | Dev-toolchain security upgrade (Vite/esbuild major) | ⏳ pending | `npm audit` still reports moderate advisory | Needs dedicated breaking-change PR. |
 | Automated tests for critical flows | ⏳ pending | no test framework/scripts in `package.json` | Recommended before or alongside major upgrades. |
