@@ -1,29 +1,32 @@
 # Security dependency follow-up plan
 
-## Current finding
-- `npm audit --omit=dev` is currently clean (`found 0 vulnerabilities`).
-- `npm audit` (including dev dependencies) reports moderate vulnerabilities in the Vite/esbuild development chain.
+## Current status after upgrade
+- `npm audit --omit=dev` is clean (`found 0 vulnerabilities`).
+- `npm audit` (including dev dependencies) is now also clean (`found 0 vulnerabilities`).
+- Vite/esbuild dev-toolchain path is upgraded to a non-vulnerable route:
+  - `vite@7.3.1`
+  - `esbuild@0.27.3` (transitive via Vite)
 
-Advisory example:
-- esbuild dev-server request vulnerability: GHSA-67mh-4wv8-2f99.
-
-## Why this is not auto-fixed immediately
-`npm audit fix --force` proposes upgrading Vite to a newer major version.
-That can affect local development behavior and plugin compatibility, so it should be handled in a dedicated upgrade PR.
-
-## Action plan
-1. Create a dedicated upgrade PR for Vite/esbuild major update.
-2. Validate local development and build behavior after upgrade:
-   - `npm run dev` works locally,
-   - `npm run build` output is valid,
-   - SPA routing still works in target hosting environment.
-3. Regression-check PDF export workflow before and after dependency update.
-4. If successful, merge upgrade and re-run:
+## What changed in this upgrade PR
+1. Upgraded Vite and React plugin to current compatible majors for the security fix path.
+2. Regenerated lockfile with `npm ci`.
+3. Re-validated local behavior and production build output.
+4. Re-ran security checks:
+   - `npm run audit:prod`
    - `npm audit`
-   - `npm audit --omit=dev`
+
+## Remaining advisories
+- None reported at time of validation.
+
+## Risk / rollback note
+- Scope is intentionally limited to dev-toolchain dependency updates and lockfile refresh.
+- If a regression appears in local development, rollback by reverting the dependency-upgrade commit and re-running:
+  - `npm ci`
+  - `npm run build`
+  - `npm audit`
 
 ## Owner checklist
 - [ ] Run `npm audit --omit=dev` on default branch weekly.
 - [ ] Track `npm audit` for development tooling risks.
-- [ ] Keep lockfile updated in dependency PRs.
+- [x] Keep lockfile updated in dependency PRs.
 - [ ] Treat critical findings as release-blocking unless explicitly risk-accepted.

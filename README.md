@@ -95,8 +95,8 @@ curl -X POST -d '{}' https://api.netlify.com/preview_server_hooks/68c5147a6f8677
 ## Security note
 Current `npm audit --omit=dev` is clean (`found 0 vulnerabilities`) for production dependencies.
 
-`npm audit` (including dev dependencies) currently flags moderate issues in the Vite/esbuild development toolchain.
-A forced auto-fix upgrades Vite to a newer major version, so this should be validated in a dedicated dependency PR before adoption.
+The Vite/esbuild development toolchain has been upgraded to the non-vulnerable path (`vite@7.3.1`, `esbuild@0.27.3` via Vite), and the latest `npm audit` now reports `found 0 vulnerabilities`.
+If a rollback is needed, revert this dependency-upgrade commit and re-run `npm ci`, `npm run build`, and `npm audit` before redeploying.
 
 See: `docs/SECURITY_DEPENDENCY_PLAN.md` and `docs/SECURITY_UPGRADE_PR_CHECKLIST.md`.
 
