@@ -9,6 +9,7 @@ import { clearDeckStorage, loadDeckFromStorage, saveDeckToStorage } from "./lib/
 import { getTelemetrySnapshot } from "./lib/telemetry";
 import { isSyncEnabled, pullDeckFromServer, pushDeckToServer } from "./lib/deckSync";
 import { BlockRenderer } from "./components/BlockRenderer";
+import { AppLogo } from "./components/AppLogo";
 
 const makeId = () => (globalThis.crypto?.randomUUID?.() ? globalThis.crypto.randomUUID() : `id-${Date.now()}-${Math.random().toString(16).slice(2)}`);
 
@@ -331,7 +332,7 @@ export default function App() {
           <div style={{ ...styles.topbar, alignItems: isCompact ? "flex-start" : "center" }}>
             <div style={styles.badge}>
               <div style={styles.badgeIcon}>
-                <Pencil size={20} color={THEME.text2} />
+                <AppLogo alt="App-logotyp" width={36} height={20} invertForDarkBg opacity={0.9} />
               </div>
               <div style={styles.badgeText}>
                 <div style={{ fontSize: 13, color: THEME.text3 }}>Datadriven strategiapp</div>
@@ -473,7 +474,21 @@ export default function App() {
           <div style={{ display: "grid", gap: 16, gridTemplateColumns: isEditing && !isCompact ? "2fr 1fr" : "1fr" }}>
             <AnimatePresence mode="wait">
               <motion.div key={activeSlide.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
-                <div style={{ ...styles.slideFrame, padding: isCompact ? 16 : styles.slideFrame.padding }}>
+                <div style={{ ...styles.slideFrame, padding: isCompact ? 16 : styles.slideFrame.padding, position: "relative", overflow: "hidden" }}>
+                  <AppLogo
+                    decorative
+                    width={isCompact ? 220 : 300}
+                    height="auto"
+                    invertForDarkBg
+                    opacity={0.055}
+                    style={{
+                      position: "absolute",
+                      right: isCompact ? -20 : -30,
+                      bottom: isCompact ? -10 : -16,
+                      maxWidth: "50%",
+                      pointerEvents: "none",
+                    }}
+                  />
                   <SectionTitle kicker={activeSlide.kicker} title={activeSlide.title} subtitle={activeSlide.subtitle} compact={isCompact} />
                   <div style={{ marginTop: 20, display: "grid", gap: 12 }}>
                     {activeSlide.blocks.map((block) => (
