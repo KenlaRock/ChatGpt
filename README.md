@@ -83,3 +83,8 @@ See: `docs/SECURITY_DEPENDENCY_PLAN.md` and `docs/SECURITY_UPGRADE_PR_CHECKLIST.
 ## Mobil/PWA roadmap
 - Se `docs/MOBILE_PWA_NOTIFICATION_PLAN.md` för stegvis plan för mobilanpassning, app-installation (PWA) och aviseringar.
 
+## Mobile + PWA status
+- Mobilanpassning är implementerad med responsiv layout och touch-swipe mellan slides.
+- Grundläggande PWA-stöd finns (`manifest.webmanifest`, service worker, offline-sida och install-CTA).
+- Aviseringar har UI-stöd i klienten, men backend-flöde för push-subscriptions är nästa steg.
+

@@ -6,9 +6,15 @@
 - Besökare ska kunna installera sajten som app (PWA) från mobil och desktop.
 
 ## Nuvarande nuläge (kort)
+
+## Status (uppdaterad 2026-02-25)
+- ✅ **Fas 1 påbörjad i kod:** responsiv kolumnlayout, mobilvänlig topbar och swipe-stöd för slides.
+- ✅ **Fas 2 delvis implementerad:** `manifest.webmanifest`, service worker-registrering, offline fallback och install-knapp kopplad till `beforeinstallprompt`.
+- 🟡 **Fas 3 ej klar:** full push-subscription med backend och segmenterade utskick återstår.
+
 - Appen är en Vite/React SPA med inline-styles + enkel global CSS.
-- Det finns ingen Web App Manifest-fil, ingen service worker och ingen push-infrastruktur.
-- Navigering finns med knappar + piltangenter, men UX är inte explicit optimerad för touch/mobil.
+- Web App Manifest och service worker finns nu implementerade i grundform; push-infrastruktur saknas fortfarande.
+- Navigering stödjer nu knappar, piltangenter och swipe på mobil; ytterligare UX-justeringar kan fortfarande göras.
 
 ---
 

@@ -33,12 +33,22 @@ function runSelfTests() {
 export default function App() {
   const [idx, setIdx] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [installReady, setInstallReady] = useState(false);
+  const [notifState, setNotifState] = useState(() =>
+    typeof Notification === "undefined" ? "unsupported" : Notification.permission
+  );
   const img = useLocalImage();
   const hiddenRefs = useRef([]);
+  const touchStartX = useRef(null);
 
   useEffect(() => {
     runSelfTests();
   }, []);
+
+  const leftCol = useMemo(() => ({ gridColumn: isMobile ? "span 12" : "span 7" }), [isMobile]);
+  const rightCol = useMemo(() => ({ gridColumn: isMobile ? "span 12" : "span 5" }), [isMobile]);
 
   const slides = useMemo(
     () => [
@@ -50,7 +60,7 @@ export default function App() {
           "En körbar deck som styr tonalitet, tempo och publicerings-tryck. Ingen förklaring. Bara signal.",
         body: (img) => (
           <div style={{ ...styles.grid12, marginTop: 24 }}>
-            <div style={{ gridColumn: "span 7" }}>
+            <div style={leftCol}>
               <Card style={{ padding: 24 }}>
                 <div
                   style={{
@@ -161,7 +171,7 @@ export default function App() {
               </Card>
             </div>
 
-            <div style={{ gridColumn: "span 5" }}>
+            <div style={rightCol}>
               <Card style={{ padding: 12 }}>
                 <div
                   style={{
@@ -232,7 +242,7 @@ export default function App() {
           "Det här är ert “style police”-slide. Om ett inlägg inte följer detta: kasta det. Hellre få stenhårda posts än mycket brus.",
         body: () => (
           <div style={{ ...styles.grid12, marginTop: 24 }}>
-            <div style={{ gridColumn: "span 7" }}>
+            <div style={leftCol}>
               <Card style={{ padding: 24 }}>
                 <div style={{ display: "grid", gap: 14 }}>
                   <Pill icon={Snowflake} title="Visuellt språk">
@@ -250,7 +260,7 @@ export default function App() {
                 </div>
               </Card>
             </div>
-            <div style={{ gridColumn: "span 5" }}>
+            <div style={rightCol}>
               <Card style={{ padding: 24 }}>
                 <div style={{ fontSize: 11, letterSpacing: "0.2em", color: THEME.text4 }}>
                   COPY BANK (KORT & KALL)
@@ -365,7 +375,7 @@ export default function App() {
           "Ni är inte här för att ‘vara sociala’. Ni är här för att skicka en kall signal, om och om igen, tills folk lyssnar.",
         body: () => (
           <div style={{ ...styles.grid12, marginTop: 24 }}>
-            <div style={{ gridColumn: "span 7" }}>
+            <div style={leftCol}>
               <Card style={{ padding: 24 }}>
                 <div style={{ display: "grid", gap: 14 }}>
                   <Pill icon={Radio} title="Instagram (huvudplattform)">
@@ -383,7 +393,7 @@ export default function App() {
                 </div>
               </Card>
             </div>
-            <div style={{ gridColumn: "span 5" }}>
+            <div style={rightCol}>
               <Card style={{ padding: 24 }}>
                 <div style={{ fontSize: 11, letterSpacing: "0.2em", color: THEME.text4 }}>
                   FORMAT-MALLAR
@@ -435,7 +445,7 @@ export default function App() {
           "Det här är den tråkiga delen som gör att den coola delen fungerar. Gör detta en gång, så blir allt lätt.",
         body: () => (
           <div style={{ ...styles.grid12, marginTop: 24 }}>
-            <div style={{ gridColumn: "span 7" }}>
+            <div style={leftCol}>
               <Card style={{ padding: 24 }}>
                 <div style={{ fontSize: 11, letterSpacing: "0.2em", color: THEME.text4 }}>
                   FÖRBERED 7 DAGAR INNAN VECKA −3
@@ -453,7 +463,7 @@ export default function App() {
                 </div>
               </Card>
             </div>
-            <div style={{ gridColumn: "span 5" }}>
+            <div style={rightCol}>
               <Card style={{ padding: 24 }}>
                 <div style={{ fontSize: 11, letterSpacing: "0.2em", color: THEME.text4 }}>
                   48H KPI (HÅRD MÄTNING)
@@ -503,7 +513,7 @@ export default function App() {
           "Ni har ett starkt språk. Nu handlar det om repetition och tajming. Folk behöver höra signalen fler gånger än du tror — och de kommer tacka dig efteråt.",
         body: (img) => (
           <div style={{ ...styles.grid12, marginTop: 24 }}>
-            <div style={{ gridColumn: "span 7" }}>
+            <div style={leftCol}>
               <Card style={{ padding: 24 }}>
                 <div style={{ fontSize: 11, letterSpacing: "0.2em", color: THEME.text4 }}>
                   EN ENKEL REGLA
@@ -556,7 +566,7 @@ export default function App() {
               </Card>
             </div>
 
-            <div style={{ gridColumn: "span 5" }}>
+            <div style={rightCol}>
               <Card style={{ padding: 12 }}>
                 <div
                   style={{
@@ -604,7 +614,7 @@ export default function App() {
         ),
       },
     ],
-    []
+    [leftCol, rightCol]
   );
 
   const clamp = (n) => Math.max(0, Math.min(slides.length - 1, n));
@@ -620,6 +630,59 @@ export default function App() {
     return () => window.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => {
+    const onInstall = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      setInstallReady(true);
+    };
+    window.addEventListener("beforeinstallprompt", onInstall);
+    return () => window.removeEventListener("beforeinstallprompt", onInstall);
+  }, []);
+
+  const requestNotifications = async () => {
+    if (!("Notification" in window)) {
+      alert("Aviseringar stöds inte i den här webbläsaren.");
+      return;
+    }
+
+    const permission = await Notification.requestPermission();
+    setNotifState(permission);
+  };
+
+  const triggerInstall = async () => {
+    if (!installPrompt) {
+      alert("Installera via webbläsarens meny om knappen inte är tillgänglig.");
+      return;
+    }
+
+    installPrompt.prompt();
+    await installPrompt.userChoice;
+    setInstallPrompt(null);
+    setInstallReady(false);
+  };
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.changedTouches?.[0]?.clientX ?? null;
+  };
+
+  const handleTouchEnd = (e) => {
+    const start = touchStartX.current;
+    const end = e.changedTouches?.[0]?.clientX;
+    if (start == null || end == null) return;
+    const dx = end - start;
+    if (Math.abs(dx) < 50) return;
+    if (dx < 0) next();
+    if (dx > 0) prev();
+    touchStartX.current = null;
+  };
 
   const exportPdf = async () => {
     if (!img.dataUrl) {
@@ -644,9 +707,18 @@ export default function App() {
 
   return (
     <div style={styles.shell}>
-      <div style={styles.container}>
+      <div style={{ ...styles.container, padding: isMobile ? "16px 12px 28px" : styles.container.padding }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          <div style={styles.topbar}>
+          <div
+            style={{
+              ...styles.topbar,
+              position: isMobile ? "sticky" : "static",
+              top: 0,
+              zIndex: 5,
+              background: isMobile ? THEME.bg : "transparent",
+              paddingBottom: isMobile ? 8 : 0,
+            }}
+          >
             <div style={styles.badge}>
               <div style={styles.badgeIcon}>
                 <Radio size={20} color={THEME.text2} />
@@ -659,7 +731,7 @@ export default function App() {
               </div>
             </div>
 
-            <div style={styles.row}>
+            <div style={{ ...styles.row, width: isMobile ? "100%" : "auto" }}>
               <button
                 onClick={exportPdf}
                 style={{ ...styles.button, ...(busy ? styles.buttonDisabled : {}) }}
@@ -687,10 +759,30 @@ export default function App() {
                 Nästa
                 <ChevronRight size={16} color={THEME.text2} />
               </button>
+
+              <button
+                onClick={triggerInstall}
+                style={{ ...styles.button, ...(installReady ? {} : styles.buttonDisabled) }}
+                disabled={!installReady}
+                title={installReady ? "Installera appen" : "Installationsprompt är inte tillgänglig ännu"}
+              >
+                <Link2 size={16} color={THEME.text2} />
+                Installera app
+              </button>
+
+              <button
+                onClick={requestNotifications}
+                style={{ ...styles.button, ...(notifState === "granted" ? styles.buttonDisabled : {}) }}
+                disabled={notifState === "granted" || notifState === "unsupported"}
+                title="Aktivera släppaviseringar"
+              >
+                <Radio size={16} color={THEME.text2} />
+                {notifState === "granted" ? "Aviseringar aktiva" : "Aktivera aviseringar"}
+              </button>
             </div>
           </div>
 
-          <div style={styles.metaBar}>
+          <div style={{ ...styles.metaBar, flexWrap: isMobile ? "wrap" : "nowrap", padding: isMobile ? "10px 12px" : styles.metaBar.padding }}>
             <div style={{ fontSize: 13, color: THEME.text3 }}>
               Slide <span style={{ fontWeight: 800, color: THEME.text }}>{idx + 1}</span> / {slides.length}
             </div>
@@ -704,12 +796,14 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.25 }}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
             >
               <SlideBody slide={slides[idx]} img={img} />
             </motion.div>
           </AnimatePresence>
 
-          <div style={styles.footerTip}>
+          <div style={{ ...styles.footerTip, fontSize: isMobile ? 11 : styles.footerTip.fontSize }}>
             <span style={{ color: THEME.text4 }}>Snabbt användartips:</span> Exportera PDF när ni laddat upp nyckelbilden.
             PDF:en blir en säljande “one-deck” ni kan skicka till team, label, press eller hålla som intern handbok.
           </div>
