@@ -80,3 +80,7 @@ Current `npm audit --omit=dev` is clean (`found 0 vulnerabilities`) for producti
 A forced auto-fix upgrades Vite to a newer major version, so this should be validated in a dedicated dependency PR before adoption.
 
 See: `docs/SECURITY_DEPENDENCY_PLAN.md` and `docs/SECURITY_UPGRADE_PR_CHECKLIST.md`.
+
+
+Netlify Deploy Permalink:
+https://699e5a8da7a48f000826d79c--av-stb.netlify.app/
