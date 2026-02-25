@@ -23,6 +23,9 @@ export default function App() {
   const [isCompact, setIsCompact] = useState(() => (typeof window !== "undefined" ? window.innerWidth <= 900 : false));
   const [isEditing, setIsEditing] = useState(false);
   const [saveState, setSaveState] = useState("sparad");
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStatus, setUploadStatus] = useState("idle");
+  const [uploadMessage, setUploadMessage] = useState("");
   const [deck, setDeck] = useState(() => loadDeckFromStorage() || DEFAULT_DECK);
   const [media, setMedia] = useState(() => deck.media || []);
   const hiddenRefs = useRef([]);
@@ -117,7 +120,20 @@ export default function App() {
       alert("Välj en PNG/JPG/WebP.");
       return;
     }
+
+    setUploadStatus("reading");
+    setUploadProgress(0);
+    setUploadMessage(`Läser in ${file.name}...`);
+
     const reader = new FileReader();
+    reader.onprogress = (event) => {
+      if (!event.lengthComputable) return;
+      setUploadProgress(Math.round((event.loaded / event.total) * 100));
+    };
+    reader.onerror = () => {
+      setUploadStatus("error");
+      setUploadMessage("Kunde inte läsa filen. Försök igen.");
+    };
     reader.onload = () => {
       setMedia((current) => [
         ...current,
@@ -128,6 +144,20 @@ export default function App() {
           alt: file.name,
         },
       ]);
+      setUploadStatus("done");
+      setUploadProgress(100);
+      setUploadMessage(`${file.name} uppladdad`);
+    };
+    reader.onloadstart = () => setUploadStatus("reading");
+    reader.onabort = () => {
+      setUploadStatus("error");
+      setUploadMessage("Uppladdningen avbröts.");
+    };
+    reader.onloadend = () => {
+      setTimeout(() => {
+        setUploadStatus("idle");
+        setUploadProgress(0);
+      }, 1000);
     };
     reader.readAsDataURL(file);
   };
@@ -175,7 +205,7 @@ export default function App() {
               </div>
             </div>
 
-            <div style={{ ...styles.row, width: isCompact ? "100%" : "auto" }}>
+            <div style={{ ...styles.toolbar, width: isCompact ? "100%" : "auto" }}>
               <button onClick={() => setIsEditing((v) => !v)} style={{ ...styles.button, ...(isCompact ? { minHeight: 46 } : {}) }}>
                 <Pencil size={16} color={THEME.text2} />
                 {isEditing ? "Visningsläge" : "Redigeringsläge"}
@@ -206,7 +236,7 @@ export default function App() {
             </Card>
           ) : null}
 
-          <div style={styles.metaBar}>
+          <div style={{ ...styles.metaBar, ...(isCompact ? { gridTemplateColumns: "1fr" } : {}) }}>
             <div style={{ fontSize: 13, color: THEME.text3 }}>Slide <strong style={{ color: THEME.text }}>{idx + 1}</strong> / {slides.length}</div>
             <div style={{ fontSize: 11, color: THEME.text4 }}>{mediaCountLabel}</div>
             <div style={{ fontSize: 11, color: THEME.text4, display: "inline-flex", alignItems: "center", gap: 6 }}>
@@ -265,6 +295,17 @@ export default function App() {
                     <Upload size={14} color={THEME.text2} /> Ladda upp bild
                     <input type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => onPickMedia(e.target.files?.[0])} />
                   </label>
+                  {uploadStatus !== "idle" ? (
+                    <div style={uploadWrapStyle}>
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 10, fontSize: 11, color: THEME.text3 }}>
+                        <span>{uploadMessage || "Laddar upp bild"}</span>
+                        <span>{uploadProgress}%</span>
+                      </div>
+                      <div style={uploadTrackStyle}>
+                        <div style={{ ...uploadFillStyle, width: `${uploadProgress}%`, background: uploadStatus === "error" ? "#ef4444" : "#22c55e" }} />
+                      </div>
+                    </div>
+                  ) : null}
                   <button style={{ ...miniBtn, justifyContent: "center" }} onClick={() => { setDeck(DEFAULT_DECK); setMedia([]); clearDeckStorage(); }}>
                     Återställ till standard
                   </button>
@@ -280,7 +321,7 @@ export default function App() {
       <div style={{ position: "fixed", left: -10000, top: 0, width: 1200 }} aria-hidden="true">
         {slides.map((slide, i) => (
           <div key={slide.id} ref={(el) => (hiddenRefs.current[i] = el)} style={{ background: THEME.bg, color: THEME.text }}>
-            <div style={{ padding: 40 }}>
+            <div style={{ padding: 40, borderRadius: 24, border: `1px solid ${THEME.border}`, background: "linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0))" }}>
               <div style={{ marginBottom: 18, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
                   <div style={{ fontSize: 11, letterSpacing: "0.2em", color: THEME.text4 }}>{deck.name}</div>
@@ -371,6 +412,28 @@ function BlockFields({ block, onChange, media }) {
 
   return null;
 }
+
+const uploadWrapStyle = {
+  borderRadius: 10,
+  border: `1px solid ${THEME.border}`,
+  background: THEME.panel2,
+  padding: "8px 10px",
+  display: "grid",
+  gap: 6,
+};
+
+const uploadTrackStyle = {
+  height: 8,
+  borderRadius: 999,
+  overflow: "hidden",
+  background: "rgba(255,255,255,0.08)",
+};
+
+const uploadFillStyle = {
+  height: "100%",
+  borderRadius: 999,
+  transition: "width 160ms ease",
+};
 
 const inputStyle = {
   borderRadius: 10,

@@ -11,17 +11,30 @@ function ImageBlock({ block, media }) {
         style={{
           marginTop: 10,
           width: "100%",
-          aspectRatio: "1/1",
           borderRadius: 14,
           border: `1px solid ${THEME.border}`,
           overflow: "hidden",
           background: THEME.panel2,
+          position: "relative",
         }}
       >
+        <div style={{ paddingTop: "100%" }} />
         {image ? (
-          <img src={image.dataUrl} alt={image.alt || image.fileName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <img
+            src={image.dataUrl}
+            alt={image.alt || image.fileName}
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
+              objectPosition: "center",
+              background: "rgba(0,0,0,0.25)",
+            }}
+          />
         ) : (
-          <div style={{ fontSize: 12, color: THEME.text4, display: "grid", placeItems: "center", height: "100%", padding: 16, textAlign: "center" }}>
+          <div style={{ fontSize: 12, color: THEME.text4, display: "grid", placeItems: "center", position: "absolute", inset: 0, padding: 16, textAlign: "center" }}>
             Ingen bild vald ännu.
           </div>
         )}

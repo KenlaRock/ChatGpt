@@ -19,9 +19,9 @@ export const styles = {
     color: THEME.text,
   },
   container: {
-    maxWidth: 1152,
+    maxWidth: 1200,
     margin: "0 auto",
-    padding: "40px 24px 56px",
+    padding: "32px 20px 44px",
   },
   topbar: {
     display: "flex",
@@ -43,6 +43,13 @@ export const styles = {
   },
   badgeText: { display: "flex", flexDirection: "column", gap: 2 },
   row: { display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" },
+  toolbar: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(140px, max-content))",
+    gap: 8,
+    alignItems: "center",
+    justifyContent: "end",
+  },
   button: {
     display: "inline-flex",
     alignItems: "center",
@@ -59,9 +66,9 @@ export const styles = {
   },
   buttonDisabled: { opacity: 0.45, cursor: "not-allowed" },
   metaBar: {
-    display: "flex",
+    display: "grid",
+    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
     alignItems: "center",
-    justifyContent: "space-between",
     gap: 12,
     borderRadius: 16,
     border: `1px solid ${THEME.border}`,
