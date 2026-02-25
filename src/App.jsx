@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, FileDown, Link2, Pencil, Save, Upload, Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileDown, Link2, Pencil, Save, Upload, Plus, Trash2, ArrowUp, ArrowDown, CopyPlus, Settings2 } from "lucide-react";
 import { THEME, styles } from "./theme";
 import { Card, SectionTitle } from "./components/primitives";
 import { exportSlidesToPdf } from "./lib/pdf";
@@ -11,6 +11,22 @@ import { isSyncEnabled, pullDeckFromServer, pushDeckToServer } from "./lib/deckS
 import { BlockRenderer } from "./components/BlockRenderer";
 
 const makeId = () => (globalThis.crypto?.randomUUID?.() ? globalThis.crypto.randomUUID() : `id-${Date.now()}-${Math.random().toString(16).slice(2)}`);
+
+const UI_PREFS_KEY = "nsr_ui_prefs_v1";
+
+const DEFAULT_EXPORT_SETTINGS = {
+  orientation: "landscape",
+  format: "a4",
+  quality: 2,
+  includeDeckMeta: true,
+  includeBackground: true,
+};
+
+const DEFAULT_UI_PREFS = {
+  density: "cozy",
+  showHints: true,
+  showTelemetry: true,
+};
 
 const newBlockTemplate = {
   text: () => ({ id: makeId(), type: "text", props: { heading: "Ny rubrik", body: "Ny text" } }),
@@ -25,6 +41,7 @@ export default function App() {
   const [exportProgress, setExportProgress] = useState(0);
   const [isCompact, setIsCompact] = useState(() => (typeof window !== "undefined" ? window.innerWidth <= 900 : false));
   const [isEditing, setIsEditing] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [saveState, setSaveState] = useState("sparad");
   const [saveProgress, setSaveProgress] = useState(0);
   const [saveStorage, setSaveStorage] = useState("local");
@@ -37,7 +54,39 @@ export default function App() {
   const hiddenRefs = useRef([]);
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [exportSettings, setExportSettings] = useState(DEFAULT_EXPORT_SETTINGS);
+  const [uiPrefs, setUiPrefs] = useState(DEFAULT_UI_PREFS);
   const isIOS = typeof navigator !== "undefined" && /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+  const denseMode = uiPrefs.density === "compact";
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const raw = window.localStorage.getItem(UI_PREFS_KEY);
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed?.uiPrefs) {
+        setUiPrefs((current) => ({ ...current, ...parsed.uiPrefs }));
+      }
+      if (parsed?.exportSettings) {
+        setExportSettings((current) => ({ ...current, ...parsed.exportSettings }));
+      }
+    } catch (error) {
+      console.warn("Could not parse UI preferences", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(
+      UI_PREFS_KEY,
+      JSON.stringify({
+        uiPrefs,
+        exportSettings,
+      }),
+    );
+  }, [uiPrefs, exportSettings]);
 
   useEffect(() => {
     const boot = async () => {
@@ -160,6 +209,28 @@ export default function App() {
     updateSlide(slideId, (slide) => ({ ...slide, blocks: slide.blocks.filter((block) => block.id !== blockId) }));
   };
 
+  const duplicateSlide = (slideId) => {
+    setDeck((current) => {
+      const at = current.slides.findIndex((slide) => slide.id === slideId);
+      if (at < 0) return current;
+      const source = current.slides[at];
+      const duplicated = {
+        ...source,
+        id: makeId(),
+        title: `${source.title} (kopia)`,
+        blocks: source.blocks.map((block) => ({ ...block, id: makeId() })),
+      };
+      const slidesNext = [...current.slides];
+      slidesNext.splice(at + 1, 0, duplicated);
+      setIdx(at + 1);
+      return {
+        ...current,
+        version: (Number.parseInt(current.version || "1", 10) + 1).toString(),
+        slides: slidesNext,
+      };
+    });
+  };
+
   const moveBlock = (slideId, blockId, dir) => {
     updateSlide(slideId, (slide) => {
       const at = slide.blocks.findIndex((block) => block.id === blockId);
@@ -228,6 +299,7 @@ export default function App() {
         nodes,
         fileName: deck.name,
         bgColor: THEME.bg,
+        options: exportSettings,
         onProgress: (progress) => setExportProgress(progress),
       });
     } catch (error) {
@@ -255,7 +327,7 @@ export default function App() {
   return (
     <div style={styles.shell}>
       <div style={{ ...styles.container, padding: isCompact ? "24px 16px 40px" : styles.container.padding }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: denseMode ? 14 : 20 }}>
           <div style={{ ...styles.topbar, alignItems: isCompact ? "flex-start" : "center" }}>
             <div style={styles.badge}>
               <div style={styles.badgeIcon}>
@@ -271,6 +343,10 @@ export default function App() {
               <button onClick={() => setIsEditing((v) => !v)} style={{ ...styles.button, ...(isCompact ? { minHeight: 46 } : {}) }}>
                 <Pencil size={16} color={THEME.text2} />
                 {isEditing ? "Visningsläge" : "Redigeringsläge"}
+              </button>
+              <button onClick={() => setShowSettings((v) => !v)} style={styles.button}>
+                <Settings2 size={16} color={THEME.text2} />
+                {showSettings ? "Dölj inställningar" : "Inställningar"}
               </button>
               <button onClick={exportPdf} style={{ ...styles.button, ...(busy ? styles.buttonDisabled : {}) }} disabled={busy}>
                 <FileDown size={16} color={THEME.text2} />
@@ -331,6 +407,69 @@ export default function App() {
             </div>
           ) : null}
 
+          {showSettings ? (
+            <Card style={{ padding: 14 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: THEME.text2 }}>Kvalitet & export</div>
+              <div style={{ marginTop: 10, display: "grid", gap: 8, gridTemplateColumns: isCompact ? "1fr" : "repeat(2, minmax(0, 1fr))" }}>
+                <label style={settingsLabelStyle}>
+                  PDF-orientering
+                  <select
+                    value={exportSettings.orientation}
+                    onChange={(e) => setExportSettings((current) => ({ ...current, orientation: e.target.value }))}
+                    style={inputStyle}
+                  >
+                    <option value="landscape">Liggande</option>
+                    <option value="portrait">Stående</option>
+                  </select>
+                </label>
+                <label style={settingsLabelStyle}>
+                  Upplösning
+                  <select
+                    value={String(exportSettings.quality)}
+                    onChange={(e) => setExportSettings((current) => ({ ...current, quality: Number(e.target.value) }))}
+                    style={inputStyle}
+                  >
+                    <option value="1">Normal (snabb)</option>
+                    <option value="2">Hög (balanserad)</option>
+                    <option value="3">Max (större fil)</option>
+                  </select>
+                </label>
+                <label style={toggleStyle}>
+                  <input
+                    type="checkbox"
+                    checked={uiPrefs.density === "compact"}
+                    onChange={(e) => setUiPrefs((current) => ({ ...current, density: e.target.checked ? "compact" : "cozy" }))}
+                  />
+                  Kompakt layout
+                </label>
+                <label style={toggleStyle}>
+                  <input
+                    type="checkbox"
+                    checked={uiPrefs.showHints}
+                    onChange={(e) => setUiPrefs((current) => ({ ...current, showHints: e.target.checked }))}
+                  />
+                  Visa hjälptips
+                </label>
+                <label style={toggleStyle}>
+                  <input
+                    type="checkbox"
+                    checked={uiPrefs.showTelemetry}
+                    onChange={(e) => setUiPrefs((current) => ({ ...current, showTelemetry: e.target.checked }))}
+                  />
+                  Visa drift/telemetri
+                </label>
+                <label style={toggleStyle}>
+                  <input
+                    type="checkbox"
+                    checked={exportSettings.includeDeckMeta}
+                    onChange={(e) => setExportSettings((current) => ({ ...current, includeDeckMeta: e.target.checked }))}
+                  />
+                  Inkludera metarader i PDF
+                </label>
+              </div>
+            </Card>
+          ) : null}
+
           <div style={{ display: "grid", gap: 16, gridTemplateColumns: isEditing && !isCompact ? "2fr 1fr" : "1fr" }}>
             <AnimatePresence mode="wait">
               <motion.div key={activeSlide.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
@@ -354,7 +493,7 @@ export default function App() {
                   <textarea value={activeSlide.subtitle} onChange={(e) => updateSlide(activeSlide.id, (s) => ({ ...s, subtitle: e.target.value }))} style={{ ...inputStyle, minHeight: 82 }} />
                 </div>
 
-                <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
+                <div style={{ marginTop: 14, display: "grid", gap: denseMode ? 8 : 10 }}>
                   {activeSlide.blocks.map((block) => (
                     <Card key={block.id} style={{ padding: 10 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
@@ -371,15 +510,17 @@ export default function App() {
                 </div>
 
 
-                <Card style={{ marginTop: 12, padding: 10 }}>
-                  <div style={{ fontSize: 12, color: THEME.text2, fontWeight: 700 }}>Drift/telemetri (lokal)</div>
-                  <div style={{ marginTop: 6, fontSize: 11, color: THEME.text4 }}>
-                    local saves: {telemetry.counters?.storage_save_local_success || 0} •
-                    indexeddb fallback: {telemetry.counters?.storage_save_indexeddb_fallback || 0} •
-                    sync ok: {telemetry.counters?.sync_push_success || 0} •
-                    sync konflikt: {telemetry.counters?.sync_conflict || 0}
-                  </div>
-                </Card>
+                {uiPrefs.showTelemetry ? (
+                  <Card style={{ marginTop: 12, padding: 10 }}>
+                    <div style={{ fontSize: 12, color: THEME.text2, fontWeight: 700 }}>Drift/telemetri (lokal)</div>
+                    <div style={{ marginTop: 6, fontSize: 11, color: THEME.text4 }}>
+                      local saves: {telemetry.counters?.storage_save_local_success || 0} •
+                      indexeddb fallback: {telemetry.counters?.storage_save_indexeddb_fallback || 0} •
+                      sync ok: {telemetry.counters?.sync_push_success || 0} •
+                      sync konflikt: {telemetry.counters?.sync_conflict || 0}
+                    </div>
+                  </Card>
+                ) : null}
                 <div style={{ marginTop: 12, display: "grid", gap: 8 }}>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     {Object.keys(newBlockTemplate).map((type) => (
@@ -392,6 +533,9 @@ export default function App() {
                     <Upload size={14} color={THEME.text2} /> Ladda upp bild
                     <input type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => onPickMedia(e.target.files?.[0])} />
                   </label>
+                  <button style={{ ...miniBtn, justifyContent: "center" }} onClick={() => duplicateSlide(activeSlide.id)}>
+                    <CopyPlus size={14} /> Duplicera slide
+                  </button>
                   {uploadStatus !== "idle" ? (
                     <div style={uploadWrapStyle}>
                       <div style={{ display: "flex", justifyContent: "space-between", gap: 10, fontSize: 11, color: THEME.text3 }}>
@@ -418,14 +562,19 @@ export default function App() {
             ) : null}
           </div>
 
-          <div style={styles.footerTip}>Tips: lägg till/ta bort block i redigeringsläge. Ändringar sparas lokalt automatiskt.</div>
+          {uiPrefs.showHints ? <div style={styles.footerTip}>Tips: lägg till/ta bort block i redigeringsläge. Ändringar sparas lokalt automatiskt.</div> : null}
         </div>
       </div>
 
       <div style={{ position: "fixed", left: -10000, top: 0, width: 1200 }} aria-hidden="true">
         {slides.map((slide, i) => (
-          <div key={slide.id} ref={(el) => (hiddenRefs.current[i] = el)} style={{ background: THEME.bg, color: THEME.text }}>
+          <div
+            key={slide.id}
+            ref={(el) => (hiddenRefs.current[i] = el)}
+            style={{ background: exportSettings.includeBackground ? THEME.bg : "#ffffff", color: THEME.text }}
+          >
             <div style={{ padding: 40, borderRadius: 24, border: `1px solid ${THEME.border}`, background: "linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0))" }}>
+              {exportSettings.includeDeckMeta ? (
               <div style={{ marginBottom: 18, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
                   <div style={{ fontSize: 11, letterSpacing: "0.2em", color: THEME.text4 }}>{deck.name}</div>
@@ -433,6 +582,7 @@ export default function App() {
                 </div>
                 <div style={{ fontSize: 11, color: THEME.text4 }}>{new Date().toISOString().slice(0, 10)}</div>
               </div>
+            ) : null}
 
               <SectionTitle kicker={slide.kicker} title={slide.title} subtitle={slide.subtitle} />
               <div style={{ marginTop: 20, display: "grid", gap: 12 }}>
@@ -441,10 +591,12 @@ export default function App() {
                 ))}
               </div>
 
-              <div style={{ marginTop: 18, display: "flex", justifyContent: "space-between", fontSize: 11, color: THEME.text4 }}>
-                <div>Cold Protocol • Active</div>
-                <div>{i + 1}/{slides.length}</div>
-              </div>
+              {exportSettings.includeDeckMeta ? (
+                <div style={{ marginTop: 18, display: "flex", justifyContent: "space-between", fontSize: 11, color: THEME.text4 }}>
+                  <div>Cold Protocol • Active</div>
+                  <div>{i + 1}/{slides.length}</div>
+                </div>
+              ) : null}
             </div>
           </div>
         ))}
@@ -581,4 +733,19 @@ const miniBtn = {
   fontSize: 12,
   padding: "6px 10px",
   cursor: "pointer",
+};
+
+const settingsLabelStyle = {
+  display: "grid",
+  gap: 6,
+  fontSize: 11,
+  color: THEME.text3,
+};
+
+const toggleStyle = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 8,
+  fontSize: 12,
+  color: THEME.text2,
 };
