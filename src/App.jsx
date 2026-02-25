@@ -1,52 +1,34 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Upload,
-  Target,
-  Snowflake,
-  Sparkles,
-  Radio,
-  Gauge,
-  Link2,
-  Layers,
-  FileDown,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, FileDown, Link2, Pencil, Save, Upload, Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { THEME, styles } from "./theme";
-import { Card, Pill, Checklist, TimelineRow, SlideBody } from "./components/primitives";
-import { useLocalImage } from "./hooks/useLocalImage";
+import { Card, SectionTitle } from "./components/primitives";
 import { exportSlidesToPdf } from "./lib/pdf";
+import { DEFAULT_DECK } from "./data/initialDeck";
+import { clearDeckStorage, loadDeckFromStorage, saveDeckToStorage } from "./lib/deckStorage";
+import { BlockRenderer } from "./components/BlockRenderer";
 
-/**
- * NOTE: This build intentionally avoids Tailwind + advanced color functions (oklch).
- * All colors are hex/rgba and all layout is plain CSS/inline styles for max compatibility.
- */
-// Tests (simple runtime asserts)
-function runSelfTests() {
-  const themeStr = JSON.stringify(THEME);
-  console.assert(!/oklch\(/i.test(themeStr), "THEME contains oklch() — should not happen.");
-  console.assert(/^#/.test(THEME.bg), "THEME.bg should be hex.");
-  console.assert(/rgba\(/.test(THEME.panel), "THEME.panel should be rgba().");
-}
+const makeId = () => (globalThis.crypto?.randomUUID?.() ? globalThis.crypto.randomUUID() : `id-${Date.now()}-${Math.random().toString(16).slice(2)}`);
+
+const newBlockTemplate = {
+  text: () => ({ id: makeId(), type: "text", props: { heading: "Ny rubrik", body: "Ny text" } }),
+  checklist: () => ({ id: makeId(), type: "checklist", props: { heading: "Ny checklista", items: ["Punkt 1"] } }),
+  quote: () => ({ id: makeId(), type: "quote", props: { text: "Ny quote", subtext: "Underrad" } }),
+  image: () => ({ id: makeId(), type: "image", props: { heading: "Ny bild", imageId: null, caption: "Bildtext" } }),
+};
 
 export default function App() {
   const [idx, setIdx] = useState(0);
   const [busy, setBusy] = useState(false);
-  const [isCompact, setIsCompact] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth <= 900 : false
-  );
+  const [isCompact, setIsCompact] = useState(() => (typeof window !== "undefined" ? window.innerWidth <= 900 : false));
+  const [isEditing, setIsEditing] = useState(false);
+  const [saveState, setSaveState] = useState("sparad");
+  const [deck, setDeck] = useState(() => loadDeckFromStorage() || DEFAULT_DECK);
+  const [media, setMedia] = useState(() => deck.media || []);
+  const hiddenRefs = useRef([]);
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
   const [isStandalone, setIsStandalone] = useState(false);
-  const img = useLocalImage();
-  const hiddenRefs = useRef([]);
-
-  const isIOS =
-    typeof navigator !== "undefined" && /iphone|ipad|ipod/i.test(navigator.userAgent);
-
-  useEffect(() => {
-    runSelfTests();
-  }, []);
+  const isIOS = typeof navigator !== "undefined" && /iphone|ipad|ipod/i.test(navigator.userAgent);
 
   useEffect(() => {
     const onResize = () => setIsCompact(window.innerWidth <= 900);
@@ -55,600 +37,29 @@ export default function App() {
       setInstallPromptEvent(e);
     };
 
-    const standalone =
-      window.matchMedia?.("(display-mode: standalone)")?.matches ||
-      window.navigator?.standalone === true;
+    const standalone = window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator?.standalone === true;
     setIsStandalone(Boolean(standalone));
 
     window.addEventListener("resize", onResize);
     window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
-
     return () => {
       window.removeEventListener("resize", onResize);
       window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
     };
   }, []);
 
-  const layout = useMemo(
-    () => ({
-      grid12: {
-        ...styles.grid12,
-        marginTop: 24,
-        gridTemplateColumns: isCompact ? "1fr" : styles.grid12.gridTemplateColumns,
-      },
-      mainCol: { gridColumn: isCompact ? "1 / -1" : "span 7" },
-      sideCol: { gridColumn: isCompact ? "1 / -1" : "span 5" },
-    }),
-    [isCompact]
-  );
+  useEffect(() => {
+    const toSave = { ...deck, media };
+    setSaveState("sparar");
+    const t = setTimeout(() => {
+      saveDeckToStorage(toSave);
+      setSaveState("sparad");
+    }, 250);
+    return () => clearTimeout(t);
+  }, [deck, media]);
 
-  const slides = useMemo(
-    () => [
-      {
-        id: "hero",
-        title: "North Star Rising — Releaseplan & Social Media-plan",
-        kicker: "KALL SIGNAL / KALL PRECISION",
-        subtitle:
-          "En körbar deck som styr tonalitet, tempo och publicerings-tryck. Ingen förklaring. Bara signal.",
-        body: (img) => (
-          <div style={layout.grid12}>
-            <div style={layout.mainCol}>
-              <Card style={{ padding: 24 }}>
-                <div
-                  style={{
-                    display: "flex",
-                    flexWrap: isCompact ? "wrap" : "nowrap",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 16,
-                  }}
-                >
-                  <div>
-                    <div
-                      style={{
-                        fontSize: 11,
-                        letterSpacing: "0.2em",
-                        color: THEME.text4,
-                      }}
-                    >
-                      NYCKELASSET
-                    </div>
-                    <div
-                      style={{
-                        marginTop: 6,
-                        fontSize: 18,
-                        fontWeight: 700,
-                        color: THEME.text,
-                      }}
-                    >
-                      Bifogad 3x3-panel
-                    </div>
-                    <div
-                      style={{
-                        marginTop: 6,
-                        fontSize: 13,
-                        color: THEME.text3,
-                        lineHeight: 1.6,
-                      }}
-                    >
-                      Ladda upp bilden så blir den ett centralt element i hela
-                      presentationen.
-                    </div>
-                  </div>
-
-                  <label style={{ ...styles.button }}>
-                    <Upload size={16} color={THEME.text2} />
-                    <span>Ladda upp bild</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      style={{ display: "none" }}
-                      onChange={(e) => img.onPick(e.target.files?.[0])}
-                    />
-                  </label>
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 18,
-                    display: "grid",
-                    gap: 14,
-                    gridTemplateColumns: isCompact ? "1fr" : "repeat(2, minmax(0, 1fr))",
-                  }}
-                >
-                  <Pill icon={Target} title="Mål (hårt)">
-                    Igenkänning + mystik. Förväntan. Max tryck första 48 timmar.
-                  </Pill>
-                  <Pill icon={Snowflake} title="Estetik (helig)">
-                    Svart/vitt, stål, is, rök, ljuskontrast, symbolik. Minimal
-                    accent.
-                  </Pill>
-                  <Pill icon={Gauge} title="Tempo">
-                    Långsamt → explosivt. Tease bygger spänning. Release smäller.
-                  </Pill>
-                  <Pill icon={Radio} title="Persona">
-                    Anonym styrka. Kall precision. Nordisk tyngd. Inga emojis.
-                    Inga ursäkter.
-                  </Pill>
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 18,
-                    borderRadius: 16,
-                    border: `1px solid ${THEME.border}`,
-                    background: THEME.panel2,
-                    padding: 16,
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 11,
-                      letterSpacing: "0.2em",
-                      color: THEME.text4,
-                    }}
-                  >
-                    MINDSET
-                  </div>
-                  <div
-                    style={{
-                      marginTop: 8,
-                      fontSize: 16,
-                      fontWeight: 700,
-                      color: THEME.text,
-                    }}
-                  >
-                    “Vi förklarar inte — vi visar.”
-                  </div>
-                </div>
-              </Card>
-            </div>
-
-            <div style={layout.sideCol}>
-              <Card style={{ padding: 12 }}>
-                <div
-                  style={{
-                    width: "100%",
-                    aspectRatio: "1/1",
-                    overflow: "hidden",
-                    borderRadius: 14,
-                    border: `1px solid ${THEME.border}`,
-                    background: THEME.panel2,
-                  }}
-                >
-                  {img.dataUrl ? (
-                    <img
-                      src={img.dataUrl}
-                      alt={img.fileName || "Key visual"}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                      crossOrigin="anonymous"
-                    />
-                  ) : (
-                    <div
-                      style={{
-                        height: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        padding: 28,
-                        textAlign: "center",
-                      }}
-                    >
-                      <div>
-                        <div style={{ fontSize: 13, color: THEME.text3 }}>
-                          Ingen bild laddad ännu.
-                        </div>
-                        <div
-                          style={{ marginTop: 8, fontSize: 11, color: THEME.text4 }}
-                        >
-                          Klicka “Ladda upp bild” och välj den bifogade 3x3-panelen.
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div
-                  style={{
-                    marginTop: 10,
-                    padding: "0 6px 6px",
-                    fontSize: 11,
-                    color: THEME.text4,
-                  }}
-                >
-                  Tips: Kör samma bild som grid-post, men även som beskärda utsnitt i reels/stories.
-                </div>
-              </Card>
-            </div>
-          </div>
-        ),
-      },
-
-      {
-        id: "rules",
-        kicker: "REGLER SOM INTE FÅR BRYTAS",
-        title: "Estetik, text och disciplin",
-        subtitle:
-          "Det här är ert “style police”-slide. Om ett inlägg inte följer detta: kasta det. Hellre få stenhårda posts än mycket brus.",
-        body: () => (
-          <div style={layout.grid12}>
-            <div style={layout.mainCol}>
-              <Card style={{ padding: 24 }}>
-                <div style={{ display: "grid", gap: 14 }}>
-                  <Pill icon={Snowflake} title="Visuellt språk">
-                    Nära monokrom bas (kallt stål/aska/is). Rök/volumetrics. Hård ljuskontrast. Symbolen är diegetisk.
-                  </Pill>
-                  <Pill icon={Sparkles} title="Textspråk">
-                    Kort. Suggestivt. Imperativt. Punkt. Inga emojis. Inga förklaringar. Aldrig “nu släpper vi…”-snack.
-                  </Pill>
-                  <Pill icon={Gauge} title="Tempo & dramaturgi">
-                    Vecka -3/-2: bygg signal. Vecka -1: namnge. Releasedag: överkör.
-                  </Pill>
-                  <Pill icon={Layers} title="Upprepning (med flit)">
-                    Samma visuella språk tills det sätter sig. Variation = utsnitt, timing, ljudbit — inte ny identitet.
-                  </Pill>
-                </div>
-              </Card>
-            </div>
-            <div style={layout.sideCol}>
-              <Card style={{ padding: 24 }}>
-                <div style={{ fontSize: 11, letterSpacing: "0.2em", color: THEME.text4 }}>
-                  COPY BANK (KORT & KALL)
-                </div>
-                <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
-                  {[
-                    "THE SIGNAL IS LIVE.",
-                    "COLD PROTOCOL ACTIVE",
-                    "TRANSMISSION RECEIVED",
-                    "NO HEAT. NO MERCY.",
-                    "YOU HEARD IT. NOW MOVE.",
-                    "REPEAT.",
-                    "SECOND WAVE",
-                  ].map((t, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        borderRadius: 12,
-                        border: `1px solid ${THEME.border}`,
-                        background: THEME.panel2,
-                        padding: "10px 14px",
-                        fontSize: 13,
-                        fontWeight: 700,
-                        letterSpacing: 0.6,
-                        color: THEME.text2,
-                      }}
-                    >
-                      {t}
-                    </div>
-                  ))}
-                </div>
-                <div style={{ marginTop: 14, fontSize: 11, color: THEME.text4 }}>
-                  Stark åsikt: ni vinner på militär minimalism. Folk blir trygga av att ni låter som en maskin.
-                </div>
-              </Card>
-            </div>
-          </div>
-        ),
-      },
-
-      {
-        id: "timeline",
-        kicker: "3 VECKOR RUNT RELEASEN",
-        title: "Tidslinje som går att följa utan att tappa kyla",
-        subtitle:
-          "Strukturen nedan är designad för igenkänning, frekvensdisciplin och maximal conversion på dag 0–2.",
-        body: () => (
-          <div style={{ marginTop: 24, display: "grid", gap: 12 }}>
-            <TimelineRow
-              week="VECKA −3"
-              purpose="Tease / Närvaro"
-              items={[
-                "2–3 inlägg: stillbild eller 5–7s mörk loop (rök/rörelse/ljus)",
-                "Story: nedräkning utan kontext (bara datum/symbol)",
-                "CTA: ingen — du vill ha nyfikenhet, inte friktion",
-              ]}
-              microcopy="NORTHSTAR RISING — INITIATED"
-            />
-            <TimelineRow
-              week="VECKA −2"
-              purpose="Identitet"
-              items={[
-                "3–4 inlägg: reveal av logotyp/emblem (kallt, rent)",
-                "8–10s reel med instrumental snippet (utan titel)",
-                "Stillbild från artwork (delbeskuren) för att tvinga folk att “fylla i”",
-                "Story: poll “Cold / Colder” + loopad ljudsnutt",
-              ]}
-              microcopy="A NEW SIGNAL EMERGES — NORTHSTAR RISING"
-            />
-            <TimelineRow
-              week="VECKA −1"
-              purpose="Singelannonsering"
-              items={[
-                "4–5 inlägg: artwork reveal (hel bild)",
-                "Titel + releasedatum (en rad)",
-                "10–12s reel med refräng-drop",
-                "Pre-save post (link in bio) — inga ursäkter, bara order",
-                "Story: daglig nedräkning + hook-loop + pre-save",
-              ]}
-              microcopy="FROZEN IN CARBIDE — OUT [DATUM]"
-            />
-            <TimelineRow
-              week="RELEASEDAG"
-              purpose="Max tryck (48h)"
-              items={[
-                "Reel/video med starkaste delen (det ska kännas oundvikligt)",
-                "Stillbild + tydlig länk",
-                "Story x3: OUT NOW → Swipe/Link → Repost första reaktioner",
-                "Pinned post: singelreel",
-              ]}
-              microcopy="OUT NOW"
-            />
-            <TimelineRow
-              week="VECKA +1"
-              purpose="Eftertryck"
-              items={[
-                "3–4 inlägg: lyric-video loop + visualizer-clip",
-                "“Behind the sound” (abstrakt — inga pratiga selfies)",
-                "Kommentar-screenshot från lyssnare",
-              ]}
-              microcopy="YOU HEARD THE SIGNAL. NOW SPREAD IT."
-            />
-          </div>
-        ),
-      },
-
-      {
-        id: "platform",
-        kicker: "PLATTFORMAR",
-        title: "Samma signal — olika förpackning",
-        subtitle:
-          "Ni är inte här för att ‘vara sociala’. Ni är här för att skicka en kall signal, om och om igen, tills folk lyssnar.",
-        body: () => (
-          <div style={layout.grid12}>
-            <div style={layout.mainCol}>
-              <Card style={{ padding: 24 }}>
-                <div style={{ display: "grid", gap: 14 }}>
-                  <Pill icon={Radio} title="Instagram (huvudplattform)">
-                    Reels + Stories. Pinna singelreelen. Stories = nedräkning, poll, reaktioner.
-                  </Pill>
-                  <Pill icon={Radio} title="Facebook">
-                    Samma content men lägre frekvens. Hellre kvalitet än “närvaro”.
-                  </Pill>
-                  <Pill icon={Radio} title="TikTok (om ni kör)">
-                    7–10s drops. Loop-vänliga breakdowns. Inga förklaringar. Bara kraft.
-                  </Pill>
-                  <Pill icon={Link2} title="CTA-hygien">
-                    Vecka -3/-2: ingen CTA. Vecka -1: pre-save. Releasedag: OUT NOW + länk. Klart.
-                  </Pill>
-                </div>
-              </Card>
-            </div>
-            <div style={layout.sideCol}>
-              <Card style={{ padding: 24 }}>
-                <div style={{ fontSize: 11, letterSpacing: "0.2em", color: THEME.text4 }}>
-                  FORMAT-MALLAR
-                </div>
-                <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
-                  {[
-                    [
-                      "Reel 8–12s",
-                      "0.0–1.0s: visuellt hook. 1–10s: musikdrop. 10–12s: logga + 1 rad text.",
-                    ],
-                    [
-                      "Story (3-pack)",
-                      "1) signal/visual. 2) datum/OUT NOW. 3) länk/repost reaktion.",
-                    ],
-                    [
-                      "Stillbild",
-                      "Hel bild (vecka -1 & release). Utsnitt (vecka -2). Alltid kort copy.",
-                    ],
-                  ].map(([h, b], i) => (
-                    <div
-                      key={i}
-                      style={{
-                        borderRadius: 12,
-                        border: `1px solid ${THEME.border}`,
-                        background: THEME.panel2,
-                        padding: 14,
-                      }}
-                    >
-                      <div style={{ fontSize: 13, fontWeight: 700, color: THEME.text2 }}>
-                        {h}
-                      </div>
-                      <div style={{ marginTop: 6, fontSize: 13, color: THEME.text3, lineHeight: 1.6 }}>
-                        {b}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            </div>
-          </div>
-        ),
-      },
-
-      {
-        id: "ops",
-        kicker: "EXECUTION",
-        title: "Operativ checklista (så ni faktiskt gör det)",
-        subtitle:
-          "Det här är den tråkiga delen som gör att den coola delen fungerar. Gör detta en gång, så blir allt lätt.",
-        body: () => (
-          <div style={layout.grid12}>
-            <div style={layout.mainCol}>
-              <Card style={{ padding: 24 }}>
-                <div style={{ fontSize: 11, letterSpacing: "0.2em", color: THEME.text4 }}>
-                  FÖRBERED 7 DAGAR INNAN VECKA −3
-                </div>
-                <div style={{ marginTop: 14 }}>
-                  <Checklist
-                    items={[
-                      "Bygg en assetbank: 1 hel artwork, 6–12 utsnitt, 3–5 rök-loopar, 2–3 logga-only frames.",
-                      "Export: 1080×1920 (stories), 1080×1350 (feed), 1080×1080 (grid), 1920×1080 (YouTube/press).",
-                      "Sätt copybank i en Notion/Google Doc: 20 rader max. Inga emojis. Inga förklaringar.",
-                      "Lägg allt i en schemaläggare (Meta Business Suite) så ni inte improviserar sönder identiteten.",
-                      "Pinned post-plan: 1 reel (release) + 1 artwork (vecka -1).",
-                    ]}
-                  />
-                </div>
-              </Card>
-            </div>
-            <div style={layout.sideCol}>
-              <Card style={{ padding: 24 }}>
-                <div style={{ fontSize: 11, letterSpacing: "0.2em", color: THEME.text4 }}>
-                  48H KPI (HÅRD MÄTNING)
-                </div>
-                <div
-                  style={{
-                    marginTop: 14,
-                    display: "grid",
-                    gap: 10,
-                    color: THEME.text3,
-                    fontSize: 13,
-                  }}
-                >
-                  {[
-                    "Reel retention: sikta på att folk ser 70–90% (korta klipp vinner).",
-                    "Saves + Shares: viktigare än likes. Det är ‘signal sprids’-mätaren.",
-                    "Link clicks / pre-save: allt före release är friktionstest.",
-                    "Kommentarer: svara kort, kallt, konsekvent. Aldrig förklarande romaner.",
-                  ].map((t, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        borderRadius: 12,
-                        border: `1px solid ${THEME.border}`,
-                        background: THEME.panel2,
-                        padding: "10px 14px",
-                      }}
-                    >
-                      {t}
-                    </div>
-                  ))}
-                </div>
-                <div style={{ marginTop: 14, fontSize: 11, color: THEME.text4 }}>
-                  Stark åsikt: om retentionen suger är det inte algoritmen — det är att er reel inte har en brutal öppning.
-                </div>
-              </Card>
-            </div>
-          </div>
-        ),
-      },
-
-      {
-        id: "final",
-        kicker: "SLUTKOMMANDO",
-        title: "Publicera som en maskin",
-        subtitle:
-          "Ni har ett starkt språk. Nu handlar det om repetition och tajming. Folk behöver höra signalen fler gånger än du tror — och de kommer tacka dig efteråt.",
-        body: (img) => (
-          <div style={layout.grid12}>
-            <div style={layout.mainCol}>
-              <Card style={{ padding: 24 }}>
-                <div style={{ fontSize: 11, letterSpacing: "0.2em", color: THEME.text4 }}>
-                  EN ENKEL REGLA
-                </div>
-                <div
-                  style={{
-                    marginTop: 10,
-                    fontSize: 24,
-                    fontWeight: 800,
-                    letterSpacing: -0.3,
-                    color: THEME.text,
-                  }}
-                >
-                  Om det känns för repetitivt för dig — är det precis lagom för publiken.
-                </div>
-
-                <div style={{ marginTop: 18, display: "grid", gap: 12 }}>
-                  {[
-                    [
-                      "Daglig micro-rutin (vecka -1 & release)",
-                      "1) Story: datum/symbol. 2) Reel: 10–12s drop. 3) Kommentar: 1 kall rad. 4) Repost reaktioner.",
-                    ],
-                    ["Copy (default)", "Titel + datum. Eller: “TRANSMISSION RECEIVED.” Punkt."],
-                  ].map(([h, b], i) => (
-                    <div
-                      key={i}
-                      style={{
-                        borderRadius: 16,
-                        border: `1px solid ${THEME.border}`,
-                        background: THEME.panel2,
-                        padding: 16,
-                      }}
-                    >
-                      <div style={{ fontSize: 13, fontWeight: 700, color: THEME.text2 }}>
-                        {h}
-                      </div>
-                      <div
-                        style={{
-                          marginTop: 6,
-                          fontSize: 13,
-                          lineHeight: 1.6,
-                          color: THEME.text3,
-                        }}
-                      >
-                        {b}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            </div>
-
-            <div style={layout.sideCol}>
-              <Card style={{ padding: 12 }}>
-                <div
-                  style={{
-                    width: "100%",
-                    aspectRatio: "1/1",
-                    overflow: "hidden",
-                    borderRadius: 14,
-                    border: `1px solid ${THEME.border}`,
-                    background: THEME.panel2,
-                  }}
-                >
-                  {img.dataUrl ? (
-                    <img
-                      src={img.dataUrl}
-                      alt={img.fileName || "Key visual"}
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                      crossOrigin="anonymous"
-                    />
-                  ) : (
-                    <div
-                      style={{
-                        height: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        padding: 28,
-                        textAlign: "center",
-                      }}
-                    >
-                      <div>
-                        <div style={{ fontSize: 13, color: THEME.text3 }}>Ladda upp nyckelbilden.</div>
-                        <div style={{ marginTop: 8, fontSize: 11, color: THEME.text4 }}>
-                          Den här sliden är byggd för att bära er grid/estetik.
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div style={{ marginTop: 10, padding: "0 6px 6px", fontSize: 11, color: THEME.text4 }}>
-                  Pro-tip: gör 9-post grid-release (den här) på vecka -1 eller dag 0, och klipp samtidigt ut 3 rutor som story-teasers.
-                </div>
-              </Card>
-            </div>
-          </div>
-        ),
-      },
-    ],
-    [isCompact, layout]
-  );
+  const slides = deck.slides;
+  const activeSlide = slides[idx];
 
   const clamp = (n) => Math.max(0, Math.min(slides.length - 1, n));
   const next = () => setIdx((v) => clamp(v + 1));
@@ -664,22 +75,75 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const exportPdf = async () => {
-    if (!img.dataUrl) {
-      alert("Ladda upp nyckelbilden först — PDF:en ska bära den.");
+  const updateSlide = (slideId, updater) => {
+    setDeck((current) => ({
+      ...current,
+      slides: current.slides.map((slide) => (slide.id === slideId ? updater(slide) : slide)),
+    }));
+  };
+
+  const updateBlock = (slideId, blockId, updater) => {
+    updateSlide(slideId, (slide) => ({
+      ...slide,
+      blocks: slide.blocks.map((block) => (block.id === blockId ? updater(block) : block)),
+    }));
+  };
+
+  const addBlock = (slideId, type) => {
+    const factory = newBlockTemplate[type] || newBlockTemplate.text;
+    const block = factory();
+    if (!block.id) block.id = makeId();
+    updateSlide(slideId, (slide) => ({ ...slide, blocks: [...slide.blocks, block] }));
+  };
+
+  const deleteBlock = (slideId, blockId) => {
+    updateSlide(slideId, (slide) => ({ ...slide, blocks: slide.blocks.filter((block) => block.id !== blockId) }));
+  };
+
+  const moveBlock = (slideId, blockId, dir) => {
+    updateSlide(slideId, (slide) => {
+      const at = slide.blocks.findIndex((block) => block.id === blockId);
+      const to = at + dir;
+      if (at < 0 || to < 0 || to >= slide.blocks.length) return slide;
+      const copy = [...slide.blocks];
+      [copy[at], copy[to]] = [copy[to], copy[at]];
+      return { ...slide, blocks: copy };
+    });
+  };
+
+  const onPickMedia = (file) => {
+    if (!file) return;
+    if (!/image\/(png|jpeg|jpg|webp)/.test(file.type)) {
+      alert("Välj en PNG/JPG/WebP.");
       return;
     }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setMedia((current) => [
+        ...current,
+        {
+          id: makeId(),
+          fileName: file.name,
+          dataUrl: reader.result,
+          alt: file.name,
+        },
+      ]);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const exportPdf = async () => {
     setBusy(true);
     try {
       const nodes = hiddenRefs.current.filter(Boolean);
       await exportSlidesToPdf({
         nodes,
-        fileName: img.fileName,
+        fileName: deck.name,
         bgColor: THEME.bg,
       });
-    } catch (e) {
-      console.error(e);
-      alert("PDF-export misslyckades.\n\n" + (e?.message || ""));
+    } catch (error) {
+      console.error(error);
+      alert("PDF-export misslyckades.\n\n" + (error?.message || ""));
     } finally {
       setBusy(false);
     }
@@ -692,6 +156,10 @@ export default function App() {
     setInstallPromptEvent(null);
   };
 
+  const saveIndicator = saveState === "sparar" ? "Sparar…" : "Sparat";
+
+  const mediaCountLabel = useMemo(() => `${media.length} bild${media.length === 1 ? "" : "er"} i biblioteket`, [media.length]);
+
   return (
     <div style={styles.shell}>
       <div style={{ ...styles.container, padding: isCompact ? "24px 16px 40px" : styles.container.padding }}>
@@ -699,49 +167,32 @@ export default function App() {
           <div style={{ ...styles.topbar, alignItems: isCompact ? "flex-start" : "center" }}>
             <div style={styles.badge}>
               <div style={styles.badgeIcon}>
-                <Radio size={20} color={THEME.text2} />
+                <Pencil size={20} color={THEME.text2} />
               </div>
               <div style={styles.badgeText}>
-                <div style={{ fontSize: 13, color: THEME.text3 }}>Körbar deck</div>
-                <div style={{ fontSize: 11, color: THEME.text4 }}>
-                  Navigera med pilarna eller piltangenter.
-                </div>
+                <div style={{ fontSize: 13, color: THEME.text3 }}>Datadriven strategiapp</div>
+                <div style={{ fontSize: 11, color: THEME.text4 }}>Visning/redigering + lokal autosave.</div>
               </div>
             </div>
 
             <div style={{ ...styles.row, width: isCompact ? "100%" : "auto" }}>
-              <button
-                onClick={exportPdf}
-                style={{ ...styles.button, ...(isCompact ? { minHeight: 46 } : {}), ...(busy ? styles.buttonDisabled : {}) }}
-                disabled={busy}
-                title={img.dataUrl ? "Exportera hela presentationen till PDF" : "Ladda upp nyckelbilden först"}
-              >
+              <button onClick={() => setIsEditing((v) => !v)} style={{ ...styles.button, ...(isCompact ? { minHeight: 46 } : {}) }}>
+                <Pencil size={16} color={THEME.text2} />
+                {isEditing ? "Visningsläge" : "Redigeringsläge"}
+              </button>
+              <button onClick={exportPdf} style={{ ...styles.button, ...(busy ? styles.buttonDisabled : {}) }} disabled={busy}>
                 <FileDown size={16} color={THEME.text2} />
                 {busy ? "Exporterar…" : "Exportera PDF"}
               </button>
-
-              <button
-                onClick={prev}
-                style={{ ...styles.button, ...(isCompact ? { minHeight: 46 } : {}), ...(idx === 0 ? styles.buttonDisabled : {}) }}
-                disabled={idx === 0}
-              >
-                <ChevronLeft size={16} color={THEME.text2} />
-                Föregående
+              <button onClick={prev} style={{ ...styles.button, ...(idx === 0 ? styles.buttonDisabled : {}) }} disabled={idx === 0}>
+                <ChevronLeft size={16} color={THEME.text2} /> Föregående
               </button>
-
-              <button
-                onClick={next}
-                style={{ ...styles.button, ...(isCompact ? { minHeight: 46 } : {}), ...(idx === slides.length - 1 ? styles.buttonDisabled : {}) }}
-                disabled={idx === slides.length - 1}
-              >
-                Nästa
-                <ChevronRight size={16} color={THEME.text2} />
+              <button onClick={next} style={{ ...styles.button, ...(idx === slides.length - 1 ? styles.buttonDisabled : {}) }} disabled={idx === slides.length - 1}>
+                Nästa <ChevronRight size={16} color={THEME.text2} />
               </button>
-
               {!isStandalone && installPromptEvent ? (
-                <button onClick={installApp} style={{ ...styles.button, ...(isCompact ? { minHeight: 46 } : {}) }}>
-                  <Link2 size={16} color={THEME.text2} />
-                  Installera app
+                <button onClick={installApp} style={styles.button}>
+                  <Link2 size={16} color={THEME.text2} /> Installera app
                 </button>
               ) : null}
             </div>
@@ -755,54 +206,99 @@ export default function App() {
             </Card>
           ) : null}
 
-          <div style={{ ...styles.metaBar, flexDirection: isCompact ? "column" : "row", alignItems: isCompact ? "flex-start" : "center" }}>
-            <div style={{ fontSize: 13, color: THEME.text3 }}>
-              Slide <span style={{ fontWeight: 800, color: THEME.text }}>{idx + 1}</span> / {slides.length}
+          <div style={styles.metaBar}>
+            <div style={{ fontSize: 13, color: THEME.text3 }}>Slide <strong style={{ color: THEME.text }}>{idx + 1}</strong> / {slides.length}</div>
+            <div style={{ fontSize: 11, color: THEME.text4 }}>{mediaCountLabel}</div>
+            <div style={{ fontSize: 11, color: THEME.text4, display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <Save size={14} /> {saveIndicator}
             </div>
-            <div style={{ fontSize: 11, color: THEME.text4 }}>Key image: {img.fileName || "(inte laddad)"}</div>
           </div>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={slides[idx].id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.25 }}
-            >
-              <SlideBody slide={slides[idx]} img={img} compact={isCompact} />
-            </motion.div>
-          </AnimatePresence>
+          <div style={{ display: "grid", gap: 16, gridTemplateColumns: isEditing && !isCompact ? "2fr 1fr" : "1fr" }}>
+            <AnimatePresence mode="wait">
+              <motion.div key={activeSlide.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
+                <div style={{ ...styles.slideFrame, padding: isCompact ? 16 : styles.slideFrame.padding }}>
+                  <SectionTitle kicker={activeSlide.kicker} title={activeSlide.title} subtitle={activeSlide.subtitle} compact={isCompact} />
+                  <div style={{ marginTop: 20, display: "grid", gap: 12 }}>
+                    {activeSlide.blocks.map((block) => (
+                      <BlockRenderer key={block.id} block={block} media={media} />
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
 
-          <div style={styles.footerTip}>
-            <span style={{ color: THEME.text4 }}>Snabbt användartips:</span> Exportera PDF när ni laddat upp nyckelbilden.
-            PDF:en blir en säljande “one-deck” ni kan skicka till team, label, press eller hålla som intern handbok.
+            {isEditing ? (
+              <Card style={{ padding: 16, height: "fit-content" }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: THEME.text2 }}>Editorpanel</div>
+                <div style={{ marginTop: 12, display: "grid", gap: 8 }}>
+                  <input value={activeSlide.kicker} onChange={(e) => updateSlide(activeSlide.id, (s) => ({ ...s, kicker: e.target.value }))} style={inputStyle} placeholder="Kicker" />
+                  <textarea value={activeSlide.title} onChange={(e) => updateSlide(activeSlide.id, (s) => ({ ...s, title: e.target.value }))} style={{ ...inputStyle, minHeight: 64 }} />
+                  <textarea value={activeSlide.subtitle} onChange={(e) => updateSlide(activeSlide.id, (s) => ({ ...s, subtitle: e.target.value }))} style={{ ...inputStyle, minHeight: 82 }} />
+                </div>
+
+                <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
+                  {activeSlide.blocks.map((block) => (
+                    <Card key={block.id} style={{ padding: 10 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                        <div style={{ fontSize: 12, color: THEME.text2 }}>{block.type}</div>
+                        <div style={{ display: "flex", gap: 6 }}>
+                          <button style={miniBtn} onClick={() => moveBlock(activeSlide.id, block.id, -1)} title="Flytta upp"><ArrowUp size={14} /></button>
+                          <button style={miniBtn} onClick={() => moveBlock(activeSlide.id, block.id, 1)} title="Flytta ned"><ArrowDown size={14} /></button>
+                          <button style={miniBtn} onClick={() => deleteBlock(activeSlide.id, block.id)} title="Ta bort"><Trash2 size={14} /></button>
+                        </div>
+                      </div>
+                      <BlockFields block={block} media={media} onChange={(nextBlock) => updateBlock(activeSlide.id, block.id, () => nextBlock)} />
+                    </Card>
+                  ))}
+                </div>
+
+                <div style={{ marginTop: 12, display: "grid", gap: 8 }}>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {Object.keys(newBlockTemplate).map((type) => (
+                      <button key={type} style={miniBtn} onClick={() => addBlock(activeSlide.id, type)}>
+                        <Plus size={14} /> {type}
+                      </button>
+                    ))}
+                  </div>
+                  <label style={{ ...styles.button, justifyContent: "center" }}>
+                    <Upload size={14} color={THEME.text2} /> Ladda upp bild
+                    <input type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => onPickMedia(e.target.files?.[0])} />
+                  </label>
+                  <button style={{ ...miniBtn, justifyContent: "center" }} onClick={() => { setDeck(DEFAULT_DECK); setMedia([]); clearDeckStorage(); }}>
+                    Återställ till standard
+                  </button>
+                </div>
+              </Card>
+            ) : null}
           </div>
+
+          <div style={styles.footerTip}>Tips: lägg till/ta bort block i redigeringsläge. Ändringar sparas lokalt automatiskt.</div>
         </div>
       </div>
 
-      {/* OFFSCREEN render for PDF */}
       <div style={{ position: "fixed", left: -10000, top: 0, width: 1200 }} aria-hidden="true">
-        {slides.map((s, i) => (
-          <div key={s.id} ref={(el) => (hiddenRefs.current[i] = el)} style={{ background: THEME.bg, color: THEME.text }}>
+        {slides.map((slide, i) => (
+          <div key={slide.id} ref={(el) => (hiddenRefs.current[i] = el)} style={{ background: THEME.bg, color: THEME.text }}>
             <div style={{ padding: 40 }}>
               <div style={{ marginBottom: 18, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
-                  <div style={{ fontSize: 11, letterSpacing: "0.2em", color: THEME.text4 }}>NORTH STAR RISING</div>
-                  <div style={{ marginTop: 6, fontSize: 14, fontWeight: 800, color: THEME.text2 }}>
-                    Releaseplan & Social Media Deck
-                  </div>
+                  <div style={{ fontSize: 11, letterSpacing: "0.2em", color: THEME.text4 }}>{deck.name}</div>
+                  <div style={{ marginTop: 6, fontSize: 14, fontWeight: 800, color: THEME.text2 }}>Version {deck.version}</div>
                 </div>
                 <div style={{ fontSize: 11, color: THEME.text4 }}>{new Date().toISOString().slice(0, 10)}</div>
               </div>
 
-              <SlideBody slide={s} img={img} compact={false} />
+              <SectionTitle kicker={slide.kicker} title={slide.title} subtitle={slide.subtitle} />
+              <div style={{ marginTop: 20, display: "grid", gap: 12 }}>
+                {slide.blocks.map((block) => (
+                  <BlockRenderer key={block.id} block={block} media={media} />
+                ))}
+              </div>
 
               <div style={{ marginTop: 18, display: "flex", justifyContent: "space-between", fontSize: 11, color: THEME.text4 }}>
                 <div>Cold Protocol • Active</div>
-                <div>
-                  {i + 1}/{slides.length}
-                </div>
+                <div>{i + 1}/{slides.length}</div>
               </div>
             </div>
           </div>
@@ -811,3 +307,90 @@ export default function App() {
     </div>
   );
 }
+
+function BlockFields({ block, onChange, media }) {
+  const setProps = (key, value) => onChange({ ...block, props: { ...block.props, [key]: value } });
+
+  if (block.type === "text") {
+    return (
+      <div style={{ marginTop: 8, display: "grid", gap: 6 }}>
+        <input value={block.props.heading || ""} onChange={(e) => setProps("heading", e.target.value)} style={inputStyle} placeholder="Rubrik" />
+        <textarea value={block.props.body || ""} onChange={(e) => setProps("body", e.target.value)} style={{ ...inputStyle, minHeight: 72 }} placeholder="Text" />
+      </div>
+    );
+  }
+
+  if (block.type === "quote") {
+    return (
+      <div style={{ marginTop: 8, display: "grid", gap: 6 }}>
+        <textarea value={block.props.text || ""} onChange={(e) => setProps("text", e.target.value)} style={{ ...inputStyle, minHeight: 72 }} placeholder="Quote" />
+        <input value={block.props.subtext || ""} onChange={(e) => setProps("subtext", e.target.value)} style={inputStyle} placeholder="Subtext" />
+      </div>
+    );
+  }
+
+  if (block.type === "checklist") {
+    return (
+      <div style={{ marginTop: 8, display: "grid", gap: 6 }}>
+        <input value={block.props.heading || ""} onChange={(e) => setProps("heading", e.target.value)} style={inputStyle} placeholder="Rubrik" />
+        <textarea
+          value={(block.props.items || []).join("\n")}
+          onChange={(e) => setProps("items", e.target.value.split("\n").filter(Boolean))}
+          style={{ ...inputStyle, minHeight: 80 }}
+          placeholder="En rad per punkt"
+        />
+      </div>
+    );
+  }
+
+  if (block.type === "image") {
+    return (
+      <div style={{ marginTop: 8, display: "grid", gap: 6 }}>
+        <input value={block.props.heading || ""} onChange={(e) => setProps("heading", e.target.value)} style={inputStyle} placeholder="Rubrik" />
+        <select value={block.props.imageId || ""} onChange={(e) => setProps("imageId", e.target.value || null)} style={inputStyle}>
+          <option value="">Ingen bild vald</option>
+          {media.map((item) => (
+            <option key={item.id} value={item.id}>{item.fileName}</option>
+          ))}
+        </select>
+        <input value={block.props.caption || ""} onChange={(e) => setProps("caption", e.target.value)} style={inputStyle} placeholder="Bildtext" />
+      </div>
+    );
+  }
+
+  if (block.type === "timeline") {
+    return (
+      <div style={{ marginTop: 8, display: "grid", gap: 6 }}>
+        <input value={block.props.week || ""} onChange={(e) => setProps("week", e.target.value)} style={inputStyle} placeholder="Vecka" />
+        <input value={block.props.purpose || ""} onChange={(e) => setProps("purpose", e.target.value)} style={inputStyle} placeholder="Syfte" />
+        <textarea value={(block.props.items || []).join("\n")} onChange={(e) => setProps("items", e.target.value.split("\n").filter(Boolean))} style={{ ...inputStyle, minHeight: 80 }} />
+        <input value={block.props.microcopy || ""} onChange={(e) => setProps("microcopy", e.target.value)} style={inputStyle} placeholder="Microcopy" />
+      </div>
+    );
+  }
+
+  return null;
+}
+
+const inputStyle = {
+  borderRadius: 10,
+  border: `1px solid ${THEME.border}`,
+  background: THEME.panel2,
+  color: THEME.text2,
+  fontSize: 12,
+  padding: "8px 10px",
+  width: "100%",
+};
+
+const miniBtn = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 6,
+  borderRadius: 10,
+  border: `1px solid ${THEME.border}`,
+  background: THEME.panel2,
+  color: THEME.text2,
+  fontSize: 12,
+  padding: "6px 10px",
+  cursor: "pointer",
+};
