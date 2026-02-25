@@ -1,27 +1,29 @@
 # Security dependency follow-up plan
 
 ## Current finding
-`npm audit --omit=dev` reports vulnerabilities in a transitive chain:
-- `jspdf` (<=4.1.0) depends on vulnerable `dompurify` (<3.2.4).
+- `npm audit --omit=dev` is currently clean (`found 0 vulnerabilities`).
+- `npm audit` (including dev dependencies) reports moderate vulnerabilities in the Vite/esbuild development chain.
 
 Advisory example:
-- DOMPurify XSS advisory: GHSA-vhxf-7vqr-mrjg.
+- esbuild dev-server request vulnerability: GHSA-67mh-4wv8-2f99.
 
-## Why this is not auto-fixed in this PR
-`npm audit fix --force` proposes upgrading `jspdf` to a newer major version, which is a breaking-change risk for PDF generation behavior.
-
-This repository currently prioritizes release stability for deck rendering/export.
+## Why this is not auto-fixed immediately
+`npm audit fix --force` proposes upgrading Vite to a newer major version.
+That can affect local development behavior and plugin compatibility, so it should be handled in a dedicated upgrade PR.
 
 ## Action plan
-1. Create a dedicated upgrade PR for `jspdf` major update.
-2. Add regression checks for PDF export before and after upgrade:
-   - multi-slide export works,
-   - uploaded image still appears in PDF,
-   - generated PDF opens correctly in common viewers.
-3. Validate bundle size/performance impact after dependency update.
-4. If successful, merge upgrade and re-run `npm audit --omit=dev`.
+1. Create a dedicated upgrade PR for Vite/esbuild major update.
+2. Validate local development and build behavior after upgrade:
+   - `npm run dev` works locally,
+   - `npm run build` output is valid,
+   - SPA routing still works in target hosting environment.
+3. Regression-check PDF export workflow before and after dependency update.
+4. If successful, merge upgrade and re-run:
+   - `npm audit`
+   - `npm audit --omit=dev`
 
 ## Owner checklist
 - [ ] Run `npm audit --omit=dev` on default branch weekly.
+- [ ] Track `npm audit` for development tooling risks.
 - [ ] Keep lockfile updated in dependency PRs.
 - [ ] Treat critical findings as release-blocking unless explicitly risk-accepted.
