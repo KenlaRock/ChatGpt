@@ -18,8 +18,24 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
+  const isNavigationRequest = event.request.mode === "navigate";
+
   event.respondWith(
-    caches.match(event.request).then((cached) => {
+    (async () => {
+      if (isNavigationRequest) {
+        try {
+          const response = await fetch(event.request);
+          if (response && response.status === 200 && response.type === "basic") {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          }
+          return response;
+        } catch {
+          return (await caches.match(event.request)) || caches.match("/offline.html");
+        }
+      }
+
+      const cached = await caches.match(event.request);
       if (cached) return cached;
 
       return fetch(event.request)
@@ -31,12 +47,7 @@ self.addEventListener("fetch", (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
           return response;
         })
-        .catch(() => {
-          if (event.request.mode === "navigate") {
-            return caches.match("/offline.html");
-          }
-          return new Response("Offline", { status: 503, statusText: "Offline" });
-        });
-    })
+        .catch(() => new Response("Offline", { status: 503, statusText: "Offline" }));
+    })()
   );
 });
