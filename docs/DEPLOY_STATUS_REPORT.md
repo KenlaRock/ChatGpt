@@ -188,3 +188,44 @@ Using the newly provided Netlify hook endpoints, repository scripts were execute
 ### Required follow-up
 - Recreate/verify hook URLs in Netlify Site settings (`Build & deploy`), then update scripts/env overrides accordingly.
 - Re-run the four hook commands until each returns 2xx.
+
+## Update: 2026-02-25 (deploy + preview + badge + naming/relation verification)
+
+### Verification commands executed
+```bash
+npm run build
+npm run smoke:postdeploy -- https://northstarrising.netlify.app
+npm run netlify:build:primary
+npm run netlify:build:secondary
+npm run netlify:preview:start
+npm run netlify:preview:start:secondary
+curl -sS -o /tmp/netlify_badge.svg -w '%{http_code}' https://api.netlify.com/api/v1/badges/679b85e1-7631-44b3-a3af-72d258120832/deploy-status
+curl -sS -o /tmp/netlify_deploys.html -w '%{http_code}' https://app.netlify.com/projects/northstarrising/deploys
+```
+
+### Results
+- Local production build completed successfully.
+- Production smoke check passed (`/`, `/boards`, active JS bundle all returned `200`).
+- Netlify hook trigger verification passed for all configured relations:
+  - `primary` build hook -> `200`
+  - `secondary` build hook -> `200`
+  - `preview` server hook -> `200`
+  - `preview:secondary` server hook -> `200`
+- Netlify deploy badge endpoint returned `200` and served SVG content.
+- Netlify deploy status page URL returned `200`.
+
+### Naming + relation integrity checks
+- Canonical site remains `northstarrising` across:
+  - Production URL: `https://northstarrising.netlify.app`
+  - Netlify deploy page path: `/projects/northstarrising/deploys`
+- Badge/site relation is consistent:
+  - Badge UUID `679b85e1-7631-44b3-a3af-72d258120832` is used in README badge URL.
+  - The same UUID is used in the HUD debug query (`?netlify_hud=...`) in `docs/NETLIFY_ACCESS.md`.
+- Hook relation map remains consistent with script labels and env keys:
+  - `NETLIFY_BUILD_HOOK_PRIMARY` -> primary build
+  - `NETLIFY_BUILD_HOOK_SECONDARY` -> secondary build
+  - `NETLIFY_PREVIEW_SERVER_HOOK` -> primary preview
+  - `NETLIFY_PREVIEW_SERVER_HOOK_SECONDARY` -> secondary preview
+
+### Current status
+Deployment, preview triggering, badge availability, and Netlify naming/relations are **GREEN** as of `2026-02-25 16:08 UTC`.
