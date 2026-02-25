@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, FileDown, Link2, Pencil, Save, Upload, Plus, Trash2, ArrowUp, ArrowDown, CopyPlus, Settings2, Menu, X, SlidersHorizontal } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileDown, Link2, Pencil, Save, Upload, Plus, Trash2, ArrowUp, ArrowDown, CopyPlus, Settings2, Menu, X, SlidersHorizontal, Maximize2, Minimize2, MessageSquare, BarChart3, ListTree, Shield } from "lucide-react";
 import { THEME, styles } from "./theme";
 import { Card, SectionTitle } from "./components/primitives";
 import { exportSlidesToPdf } from "./lib/pdf";
@@ -28,6 +28,10 @@ const DEFAULT_UI_PREFS = {
   showHints: true,
   showTelemetry: true,
 };
+
+const FEEDBACK_URL_KEY = "nsr_feedback_url_v1";
+const PASSWORD_KEY = "nsr_deck_password_v1";
+const VIEW_STATS_KEY = "nsr_view_stats_v1";
 
 const newBlockTemplate = {
   text: () => ({ id: makeId(), type: "text", props: { heading: "Ny rubrik", body: "Ny text" } }),
@@ -60,6 +64,15 @@ export default function App() {
   const [isStandalone, setIsStandalone] = useState(false);
   const [exportSettings, setExportSettings] = useState(DEFAULT_EXPORT_SETTINGS);
   const [uiPrefs, setUiPrefs] = useState(DEFAULT_UI_PREFS);
+  const [showOverview, setShowOverview] = useState(false);
+  const [lastUpdatedAt, setLastUpdatedAt] = useState(() => new Date().toISOString());
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [feedbackUrl, setFeedbackUrl] = useState("");
+  const [deckPassword, setDeckPassword] = useState("");
+  const [passwordInput, setPasswordInput] = useState("");
+  const [isUnlocked, setIsUnlocked] = useState(true);
+  const [viewStats, setViewStats] = useState(() => ({ totalViews: 0, slideViews: {} }));
+  const touchStartX = useRef(null);
   const isIOS = typeof navigator !== "undefined" && /iphone|ipad|ipod/i.test(navigator.userAgent);
 
   const denseMode = uiPrefs.density === "compact";
@@ -91,6 +104,39 @@ export default function App() {
       }),
     );
   }, [uiPrefs, exportSettings]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const savedFeedback = window.localStorage.getItem(FEEDBACK_URL_KEY) || "";
+    const savedPassword = window.localStorage.getItem(PASSWORD_KEY) || "";
+    const savedStats = window.localStorage.getItem(VIEW_STATS_KEY);
+    setFeedbackUrl(savedFeedback);
+    setDeckPassword(savedPassword);
+    setIsUnlocked(!savedPassword);
+    if (savedStats) {
+      try {
+        setViewStats(JSON.parse(savedStats));
+      } catch (error) {
+        console.warn("Could not parse view stats", error);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(FEEDBACK_URL_KEY, feedbackUrl);
+  }, [feedbackUrl]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(PASSWORD_KEY, deckPassword);
+    setIsUnlocked(!deckPassword);
+  }, [deckPassword]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(VIEW_STATS_KEY, JSON.stringify(viewStats));
+  }, [viewStats]);
 
   useEffect(() => {
     const boot = async () => {
@@ -150,6 +196,7 @@ export default function App() {
 
   useEffect(() => {
     const toSave = { ...deck, media };
+    setLastUpdatedAt(new Date().toISOString());
     setSaveState("sparar");
     setSaveProgress(5);
     const t = setTimeout(async () => {
@@ -203,11 +250,32 @@ export default function App() {
     const onKey = (e) => {
       if (e.key === "ArrowLeft") prev();
       if (e.key === "ArrowRight") next();
+      if (e.key.toLowerCase() === "o") setShowOverview((v) => !v);
+      if (e.key === "Escape") setShowOverview(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const onFullscreenChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
+  }, []);
+
+  useEffect(() => {
+    const slideId = slides[idx]?.id;
+    if (!slideId) return;
+    setViewStats((current) => ({
+      totalViews: (current.totalViews || 0) + 1,
+      slideViews: {
+        ...current.slideViews,
+        [slideId]: (current.slideViews?.[slideId] || 0) + 1,
+      },
+    }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idx]);
 
   const updateSlide = (slideId, updater) => {
     setDeck((current) => ({
@@ -294,7 +362,7 @@ export default function App() {
           id: makeId(),
           fileName: file.name,
           dataUrl: reader.result,
-          alt: file.name,
+          alt: file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " "),
         },
       ]);
       setUploadStatus("done");
@@ -343,12 +411,50 @@ export default function App() {
     setInstallPromptEvent(null);
   };
 
+  const toggleFullscreen = async () => {
+    if (!document.fullscreenElement) {
+      await document.documentElement.requestFullscreen?.();
+    } else {
+      await document.exitFullscreen?.();
+    }
+  };
+
+  const shareDeck = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: deck.name, text: "North Star Rising release deck", url });
+        return;
+      } catch (error) {
+        console.warn("Native share was cancelled/unavailable", error);
+      }
+    }
+    await navigator.clipboard?.writeText(url);
+    alert("Länk kopierad till urklipp.");
+  };
+
+  const handleTouchStart = (event) => {
+    touchStartX.current = event.changedTouches?.[0]?.clientX || null;
+  };
+
+  const handleTouchEnd = (event) => {
+    const start = touchStartX.current;
+    const end = event.changedTouches?.[0]?.clientX;
+    if (start == null || end == null) return;
+    const delta = end - start;
+    if (Math.abs(delta) < 40) return;
+    if (delta > 0) prev();
+    else next();
+  };
+
   const saveIndicator = saveState === "sparar" ? "Sparar…" : saveState === "fel" ? "Sparfel" : "Sparat";
   const saveStorageLabel = saveStorage === "indexeddb" ? "IndexedDB (stora bilder)" : "LocalStorage";
 
   const mediaCountLabel = useMemo(() => `${media.length} bild${media.length === 1 ? "" : "er"} i biblioteket`, [media.length]);
   const telemetry = useMemo(() => getTelemetrySnapshot(), [saveState, saveStorage, syncState]);
   const showEditorPanel = isEditing && (!isPhone || showMobileEditor);
+  const updatedLabel = useMemo(() => new Date(lastUpdatedAt).toLocaleString("sv-SE"), [lastUpdatedAt]);
+  const passwordEnabled = Boolean(deckPassword);
 
   return (
     <div style={styles.shell}>
@@ -387,6 +493,16 @@ export default function App() {
                 <button onClick={exportPdf} style={{ ...styles.button, ...(busy ? styles.buttonDisabled : {}) }} disabled={busy}>
                   <FileDown size={16} color={THEME.text2} />
                   {busy ? "Exporterar…" : "Exportera PDF"}
+                </button>
+                <button onClick={shareDeck} style={styles.button}>
+                  <Link2 size={16} color={THEME.text2} /> Dela
+                </button>
+                <button onClick={toggleFullscreen} style={styles.button}>
+                  {isFullscreen ? <Minimize2 size={16} color={THEME.text2} /> : <Maximize2 size={16} color={THEME.text2} />}
+                  {isFullscreen ? "Avsluta fullscreen" : "Fullscreen"}
+                </button>
+                <button onClick={() => setShowOverview((v) => !v)} style={styles.button}>
+                  <ListTree size={16} color={THEME.text2} /> {showOverview ? "Dölj innehåll" : "Innehåll"}
                 </button>
                 <button onClick={prev} style={{ ...styles.button, ...(idx === 0 ? styles.buttonDisabled : {}) }} disabled={idx === 0}>
                   <ChevronLeft size={16} color={THEME.text2} /> Föregående
@@ -442,6 +558,7 @@ export default function App() {
               <Save size={13} /> {saveIndicator}
             </div>
             <div style={{ fontSize: 11, color: THEME.text4, textAlign: isPhone ? "right" : "left" }}>Sync: {syncState}</div>
+            <div style={{ fontSize: 11, color: THEME.text4, textAlign: isPhone ? "right" : "left" }}>Uppdaterad: {updatedLabel}</div>
           </div>
 
           {isPhone ? (
@@ -545,14 +662,60 @@ export default function App() {
                   />
                   Inkludera metarader i PDF
                 </label>
+                <label style={settingsLabelStyle}>
+                  Feedback-länk
+                  <input value={feedbackUrl} onChange={(e) => setFeedbackUrl(e.target.value)} style={inputStyle} placeholder="https://..." />
+                </label>
+                <label style={settingsLabelStyle}>
+                  Lösenordsskydd
+                  <input type="password" value={deckPassword} onChange={(e) => setDeckPassword(e.target.value)} style={inputStyle} placeholder="Tomt = av" />
+                </label>
+              </div>
+              <div style={{ marginTop: 10, fontSize: 11, color: THEME.text4, display: "inline-flex", alignItems: "center", gap: 8 }}>
+                <BarChart3 size={13} /> Visningar: {viewStats.totalViews || 0}
               </div>
             </Card>
           ) : null}
 
+          {passwordEnabled && !isUnlocked ? (
+            <Card style={{ padding: 16, maxWidth: 520 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 700, color: THEME.text2 }}><Shield size={16} /> Skyddad förhandsversion</div>
+              <div style={{ marginTop: 8, fontSize: 12, color: THEME.text4 }}>Ange lösenord för att visa decken.</div>
+              <input type="password" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} style={{ ...inputStyle, marginTop: 10 }} placeholder="Lösenord" />
+              <button
+                style={{ ...miniBtn, marginTop: 10 }}
+                onClick={() => {
+                  if (passwordInput === deckPassword) setIsUnlocked(true);
+                  else alert("Fel lösenord.");
+                }}
+              >
+                <Shield size={14} /> Lås upp
+              </button>
+            </Card>
+          ) : null}
+
+          {showOverview ? (
+            <Card style={{ padding: 12 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: THEME.text2 }}>Innehåll</div>
+              <div style={{ marginTop: 10, display: "grid", gap: 6 }}>
+                {slides.map((slide, slideIndex) => (
+                  <button key={slide.id} style={{ ...miniBtn, justifyContent: "flex-start" }} onClick={() => { setIdx(slideIndex); setShowOverview(false); }}>
+                    {slideIndex + 1}. {slide.title}
+                  </button>
+                ))}
+              </div>
+            </Card>
+          ) : null}
+
+          {!passwordEnabled || isUnlocked ? (
           <div style={{ display: "grid", gap: 16, gridTemplateColumns: isEditing && !isCompact ? "2fr 1fr" : "1fr" }}>
             <AnimatePresence mode="wait">
               <motion.div key={activeSlide.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
-                <div style={{ ...styles.slideFrame, padding: isCompact ? 16 : styles.slideFrame.padding, position: "relative", overflow: "hidden" }}>
+                <div
+                  style={{ ...styles.slideFrame, padding: isCompact ? 16 : styles.slideFrame.padding, position: "relative", overflow: "hidden" }}
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={handleTouchEnd}
+                >
                   <AppLogo
                     decorative
                     width={isCompact ? 220 : 300}
@@ -654,8 +817,14 @@ export default function App() {
               </Card>
             ) : null}
           </div>
+          ) : null}
 
           {uiPrefs.showHints ? <div style={styles.footerTip}>Tips: lägg till/ta bort block i redigeringsläge. Ändringar sparas lokalt automatiskt.</div> : null}
+          {feedbackUrl ? (
+            <a href={feedbackUrl} target="_blank" rel="noreferrer" style={{ ...styles.footerTip, display: "inline-flex", gap: 6, alignItems: "center" }}>
+              <MessageSquare size={13} /> Skicka feedback
+            </a>
+          ) : null}
         </div>
       </div>
 
@@ -769,6 +938,7 @@ function BlockFields({ block, onChange, media }) {
           <option value="contain">Anpassa hela bilden (contain)</option>
           <option value="cover">Fyll ytan (cover)</option>
         </select>
+        <input value={block.props.alt || ""} onChange={(e) => setProps("alt", e.target.value)} style={inputStyle} placeholder="Alt-text för skärmläsare" />
         <input value={block.props.caption || ""} onChange={(e) => setProps("caption", e.target.value)} style={inputStyle} placeholder="Bildtext" />
       </div>
     );

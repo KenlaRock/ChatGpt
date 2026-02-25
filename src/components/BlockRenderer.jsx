@@ -24,7 +24,7 @@ function ImageBlock({ block, media }) {
         {image ? (
           <img
             src={image.dataUrl}
-            alt={image.alt || image.fileName}
+            alt={block.props.alt || image.alt || image.fileName}
             style={{
               position: "absolute",
               inset: 0,
