@@ -1,5 +1,8 @@
 # North Star Rising — Release Deck (React/Vite)
 
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/679b85e1-7631-44b3-a3af-72d258120832/deploy-status)](https://app.netlify.com/projects/northstarrising/deploys)
+
 ## What this is
 A runnable, single-page presentation app with:
 - Slide navigation (buttons + arrow keys)
@@ -106,20 +109,24 @@ Helpful Netlify links:
 
 ## Project Netlify endpoints
 - Site URL: https://northstarrising.netlify.app
-- Build hook (primary): set env var `NETLIFY_BUILD_HOOK_PRIMARY`
-- Build hook (secondary): set env var `NETLIFY_BUILD_HOOK_SECONDARY`
-- Preview server hook: set env var `NETLIFY_PREVIEW_SERVER_HOOK`
+- Build hook (primary): `https://api.netlify.com/build_hooks/699f04659adb693fea055cc0`
+- Build hook (secondary): `https://api.netlify.com/build_hooks/699f04869662fb3d15b13d18`
+- Preview server hook (primary): `https://api.netlify.com/preview_server_hooks/699f04f7bcd708545509329f`
+- Preview server hook (secondary): `https://api.netlify.com/preview_server_hooks/699f050e9adb693f160565c9`
 
-Quick triggers (after exporting the corresponding hook URL env vars):
+Quick triggers (uses committed defaults but can be overridden by env vars):
 ```bash
-export NETLIFY_BUILD_HOOK_PRIMARY='https://api.netlify.com/build_hooks/<new-primary-id>'
-export NETLIFY_BUILD_HOOK_SECONDARY='https://api.netlify.com/build_hooks/<new-secondary-id>'
-export NETLIFY_PREVIEW_SERVER_HOOK='https://api.netlify.com/preview_server_hooks/<new-preview-id>'
+export NETLIFY_BUILD_HOOK_PRIMARY='https://api.netlify.com/build_hooks/699f04659adb693fea055cc0'
+export NETLIFY_BUILD_HOOK_SECONDARY='https://api.netlify.com/build_hooks/699f04869662fb3d15b13d18'
+export NETLIFY_PREVIEW_SERVER_HOOK='https://api.netlify.com/preview_server_hooks/699f04f7bcd708545509329f'
+export NETLIFY_PREVIEW_SERVER_HOOK_SECONDARY='https://api.netlify.com/preview_server_hooks/699f050e9adb693f160565c9'
 
 npm run netlify:build:primary
 npm run netlify:build:secondary
 npm run netlify:preview:start
+npm run netlify:preview:start:secondary
 ```
+Current operational note: if any of these return `404 Not Found`, regenerate the hook in Netlify before retrying.
 
 Local development note:
 - Prefer `npm run dev` for day-to-day work.
@@ -127,7 +134,7 @@ Local development note:
 
 If you prefer raw curl:
 ```bash
-curl -X POST -H 'Content-Type: application/json' -d '{}' "$NETLIFY_PREVIEW_SERVER_HOOK"
+curl -X POST -H 'Content-Type: application/json' -d '{}' https://api.netlify.com/preview_server_hooks/699f04f7bcd708545509329f
 ```
 
 ## Security note

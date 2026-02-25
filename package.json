@@ -14,7 +14,8 @@
     "smoke:postdeploy": "node ./scripts/post-deploy-smoke.mjs",
     "dev:clean": "./scripts/normalize-npm-env.sh npm run dev",
     "build:clean": "./scripts/normalize-npm-env.sh npm run build",
-    "test:e2e:media": "node ./scripts/e2e-media-persistence.mjs"
+    "test:e2e:media": "node ./scripts/e2e-media-persistence.mjs",
+    "netlify:preview:start:secondary": "node ./scripts/netlify-hook-trigger.mjs preview:secondary"
   },
   "dependencies": {
     "framer-motion": "^11.0.0",

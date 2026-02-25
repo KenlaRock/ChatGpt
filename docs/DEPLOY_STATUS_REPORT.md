@@ -170,3 +170,21 @@ The project rename/site migration changed operational Netlify identifiers (site/
 ### Required Netlify-side follow-up
 - Regenerate build hooks in Netlify for the renamed project and store them as CI/repo secrets/environment variables.
 - Resolve Netlify usage quota overage before expecting `200` responses from the new site URL.
+
+## Update: 2026-02-25 (hook validation with provided replacements)
+
+### Validation executed
+Using the newly provided Netlify hook endpoints, repository scripts were executed:
+- `npm run netlify:build:primary`
+- `npm run netlify:build:secondary`
+- `npm run netlify:preview:start`
+- `npm run netlify:preview:start:secondary`
+
+### Outcome
+- All four hook calls currently return final `HTTP 404 Not Found` from Netlify.
+- Hook trigger parser now correctly reads the final HTTP status from curl output and fails if non-2xx.
+- This fixes the prior false-positive behavior where proxy header lines could make an invalid hook appear successful.
+
+### Required follow-up
+- Recreate/verify hook URLs in Netlify Site settings (`Build & deploy`), then update scripts/env overrides accordingly.
+- Re-run the four hook commands until each returns 2xx.

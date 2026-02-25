@@ -30,3 +30,16 @@ Recommended replacement flow:
 ```bash
 npm run netlify:build:primary
 ```
+
+## Update: replacement hooks re-tested
+The replacement hook URLs were integrated and tested through npm scripts.
+Current response from Netlify for each is `404 Not Found`.
+
+Operational next step: regenerate hook URLs in Netlify and re-run:
+
+```bash
+npm run netlify:build:primary
+npm run netlify:build:secondary
+npm run netlify:preview:start
+npm run netlify:preview:start:secondary
+```
