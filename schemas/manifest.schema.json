@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nullforge.example/schemas/manifest.schema.json",
+  "title": "Experiment Package Manifest",
+  "type": "object",
+  "required": ["schema_version", "package_id", "files"],
+  "properties": {
+    "schema_version": {"const": "0.1.0"},
+    "package_id": {"type": "string"},
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": {"type": "string"},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "role": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nullforge.example/schemas/snapshot.schema.json",
+  "title": "Surgical Freeze Snapshot",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "snapshot_id",
+    "experiment_id",
+    "sample",
+    "truth_state",
+    "interaction_state",
+    "intervention_state",
+    "visualization_state"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.1.0"},
+    "snapshot_id": {"type": "string"},
+    "experiment_id": {"type": "string"},
+    "sample": {"type": "integer", "minimum": 0},
+    "time_seconds": {"type": "number", "minimum": 0},
+    "truth_state": {"type": "object"},
+    "interaction_state": {"type": "object"},
+    "intervention_state": {"type": "object"},
+    "visualization_state": {"type": "object"},
+    "limitations": {"type": "array", "items": {"type": "string"}},
+    "state_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  },
+  "additionalProperties": false
+}
