@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="dark" />
+  <title>NullForge Preview Lab v0.1</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">NULLFORGE SIMULATION LAB</p>
+      <h1>Preview Lab <span>v0.1</span></h1>
+      <p class="subtitle">Realtidslek för fas, övertoner, L/R/C, brus och dokumenterbara interventioner.</p>
+    </div>
+    <div class="truth-badge" title="Den här webbvyn är en perceptuell förhandsmiljö, inte den deterministiska Rust-sanningsmotorn.">
+      PREVIEW / NOT TRUTH ENGINE
+    </div>
+  </header>
+
+  <main>
+    <section class="toolbar panel" aria-label="Transport och data">
+      <button id="audioToggle" class="primary">Starta ljud</button>
+      <button id="freezeToggle">Lås snapshot</button>
+      <button id="recordToggle">Spela in automation</button>
+      <button id="playAutomation">Spela automation</button>
+      <button id="clearAutomation">Rensa automation</button>
+      <button id="exportSession">Exportera JSON</button>
+      <label class="file-button">Importera JSON<input id="importSession" type="file" accept="application/json,.json" /></label>
+      <div class="status-stack">
+        <span id="audioStatus">Ljud: av</span>
+        <span id="recordStatus">Automation: 0 events</span>
+      </div>
+    </section>
+
+    <section class="grid two-columns">
+      <article class="panel source-card" data-source="A">
+        <div class="panel-heading">
+          <div><p class="eyebrow">SOURCE A</p><h2>Oscillator A</h2></div>
+          <label class="switch"><input id="A-enabled" type="checkbox" checked /><span></span></label>
+        </div>
+        <div class="control-grid">
+          <label>Frekvens <output id="A-frequency-out">220 Hz</output><input id="A-frequency" data-target="sources.A.frequency_hz" type="range" min="40" max="1000" value="220" step="1" /></label>
+          <label>Gain <output id="A-gain-out">0.35</output><input id="A-gain" data-target="sources.A.gain" type="range" min="0" max="0.8" value="0.35" step="0.01" /></label>
+          <label>Fas <output id="A-phase-out">0°</output><input id="A-phase" data-target="sources.A.phase_deg" type="range" min="-180" max="180" value="0" step="1" /></label>
+          <label>Rutt<select id="A-route" data-target="sources.A.route"><option value="L">L</option><option value="C" selected>C</option><option value="R">R</option></select></label>
+        </div>
+        <div class="harmonics" id="A-harmonics" aria-label="Övertoner A"></div>
+      </article>
+
+      <article class="panel source-card" data-source="B">
+        <div class="panel-heading">
+          <div><p class="eyebrow">SOURCE B</p><h2>Oscillator B</h2></div>
+          <label class="switch"><input id="B-enabled" type="checkbox" checked /><span></span></label>
+        </div>
+        <div class="control-grid">
+          <label>Frekvens <output id="B-frequency-out">220 Hz</output><input id="B-frequency" data-target="sources.B.frequency_hz" type="range" min="40" max="1000" value="220" step="1" /></label>
+          <label>Gain <output id="B-gain-out">0.35</output><input id="B-gain" data-target="sources.B.gain" type="range" min="0" max="0.8" value="0.35" step="0.01" /></label>
+          <label>Fas <output id="B-phase-out">180°</output><input id="B-phase" data-target="sources.B.phase_deg" type="range" min="-180" max="180" value="180" step="1" /></label>
+          <label>Rutt<select id="B-route" data-target="sources.B.route"><option value="L">L</option><option value="C" selected>C</option><option value="R">R</option></select></label>
+        </div>
+        <div class="harmonics" id="B-harmonics" aria-label="Övertoner B"></div>
+      </article>
+    </section>
+
+    <section class="grid three-columns">
+      <article class="panel">
+        <div class="panel-heading"><div><p class="eyebrow">CONTROLLED NOISE</p><h2>Brusvägg</h2></div></div>
+        <div class="control-grid single">
+          <label>Nivå <output id="noise-gain-out">0.00</output><input id="noise-gain" data-target="noise.gain" type="range" min="0" max="0.35" value="0" step="0.005" /></label>
+          <label>Low-pass <output id="noise-cutoff-out">8000 Hz</output><input id="noise-cutoff" data-target="noise.cutoff_hz" type="range" min="100" max="16000" value="8000" step="10" /></label>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-heading"><div><p class="eyebrow">INTERACTION-CONDITIONED</p><h2>Intervention</h2></div><label class="switch"><input id="intervention-enabled" type="checkbox" /><span></span></label></div>
+        <div class="control-grid single">
+          <label>Villkor<select id="intervention-condition" data-target="intervention.condition"><option value="opposition">Nära 180°</option><option value="convergence">Nära 0°</option></select></label>
+          <label>Tolerans <output id="intervention-threshold-out">12°</output><input id="intervention-threshold" data-target="intervention.threshold_deg" type="range" min="1" max="90" value="12" step="1" /></label>
+          <label>Audio × <output id="intervention-audio-out">0.25</output><input id="intervention-audio" data-target="intervention.audio_multiplier" type="range" min="0" max="2" value="0.25" step="0.05" /></label>
+          <label>Visual × <output id="intervention-visual-out">4.0</output><input id="intervention-visual" data-target="visualization.intervention_exaggeration" type="range" min="1" max="12" value="4" step="0.5" /></label>
+        </div>
+        <p class="microcopy">Audiomultiplikatorn hör till <strong>Intervention State</strong>. Visual × påverkar endast presentationen.</p>
+      </article>
+
+      <article class="panel metrics-panel">
+        <div class="panel-heading"><div><p class="eyebrow">LIVE METRICS</p><h2>M/S & korrelation</h2></div></div>
+        <dl>
+          <div><dt>RMS L</dt><dd id="metric-rms-l">—</dd></div>
+          <div><dt>RMS R</dt><dd id="metric-rms-r">—</dd></div>
+          <div><dt>RMS M</dt><dd id="metric-rms-m">—</dd></div>
+          <div><dt>RMS S</dt><dd id="metric-rms-s">—</dd></div>
+          <div><dt>L/R corr</dt><dd id="metric-corr">—</dd></div>
+          <div><dt>Center/null</dt><dd id="metric-null">—</dd></div>
+          <div><dt>Intervention</dt><dd id="metric-intervention">inactive</dd></div>
+        </dl>
+      </article>
+    </section>
+
+    <section class="grid visual-grid">
+      <article class="panel visual-panel"><div class="panel-heading"><div><p class="eyebrow">TIME DOMAIN</p><h2>Oscilloskop L/R</h2></div></div><canvas id="scopeCanvas" width="1000" height="360"></canvas></article>
+      <article class="panel visual-panel"><div class="panel-heading"><div><p class="eyebrow">VECTOR PLANE</p><h2>Lissajous / stereofält</h2></div></div><canvas id="vectorCanvas" width="700" height="700"></canvas></article>
+      <article class="panel visual-panel"><div class="panel-heading"><div><p class="eyebrow">MODEL VIEW</p><h2>Fasvektorer</h2></div></div><canvas id="phaseCanvas" width="700" height="700"></canvas></article>
+    </section>
+
+    <section class="panel snapshot-panel">
+      <div class="panel-heading"><div><p class="eyebrow">SURGICAL FREEZE</p><h2>Senaste snapshot</h2></div></div>
+      <pre id="snapshotOutput">Ingen snapshot låst ännu.</pre>
+    </section>
+  </main>
+
+  <footer>
+    <p>Preview Lab använder Web Audio och Canvas. Exporterad JSON innehåller state, automation, snapshot och versionsmetadata. Deterministisk evidens produceras fortfarande av Rust/Python-kedjan.</p>
+  </footer>
+  <script src="app.js" defer></script>
+</body>
+</html>
