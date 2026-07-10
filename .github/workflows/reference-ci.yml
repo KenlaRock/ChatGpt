@@ -1,0 +1,52 @@
+name: Reference CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  reference:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Validate public information boundary
+        run: python tools/check_public_boundary.py
+
+      - name: Run Python reference and property tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Run Rust core tests
+        run: cargo test --workspace --all-targets
+
+      - name: Render Python reference experiment
+        run: |
+          python reference/run_experiment.py \
+            scenarios/phase-and-null/EXP-VECTOR-NULL-001.json \
+            artifacts/EXP-VECTOR-NULL-001
+
+      - name: Render Rust candidate metrics
+        run: |
+          cargo run --quiet -p nf-sim-core -- \
+            scenarios/phase-and-null/EXP-VECTOR-NULL-001.json \
+            artifacts/EXP-VECTOR-NULL-001/rust-metrics.json
+
+      - name: Compare Rust against independent Python oracle
+        run: |
+          python tools/compare_metrics.py \
+            artifacts/EXP-VECTOR-NULL-001/metrics.json \
+            artifacts/EXP-VECTOR-NULL-001/rust-metrics.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: EXP-VECTOR-NULL-001
+          path: artifacts/EXP-VECTOR-NULL-001
