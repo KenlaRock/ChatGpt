@@ -38,13 +38,23 @@ A visual exaggeration must never silently modify Truth State.
 - the first synthetic phase/null experiment,
 - metrics and event snapshot,
 - validation and property tests,
-- source-conversation transparency records.
+- sanitized source-transparency records.
 
-Canonical repository: https://github.com/KenlaRock/ChatGpt
-
-Drive foundation archive: https://drive.google.com/drive/folders/1MLx8DtvFAgW1pgJvBMkRCzaKGRsxylmr
+Canonical public repository: https://github.com/KenlaRock/ChatGpt
 
 The Python oracle is deliberately small. It is not the intended production engine. Its job is to provide an independent, readable reference that the future Rust native/WASM engine must match within declared tolerances.
+
+## Public and internal information boundary
+
+This repository is intentionally public. Private Google Drive and Notion workspaces are used internally by the project team and are not linked from this repository.
+
+Before publication, material must be sanitized and pass:
+
+```bash
+python tools/check_public_boundary.py
+```
+
+See [`PUBLICATION_BOUNDARY.md`](PUBLICATION_BOUNDARY.md).
 
 ## Run the reference experiment
 
@@ -59,6 +69,7 @@ python reference/run_experiment.py \
 ```bash
 python -m unittest discover -s tests -v
 python tools/validate_package.py
+python tools/check_public_boundary.py
 ```
 
 ## Intended production architecture
