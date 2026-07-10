@@ -1,0 +1,37 @@
+{
+  "document_type": "nullforge_preview_session",
+  "schema_version": "0.1.0",
+  "app_version": "0.1.0-preview",
+  "exported_at": "2026-07-10T16:40:00Z",
+  "mode": "preview_not_truth_engine",
+  "sample_rate_hz": 48000,
+  "state": {
+    "sources": {
+      "A": {"enabled": true, "frequency_hz": 220, "gain": 0.35, "phase_deg": 0, "route": "C", "harmonics": [1, 0.45, 0.28, 0.18, 0.12, 0.08, 0.05, 0.03]},
+      "B": {"enabled": true, "frequency_hz": 220, "gain": 0.35, "phase_deg": 180, "route": "C", "harmonics": [1, 0.45, 0.28, 0.18, 0.12, 0.08, 0.05, 0.03]}
+    },
+    "noise": {"gain": 0, "cutoff_hz": 8000},
+    "intervention": {"enabled": true, "condition": "opposition", "threshold_deg": 12, "audio_multiplier": 0.25, "active": true},
+    "visualization": {"intervention_exaggeration": 4, "frozen": false}
+  },
+  "automation_events": [
+    {"t_ms": 0, "target": "sources.B.phase_deg", "value": 0},
+    {"t_ms": 1000, "target": "sources.B.phase_deg", "value": 180}
+  ],
+  "automation_tracks": [
+    {
+      "target": "sources.B.phase_deg",
+      "curve": "step",
+      "coordinate_space": "none",
+      "keys": [
+        {"sample": 0, "value": 0},
+        {"sample": 48000, "value": 180}
+      ]
+    }
+  ],
+  "snapshot": null,
+  "limitations": [
+    "Web Audio scheduling and browser DSP are not the deterministic Rust truth engine.",
+    "Visual exaggeration is presentation-only unless an explicit Intervention State audio multiplier is active."
+  ]
+}
