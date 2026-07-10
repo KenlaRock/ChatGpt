@@ -17,6 +17,10 @@ jobs:
         with:
           python-version: "3.12"
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
       - uses: dtolnay/rust-toolchain@stable
 
       - name: Install Python dependencies
@@ -27,6 +31,11 @@ jobs:
 
       - name: Validate experiment schemas
         run: python tools/validate_package.py
+
+      - name: Validate browser Preview Lab
+        run: |
+          python tools/validate_web_preview.py
+          node --check web/app.js
 
       - name: Run Python reference and property tests
         run: python -m unittest discover -s tests -v
