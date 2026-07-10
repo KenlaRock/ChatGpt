@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   reference:
     runs-on: ubuntu-latest
@@ -21,6 +24,9 @@ jobs:
 
       - name: Validate public information boundary
         run: python tools/check_public_boundary.py
+
+      - name: Validate experiment schemas
+        run: python tools/validate_package.py
 
       - name: Run Python reference and property tests
         run: python -m unittest discover -s tests -v
