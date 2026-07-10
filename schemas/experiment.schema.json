@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nullforge.example/schemas/experiment.schema.json",
+  "title": "NullForge SimLab Experiment",
+  "type": "object",
+  "required": ["schema_version", "experiment_id", "engine", "timeline", "sources", "routing"],
+  "properties": {
+    "schema_version": {"type": "string", "const": "0.1.0"},
+    "experiment_id": {"type": "string", "pattern": "^[A-Z0-9][A-Z0-9._-]+$"},
+    "title": {"type": "string"},
+    "description": {"type": "string"},
+    "engine": {
+      "type": "object",
+      "required": ["sample_rate", "render_seed"],
+      "properties": {
+        "sample_rate": {"type": "integer", "minimum": 8000, "maximum": 384000},
+        "render_seed": {"type": "integer", "minimum": 0},
+        "coordinate_system": {"enum": ["right_handed_y_up"]}
+      },
+      "additionalProperties": true
+    },
+    "timeline": {
+      "type": "object",
+      "required": ["duration_samples"],
+      "properties": {
+        "duration_samples": {"type": "integer", "minimum": 1},
+        "tempo_bpm": {"type": "number", "exclusiveMinimum": 0},
+        "time_signature": {
+          "type": "array",
+          "prefixItems": [
+            {"type": "integer", "minimum": 1},
+            {"type": "integer", "enum": [1, 2, 4, 8, 16, 32]}
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        }
+      },
+      "additionalProperties": false
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "generator", "frequency_hz", "amplitude", "phase_deg", "channel"],
+        "properties": {
+          "id": {"type": "string"},
+          "generator": {"enum": ["sine", "additive"]},
+          "frequency_hz": {"type": "number", "exclusiveMinimum": 0},
+          "amplitude": {"type": "number", "minimum": 0},
+          "phase_deg": {"type": "number"},
+          "partials": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["harmonic", "amplitude"],
+              "properties": {
+                "harmonic": {"type": "integer", "minimum": 1},
+                "amplitude": {"type": "number", "minimum": 0},
+                "phase_offset_deg": {"type": "number"}
+              },
+              "additionalProperties": false
+            }
+          },
+          "channel": {"enum": ["L", "R", "C"]}
+        },
+        "additionalProperties": false
+      }
+    },
+    "automation": {"type": "array", "items": {"$ref": "automation.schema.json"}},
+    "routing": {
+      "type": "object",
+      "required": ["center_formula", "side_formula"],
+      "properties": {
+        "center_formula": {"const": "(L+R)/2"},
+        "side_formula": {"const": "(L-R)/2"}
+      },
+      "additionalProperties": false
+    },
+    "interaction_rules": {"type": "array", "items": {"$ref": "interaction-rule.schema.json"}},
+    "visualization": {"type": "object"},
+    "expected": {"type": "array", "items": {"type": "object"}}
+  },
+  "additionalProperties": false
+}
