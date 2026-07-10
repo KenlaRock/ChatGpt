@@ -1,0 +1,105 @@
+{
+  "schema_version": "0.1.0",
+  "experiment_id": "EXP-VECTOR-NULL-001",
+  "title": "Additive L/R phase sweep into center null",
+  "description": "Two identical H1-H16 signals. Right phase sweeps from 0 to 180 degrees. Visualization exaggeration is metadata only.",
+  "engine": {
+    "sample_rate": 48000,
+    "render_seed": 913744,
+    "coordinate_system": "right_handed_y_up"
+  },
+  "timeline": {
+    "duration_samples": 480000,
+    "tempo_bpm": 96.0,
+    "time_signature": [4, 4]
+  },
+  "sources": [
+    {
+      "id": "SRC-L",
+      "generator": "additive",
+      "frequency_hz": 110.0,
+      "amplitude": 0.8,
+      "phase_deg": 0.0,
+      "partials": [
+        {"harmonic":1,"amplitude":1.0,"phase_offset_deg":0.0},
+        {"harmonic":2,"amplitude":0.5,"phase_offset_deg":0.0},
+        {"harmonic":3,"amplitude":0.3333333333,"phase_offset_deg":0.0},
+        {"harmonic":4,"amplitude":0.25,"phase_offset_deg":0.0},
+        {"harmonic":5,"amplitude":0.2,"phase_offset_deg":0.0},
+        {"harmonic":6,"amplitude":0.1666666667,"phase_offset_deg":0.0},
+        {"harmonic":7,"amplitude":0.1428571429,"phase_offset_deg":0.0},
+        {"harmonic":8,"amplitude":0.125,"phase_offset_deg":0.0},
+        {"harmonic":9,"amplitude":0.1111111111,"phase_offset_deg":0.0},
+        {"harmonic":10,"amplitude":0.1,"phase_offset_deg":0.0},
+        {"harmonic":11,"amplitude":0.0909090909,"phase_offset_deg":0.0},
+        {"harmonic":12,"amplitude":0.0833333333,"phase_offset_deg":0.0},
+        {"harmonic":13,"amplitude":0.0769230769,"phase_offset_deg":0.0},
+        {"harmonic":14,"amplitude":0.0714285714,"phase_offset_deg":0.0},
+        {"harmonic":15,"amplitude":0.0666666667,"phase_offset_deg":0.0},
+        {"harmonic":16,"amplitude":0.0625,"phase_offset_deg":0.0}
+      ],
+      "channel": "L"
+    },
+    {
+      "id": "SRC-R",
+      "generator": "additive",
+      "frequency_hz": 110.0,
+      "amplitude": 0.8,
+      "phase_deg": 0.0,
+      "partials": [
+        {"harmonic":1,"amplitude":1.0,"phase_offset_deg":0.0},
+        {"harmonic":2,"amplitude":0.5,"phase_offset_deg":0.0},
+        {"harmonic":3,"amplitude":0.3333333333,"phase_offset_deg":0.0},
+        {"harmonic":4,"amplitude":0.25,"phase_offset_deg":0.0},
+        {"harmonic":5,"amplitude":0.2,"phase_offset_deg":0.0},
+        {"harmonic":6,"amplitude":0.1666666667,"phase_offset_deg":0.0},
+        {"harmonic":7,"amplitude":0.1428571429,"phase_offset_deg":0.0},
+        {"harmonic":8,"amplitude":0.125,"phase_offset_deg":0.0},
+        {"harmonic":9,"amplitude":0.1111111111,"phase_offset_deg":0.0},
+        {"harmonic":10,"amplitude":0.1,"phase_offset_deg":0.0},
+        {"harmonic":11,"amplitude":0.0909090909,"phase_offset_deg":0.0},
+        {"harmonic":12,"amplitude":0.0833333333,"phase_offset_deg":0.0},
+        {"harmonic":13,"amplitude":0.0769230769,"phase_offset_deg":0.0},
+        {"harmonic":14,"amplitude":0.0714285714,"phase_offset_deg":0.0},
+        {"harmonic":15,"amplitude":0.0666666667,"phase_offset_deg":0.0},
+        {"harmonic":16,"amplitude":0.0625,"phase_offset_deg":0.0}
+      ],
+      "channel": "R"
+    }
+  ],
+  "automation": [
+    {
+      "target": "SRC-R.phase_deg",
+      "curve": "linear",
+      "coordinate_space": "abstract_signal_space",
+      "keys": [
+        {"sample": 0, "value": 0.0},
+        {"sample": 480000, "value": 180.0}
+      ]
+    }
+  ],
+  "routing": {
+    "center_formula": "(L+R)/2",
+    "side_formula": "(L-R)/2"
+  },
+  "interaction_rules": [
+    {
+      "id": "RULE-DEEP-NULL-001",
+      "sensor": {"type": "metric", "metric": "bus.center.null_depth_db"},
+      "condition": {"operator": "less_than", "value": -25.0, "hysteresis": 3.0, "hold_samples": 480},
+      "responses": [
+        {"classification": "OBSERVATION_MODIFIER", "type": "visual_exaggeration", "target": "visual.phase_vectors.scale", "value": 20.0},
+        {"classification": "SNAPSHOT", "type": "event_snapshot", "target": "snapshot.deepest_null", "value": true}
+      ]
+    }
+  ],
+  "visualization": {
+    "mode": "Extreme Microscope",
+    "phase_angle_exaggeration": 20.0,
+    "amplitude_scale": 4.0,
+    "audio_truth_unchanged": true
+  },
+  "expected": [
+    {"metric": "deepest_null_db_10ms", "operator": "less_than", "value": -20.0}
+  ]
+}
