@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nullforge.example/schemas/automation.schema.json",
+  "title": "Automation Track",
+  "type": "object",
+  "required": ["target", "curve", "keys"],
+  "properties": {
+    "target": {"type": "string"},
+    "curve": {"enum": ["step", "linear", "cubic_bezier", "catmull_rom", "sampled_curve"]},
+    "coordinate_space": {"enum": ["none", "physical_acoustic_space", "abstract_signal_space"]},
+    "keys": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["sample", "value"],
+        "properties": {
+          "sample": {"type": "integer", "minimum": 0},
+          "value": {
+            "oneOf": [
+              {"type": "number"},
+              {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 4}
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
