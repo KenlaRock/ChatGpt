@@ -1,0 +1,59 @@
+name: Deploy Preview Lab to GitHub Pages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  validate-and-package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: sanitized-main-2026-07-10
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install validation dependencies
+        run: pip install -r requirements.txt
+
+      - name: Validate public artifact boundary
+        run: |
+          python tools/check_public_boundary.py
+          python tools/validate_package.py
+          python tools/validate_web_preview.py
+          node --check web/app.js
+          node --check web/session-contract.js
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Preview Lab artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: web
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: validate-and-package
+    steps:
+      - name: Deploy Preview Lab
+        id: deployment
+        uses: actions/deploy-pages@v4
