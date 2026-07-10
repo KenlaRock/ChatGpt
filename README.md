@@ -1,6 +1,6 @@
 # NullForge Simulation Lab
 
-**Status:** Open Source Foundation v0.1 — canonical Git baseline  
+**Status:** Open Source Foundation v0.2 — Preview Lab vertical slice  
 **Date:** 2026-07-10  
 **Project owner / research arbiter:** Ken Kängström  
 **Primary software license:** AGPL-3.0-or-later (candidate, pending final legal sanity check)
@@ -28,21 +28,20 @@ The system separates four state domains:
 
 A visual exaggeration must never silently modify Truth State.
 
-## What exists in this foundation package
+## What exists now
 
-- project charter and robust build plan,
 - scientific-integrity and governance rules,
 - Architecture Decision Records,
 - JSON Schema Draft 2020-12 contracts,
 - a deterministic Python reference oracle,
-- the first synthetic phase/null experiment,
-- metrics and event snapshot,
-- validation and property tests,
+- a Rust core cross-implementation-verified for `EXP-VECTOR-NULL-001 / v0.1`,
+- metrics, snapshots, validation and property tests,
+- a local-first browser Preview Lab,
 - sanitized source-transparency records.
 
 Canonical public repository: https://github.com/KenlaRock/ChatGpt
 
-The Python oracle is deliberately small. It is not the intended production engine. Its job is to provide an independent, readable reference that the future Rust native/WASM engine must match within declared tolerances.
+The Python oracle is deliberately small and independent. The Rust implementation is the production-engine candidate. Browser Web Audio is an exploratory preview surface and is not deterministic evidence.
 
 ## Public and internal information boundary
 
@@ -56,7 +55,37 @@ python tools/check_public_boundary.py
 
 See [`PUBLICATION_BOUNDARY.md`](PUBLICATION_BOUNDARY.md).
 
-## Run the reference experiment
+## Run the interactive Preview Lab
+
+Requirements:
+
+- Python 3,
+- a modern Chromium-based browser for the first validation pass,
+- headphones or low monitor volume when experimenting with cancellation and intervention gain.
+
+From the repository root:
+
+```bash
+python -m http.server 8080 --directory web
+```
+
+Then open:
+
+```text
+http://localhost:8080
+```
+
+Press **Starta ljud** in the browser. Audio cannot start automatically because browsers require a user gesture.
+
+Preview Lab v0.1 includes two additive H1–H8 sources, L/C/R routing, phase, a controlled noise wall, real-time L/R and vector views, M/S metrics, interaction-conditioned intervention, Surgical Freeze snapshots, automation recording/playback, and JSON import/export.
+
+See [`web/README.md`](web/README.md). Exported browser snapshots are explicitly labeled:
+
+```text
+PREVIEW_SNAPSHOT_NOT_DETERMINISTIC_EVIDENCE
+```
+
+## Run the deterministic reference experiment
 
 ```bash
 python reference/run_experiment.py \
@@ -64,23 +93,37 @@ python reference/run_experiment.py \
   artifacts/EXP-VECTOR-NULL-001
 ```
 
+## Run the Rust candidate
+
+```bash
+cargo run --release -p nf-sim-core -- \
+  scenarios/phase-and-null/EXP-VECTOR-NULL-001.json \
+  artifacts/EXP-VECTOR-NULL-001/rust-metrics.json
+```
+
 ## Run validation
 
 ```bash
-python -m unittest discover -s tests -v
-python tools/validate_package.py
+pip install -r requirements.txt
 python tools/check_public_boundary.py
+python tools/validate_package.py
+python tools/validate_web_preview.py
+node --check web/app.js
+python -m unittest discover -s tests -v
+cargo test --workspace --all-targets
 ```
 
 ## Intended production architecture
 
-- Rust native canonical runner
-- Rust → WebAssembly real-time core
-- TypeScript web application
-- Web Audio + AudioWorklet
-- Three.js visualization
-- JSON Schema contracts
-- local-first storage and file exchange
+- Rust native canonical runner,
+- Rust → WebAssembly real-time core,
+- TypeScript application shell,
+- Web Audio / AudioWorklet output,
+- Three.js scientific visualization,
+- JSON Schema contracts,
+- local-first storage and file exchange.
+
+The current browser Preview Lab is a dependency-free vertical slice. It proves the control model and exchange workflow before the interface is coupled to Rust/WASM.
 
 ## License map
 
