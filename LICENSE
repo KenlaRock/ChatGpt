@@ -1,0 +1,26 @@
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+NullForge Simulation Lab
+Copyright (C) 2026 Ken Kängström and contributors
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU Affero General Public License as published by the Free
+Software Foundation, either version 3 of the License, or (at your option) any
+later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+Canonical license identifier:
+https://spdx.org/licenses/AGPL-3.0-or-later.html
+
+Canonical verbatim license source used for the upcoming full-text import:
+spdx/license-list-data — text/AGPL-3.0-or-later.txt
+Git blob SHA: 0c97efd25b5974b974ed9a8a18207bc4f55bb338
+
+IMPORTANT FOUNDATION STATUS
+The SPDX declaration and grant above are active. Before the first tagged public
+release, this file will be replaced by the complete verbatim canonical AGPL text
+from the pinned SPDX source above. This explicit foundation notice must not be
+mistaken for the final release license payload.
