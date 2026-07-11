@@ -4,6 +4,8 @@ Status: **AI Gate v0.2.1 PATCH-2 ACTIVE** on `main` after merge of PR #114.
 
 AI Gate activation commit: `main@2f49d16153d2baca8b36cec6286b27e43262d081`.
 
+Repository-state reconciliation commit: `main@343aed65dee1fe81ebb4dbc627288eaa61f7156d` from PR #119.
+
 Scientific authority remains unchanged: canonical offline evidence and the Python/Rust comparison are owned by Reference CI. Netlify availability remains a deployment observation, not correctness or scientific evidence.
 
 ## Completed activation evidence
@@ -15,6 +17,7 @@ Scientific authority remains unchanged: canonical offline evidence and the Pytho
 - PR #114 merged as `2f49d16153d2baca8b36cec6286b27e43262d081`, placing the permanent `AI Gate / ai-gate` workflow on `main`.
 - The permanent workflow reads validator code, configuration, schema, and test runner from the trusted pull-request base rather than from the untrusted candidate branch.
 - Post-activation live PR #118 deliberately added root-level `dummy-file.md` outside declared scope. Trusted preflight produced `AI_GATE_FAIL: Changed outside declared scope: dummy-file.md`, Reference CI passed independently, and the PR was closed without merge.
+- PR #119 merged as `343aed65dee1fe81ebb4dbc627288eaa61f7156d`, reconciling the repository-state documentation with the active baseline.
 - Fail-only `fnmatch` semantics are documented and prohibited from granting allow scope.
 - Placeholder detection rejects standalone seven-zero dummy tokens without false-positive matching inside legitimate alphanumeric hashes.
 
@@ -33,10 +36,10 @@ Scientific authority remains unchanged: canonical offline evidence and the Pytho
 - Current human-bypass exposure is operationally low because Ken is the only human maintainer with repository authority. Independent code-owner approval cannot presently be supplied by a second human, so that requirement remains an explicitly documented external control gap rather than being silently removed.
 - If another maintainer, code owner, automation token, or external integration receives write authority, configure the branch ruleset and independent review requirement before relying on that new access path.
 
-## Current documentation cleanup
+## Documentation state
 
-Branch `gate/post-activation-state-cleanup-20260711` corrects the stale bootstrap wording in this file and `CHANGELOG.md` through a normal `R0_DOC_ONLY` gate-controlled pull request. No gate implementation, protected path, scientific baseline, or deployment behavior is changed.
+The activation history, live-test evidence, operating procedure, and remaining external-control gaps are recorded using durable post-merge wording. No gate implementation, protected path, scientific baseline, or deployment behavior was changed by the documentation reconciliation.
 
 ## Rollback
 
-Close the documentation cleanup PR without merge if any statement is inaccurate. After merge, revert the documentation commit if a factual error is discovered; do not alter the active gate implementation or activation commit as part of that rollback.
+If a factual error is discovered, revert only the relevant documentation commit. Preserve the active gate implementation, activation commit, live-test provenance, and Reference CI scientific authority.
