@@ -18,3 +18,5 @@ Open gates:
 Rollback:
 
 Close the bootstrap PR or revert its integration commits. Preserve QA logs and failed dry-run records as provenance.
+
+Live hostile record: `task/ai-gate-live-hostile` intentionally introduces an undeclared path against the patched gate and must fail preflight before its fixed test profile is executed.
