@@ -1,27 +1,34 @@
 # NullForge Repository State
 
-Status: **AI Gate v0.2.1 PATCH-2 — technically validated bootstrap candidate** on draft PR #114. It is not yet the active `main` baseline.
+Status: **AI Gate v0.2.1 PATCH-2 ACTIVE** on `main` after merge of PR #114.
 
-Latest stable/green public base: `main@865f78225106677724b60b336203d0de5d8b13ee`.
+Latest active public base: `main@2f49d16153d2baca8b36cec6286b27e43262d081`.
 
 Scientific authority remains unchanged: canonical offline evidence and the Python/Rust comparison are owned by Reference CI. Netlify availability remains a deployment observation, not correctness or scientific evidence.
 
-## Completed bootstrap evidence
+## Completed activation evidence
 
 - Local adversarial gate suite: **23/23 passed** after Fable5 hardening.
-- Real GitHub Actions exposed a zero-tolerance timestamp defect; the validator now permits at most five minutes of future clock skew and rejects larger displacement.
-- Compliant live PR #115 at `724ee09b31827d1005e3e3833a37d37bf756afbe`: AI Gate Bootstrap **passed** and Reference CI **passed**; PR closed without merge.
-- Hostile live PR #116 at `07257a91b682f7709d028368b2a42b54fc1afdcb`: AI Gate Bootstrap **failed in preflight** on undeclared scope while Reference CI **passed**; PR closed without merge.
-- The temporary bootstrap child-PR workflow has been removed after testing, and the permanent workflow now targets `main` only.
+- Compliant live PR #115: AI Gate Bootstrap **passed** and Reference CI **passed**; PR closed without merge.
+- Hostile live PR #116: AI Gate Bootstrap **failed in preflight** on undeclared scope while Reference CI **passed**; PR closed without merge.
+- PR #114 merged as `2f49d16153d2baca8b36cec6286b27e43262d081`, placing the permanent `AI Gate / ai-gate` workflow on `main`.
+- The permanent workflow loads validator, schema, configuration, and test runner from the trusted PR base branch.
 - Fail-only `fnmatch` semantics are documented and prohibited from allow-scope use.
-- Placeholder detection now rejects standalone seven-zero dummy tokens without false-positive matching inside legitimate alphanumeric hashes.
+- Placeholder detection rejects standalone seven-zero dummy tokens without false-positive matching inside legitimate alphanumeric hashes.
 
-## Remaining activation gates
+## Remaining external enforcement gate
 
 - Configure a GitHub protected-branch/ruleset for `main` requiring `AI Gate / ai-gate`, `Reference CI / reference`, code-owner review, stale-review dismissal, no force-push, and no branch deletion.
-- Obtain literal human code-owner approval for PR #114. Technical AI review cannot honestly substitute for this independent human control.
-- Merge only after those external controls are confirmed.
+- Until that platform rule exists, maintainers must voluntarily refuse direct pushes and merges that bypass red or missing checks.
+
+## Post-activation live scope test — 2026-07-11
+
+- Test branch: `gate/ai-gate-live-scope-violation-20260711`.
+- Declared ordinary path: `docs/AI_GATE_LIVE_SCOPE_TEST.md`.
+- Deliberate violation: root-level `dummy-file.md` is absent from `allowed_paths`.
+- Acceptance criterion: active `AI Gate / ai-gate` fails in preflight on the undeclared path. `Reference CI / reference` may pass independently.
+- Disposition: close without merge and preserve the failed Actions record as QA provenance.
 
 ## Rollback
 
-Close draft PR #114 without merging, or revert its bootstrap commits if it is later merged. Preserve local QA results, PR #115, PR #116, workflow logs, and failed attempts as provenance.
+For the live negative test, close its PR without merging and retain the failed workflow record. The active `main` baseline remains unchanged.
