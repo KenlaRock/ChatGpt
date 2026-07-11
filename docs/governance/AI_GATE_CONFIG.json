@@ -1,0 +1,157 @@
+{
+  "config_version": "0.2.1",
+  "mandatory_read_files": [
+    "AGENTS.md",
+    "README.md",
+    "ARCHITECTURE.md",
+    "SCIENTIFIC_INTEGRITY.md",
+    "PUBLICATION_BOUNDARY.md",
+    "CHANGELOG.md",
+    "docs/STATE.md",
+    "docs/governance/AI_GATE_RULESET.md",
+    "docs/governance/AI_GATE_CONFIG.json",
+    "schemas/ai-session-proof.schema.json"
+  ],
+  "immutable_context_files": [
+    "AGENTS.md",
+    "README.md",
+    "ARCHITECTURE.md",
+    "SCIENTIFIC_INTEGRITY.md",
+    "PUBLICATION_BOUNDARY.md",
+    "docs/governance/AI_GATE_RULESET.md",
+    "docs/governance/AI_GATE_CONFIG.json",
+    "schemas/ai-session-proof.schema.json"
+  ],
+  "state_files": [
+    "CHANGELOG.md",
+    "docs/STATE.md"
+  ],
+  "gate_files": [
+    "AGENTS.md",
+    "requirements-ai-gate.txt",
+    ".github/workflows/ai-gate.yml",
+    ".github/CODEOWNERS",
+    ".github/pull_request_template.md",
+    "docs/governance/**",
+    "schemas/**",
+    "tools/ai_gate/**"
+  ],
+  "protected_paths": [
+    ".github/**",
+    "docs/governance/**",
+    "SCIENTIFIC_INTEGRITY.md",
+    "ARCHITECTURE.md",
+    "PUBLICATION_BOUNDARY.md",
+    "schemas/**",
+    "reference/**",
+    "reference_oracle/**",
+    "scenarios/**",
+    "experiments/**",
+    "crates/**",
+    "Cargo.toml",
+    "Cargo.lock",
+    "netlify.toml"
+  ],
+  "forbidden_paths": [
+    ".git/**"
+  ],
+  "forbidden_basenames": [
+    ".env",
+    ".env.*",
+    "*.pem",
+    "*.key",
+    "id_rsa",
+    "id_ed25519",
+    "credentials.json",
+    "credentials.yml",
+    "credentials.yaml",
+    "secrets.json",
+    "secrets.yml",
+    "secrets.yaml",
+    "token.txt",
+    "tokens.txt"
+  ],
+  "always_allowed_task_artifacts": [
+    "ai/session-proof.json",
+    "ai/control-report.md"
+  ],
+  "minimum_report_section_chars": 40,
+  "external_required_status_checks": [
+    "AI Gate / ai-gate",
+    "Reference CI / reference"
+  ],
+  "test_profiles": {
+    "R0_DOC_ONLY": [
+      "public_boundary"
+    ],
+    "R1_SAFE_UI": [
+      "unit_tests",
+      "public_boundary"
+    ],
+    "R2_LOGIC": [
+      "unit_tests",
+      "public_boundary"
+    ],
+    "R3_DSP_OR_SCIENCE": [
+      "unit_tests",
+      "reference_experiment",
+      "public_boundary"
+    ],
+    "R4_GOVERNANCE_OR_DEPLOY": [
+      "unit_tests",
+      "ai_gate_selftest",
+      "public_boundary"
+    ]
+  },
+  "tests": {
+    "unit_tests": {
+      "argv": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "required_paths": [
+        "tests"
+      ]
+    },
+    "ai_gate_selftest": {
+      "argv": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools/ai_gate/tests",
+        "-v"
+      ],
+      "required_paths": [
+        "tools/ai_gate/tests"
+      ]
+    },
+    "reference_experiment": {
+      "argv": [
+        "python",
+        "reference/run_experiment.py",
+        "scenarios/phase-and-null/EXP-VECTOR-NULL-001.json",
+        "{test_output_dir}/EXP-VECTOR-NULL-001"
+      ],
+      "required_paths": [
+        "reference/run_experiment.py",
+        "scenarios/phase-and-null/EXP-VECTOR-NULL-001.json"
+      ]
+    },
+    "public_boundary": {
+      "argv": [
+        "python",
+        "tools/check_public_boundary.py"
+      ],
+      "required_paths": [
+        "tools/check_public_boundary.py"
+      ]
+    }
+  }
+}

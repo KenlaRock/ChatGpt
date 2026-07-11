@@ -1,0 +1,13 @@
+# NullForge code ownership — branch rules must require Code Owner approval.
+/.github/** @KenlaRock
+/AGENTS.md @KenlaRock
+/docs/governance/** @KenlaRock
+/docs/STATE.md @KenlaRock
+/SCIENTIFIC_INTEGRITY.md @KenlaRock
+/ARCHITECTURE.md @KenlaRock
+/PUBLICATION_BOUNDARY.md @KenlaRock
+/schemas/** @KenlaRock
+/tools/ai_gate/** @KenlaRock
+/reference/** @KenlaRock
+/scenarios/** @KenlaRock
+/netlify.toml @KenlaRock
