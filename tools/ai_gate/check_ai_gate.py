@@ -13,7 +13,7 @@ import json
 import re
 import subprocess
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path, PurePosixPath
 
 from jsonschema import Draft202012Validator, FormatChecker
@@ -24,6 +24,8 @@ REPORT_HEADINGS = [
     "Approved scope", "Risk class", "Required tests", "Rollback plan",
 ]
 PLACEHOLDER_RE = re.compile(r"<!--|\bTODO\b|\bTBD\b|replace(?:-me| this| with)|0000000", re.I)
+MAX_FUTURE_CLOCK_SKEW = timedelta(minutes=5)
+MAX_PROOF_AGE = timedelta(days=30)
 
 
 def fail(message: str) -> None:
@@ -166,7 +168,8 @@ def main() -> None:
     head_commit=run(["git","rev-parse",a.head])
     if proof["base_commit"] != merge_base: fail("base_commit does not equal the actual merge-base")
     if proof["branch"] != a.branch: fail("Proof branch does not match the PR head branch")
-    if merge_base not in proof["latest_green_version"]: fail("latest_green_version must reference the actual merge-base")
+    if merge_base not in proof["latest_green_version"]:
+        fail("latest_green_version must reference the actual merge-base")
 
     mandatory=[clean_repo_path(x) for x in config["mandatory_read_files"]]
     if proof["mandatory_files"] != mandatory: fail("mandatory_files must exactly match configured order and contents")
@@ -176,8 +179,10 @@ def main() -> None:
     gate_files=config["gate_files"]
     allow_gate_change = proof["risk_class"] == "R4_GOVERNANCE_OR_DEPLOY" and proof["gate_change"]
     approved_context_changes={clean_repo_path(x) for x in proof["approved_context_changes"]}
-    if approved_context_changes and not allow_gate_change: fail("approved_context_changes requires R4_GOVERNANCE_OR_DEPLOY + gate_change")
-    if not approved_context_changes.issubset(immutable): fail("approved_context_changes may contain only configured immutable context files")
+    if approved_context_changes and not allow_gate_change:
+        fail("approved_context_changes requires R4_GOVERNANCE_OR_DEPLOY + gate_change")
+    if not approved_context_changes.issubset(immutable):
+        fail("approved_context_changes may contain only configured immutable context files")
     for path in mandatory:
         base_hash=sha256_bytes(git_blob(merge_base,path))
         if hashes[path] != base_hash: fail(f"Proof hash is not the base-commit hash: {path}")
@@ -186,12 +191,18 @@ def main() -> None:
             if not current.exists(): fail(f"Immutable context file missing in checkout: {path}")
             if sha256_file(current) != base_hash: fail(f"Immutable context file changed after gate opened: {path}")
 
-    created=datetime.fromisoformat(proof["created_at"].replace("Z","+00:00")); now=datetime.now(timezone.utc)
+    # Distributed CI clocks may differ slightly. Permit bounded skew, not arbitrary future proofs.
+    created=datetime.fromisoformat(proof["created_at"].replace("Z","+00:00"))
+    now=datetime.now(timezone.utc)
     if created.tzinfo is None: fail("created_at must include timezone")
-    if created > now.replace(microsecond=0): fail("created_at is in the future")
-    if (now-created).days > 30: fail("session proof is older than 30 days")
+    if created - now > MAX_FUTURE_CLOCK_SKEW:
+        fail("created_at is more than 5 minutes in the future")
+    if now - created > MAX_PROOF_AGE:
+        fail("session proof is older than 30 days")
 
-    report=report_path.read_text(encoding="utf-8"); sections=report_sections(report); minimum=int(config.get("minimum_report_section_chars",40))
+    report=report_path.read_text(encoding="utf-8")
+    sections=report_sections(report)
+    minimum=int(config.get("minimum_report_section_chars",40))
     for heading in REPORT_HEADINGS:
         body=sections.get(heading,"")
         if len(body) < minimum: fail(f"Control report section is missing or too short: {heading}")
@@ -201,10 +212,14 @@ def main() -> None:
 
     allowed=[clean_repo_path(x) for x in proof["allowed_paths"]]
     additional_forbidden=[clean_repo_path(x) for x in proof["additional_forbidden_paths"]]
-    for pattern in allowed: subtree_match("__scope_validation_probe__", pattern)
-    for pattern in additional_forbidden: policy_match("__scope_validation_probe__", pattern)
+    for pattern in allowed:
+        # Force validation even when a PR only changes state files.
+        subtree_match("__scope_validation_probe__", pattern)
+    for pattern in additional_forbidden:
+        policy_match("__scope_validation_probe__", pattern)
     always=set(config["always_allowed_task_artifacts"]); state=set(config["state_files"])
-    protected=config["protected_paths"]; global_forbidden=config["forbidden_paths"]; forbidden_names=config["forbidden_basenames"]
+    protected=config["protected_paths"]
+    global_forbidden=config["forbidden_paths"]; forbidden_names=config["forbidden_basenames"]
     entries=changed_entries(a.base,a.head)
     if not entries: fail("No changed files detected")
     changed_paths=[]
@@ -216,12 +231,16 @@ def main() -> None:
             if path in always or path in state: continue
             if not any(subtree_match(path,p) for p in allowed): fail(f"Changed outside declared scope: {path}")
             is_gate=any(policy_match(path,p) for p in gate_files)
-            if is_gate and not (proof["risk_class"]=="R4_GOVERNANCE_OR_DEPLOY" and proof["gate_change"]): fail(f"Gate file changed without R4 + gate_change: {path}")
+            if is_gate and not (proof["risk_class"]=="R4_GOVERNANCE_OR_DEPLOY" and proof["gate_change"]):
+                fail(f"Gate file changed without R4 + gate_change: {path}")
             is_protected=any(policy_match(path,p) for p in protected)
-            if is_protected and proof["risk_class"] != "R4_GOVERNANCE_OR_DEPLOY": fail(f"Protected path changed without R4: {path}")
+            if is_protected and proof["risk_class"] != "R4_GOVERNANCE_OR_DEPLOY":
+                fail(f"Protected path changed without R4: {path}")
 
-    changed_path_set=set(changed_paths); missing_approved=approved_context_changes-changed_path_set
-    if missing_approved: fail("approved_context_changes lists unchanged paths: " + ", ".join(sorted(missing_approved)))
+    changed_path_set=set(changed_paths)
+    missing_approved=approved_context_changes-changed_path_set
+    if missing_approved:
+        fail("approved_context_changes lists unchanged paths: " + ", ".join(sorted(missing_approved)))
     for path in state:
         if path not in changed_paths: fail(f"Required state file not updated: {path}")
         if not substantive_state_change(a.base,a.head,path): fail(f"State update is not substantive: {path}")
@@ -232,13 +251,18 @@ def main() -> None:
     if a.phase == "final":
         if not a.test_evidence: fail("Final phase requires test evidence")
         evidence=load_json(Path(a.test_evidence),"test evidence")
-        if evidence.get("base_commit") != merge_base or evidence.get("head_commit") != head_commit: fail("Test evidence commit identity mismatch")
-        if evidence.get("risk_class") != proof["risk_class"] or evidence.get("test_ids") != expected_tests: fail("Test evidence profile mismatch")
-        if evidence.get("working_tree_changed_by_tests") is not False: fail("Tests changed the candidate working tree")
+        if evidence.get("base_commit") != merge_base or evidence.get("head_commit") != head_commit:
+            fail("Test evidence commit identity mismatch")
+        if evidence.get("risk_class") != proof["risk_class"] or evidence.get("test_ids") != expected_tests:
+            fail("Test evidence profile mismatch")
+        if evidence.get("working_tree_changed_by_tests") is not False:
+            fail("Tests changed the candidate working tree")
         results=evidence.get("results")
-        if not isinstance(results,list) or [r.get("id") for r in results] != expected_tests: fail("Test evidence result set mismatch")
+        if not isinstance(results,list) or [r.get("id") for r in results] != expected_tests:
+            fail("Test evidence result set mismatch")
         for result in results:
-            if result.get("returncode") != 0 or result.get("skipped"): fail(f"Required test did not pass: {result.get('id')}")
+            if result.get("returncode") != 0 or result.get("skipped"):
+                fail(f"Required test did not pass: {result.get('id')}")
 
     print(f"AI_GATE_PASS: {a.phase} validation succeeded for {proof['task_id']} at {head_commit[:12]}.")
 
