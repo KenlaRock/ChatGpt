@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nullforge.local/schemas/ai-session-proof-v0.2.1.schema.json",
+  "title": "NullForge AI Session Proof v0.2.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "task_id",
+    "branch",
+    "base_commit",
+    "agent",
+    "created_at",
+    "mandatory_files",
+    "mandatory_file_hashes",
+    "project_state_summary",
+    "current_task_summary",
+    "must_not_change",
+    "latest_green_version",
+    "allowed_paths",
+    "additional_forbidden_paths",
+    "approved_context_changes",
+    "risk_class",
+    "required_test_ids",
+    "rollback_plan",
+    "control_report_path",
+    "gate_change"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.2.1"},
+    "task_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_-]{2,31}$"},
+    "branch": {"type": "string", "pattern": "^(task|fix|docs|gate|feat|chore)/[a-zA-Z0-9][a-zA-Z0-9._/-]{1,100}$"},
+    "base_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "model_or_runtime", "operator"],
+      "properties": {
+        "name": {"type": "string", "minLength": 2},
+        "model_or_runtime": {"type": "string", "minLength": 2},
+        "operator": {"type": "string", "minLength": 2}
+      }
+    },
+    "created_at": {"type": "string", "format": "date-time"},
+    "mandatory_files": {"type": "array", "uniqueItems": true, "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "mandatory_file_hashes": {"type": "object", "minProperties": 1, "additionalProperties": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}},
+    "project_state_summary": {"type": "string", "minLength": 100},
+    "current_task_summary": {"type": "string", "minLength": 50},
+    "must_not_change": {"type": "array", "uniqueItems": true, "minItems": 1, "items": {"type": "string", "minLength": 5}},
+    "latest_green_version": {"type": "string", "minLength": 12},
+    "allowed_paths": {"type": "array", "uniqueItems": true, "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "additional_forbidden_paths": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "risk_class": {"enum": ["R0_DOC_ONLY", "R1_SAFE_UI", "R2_LOGIC", "R3_DSP_OR_SCIENCE", "R4_GOVERNANCE_OR_DEPLOY"]},
+    "required_test_ids": {"type": "array", "uniqueItems": true, "minItems": 1, "items": {"type": "string", "pattern": "^[a-z][a-z0-9_-]{2,63}$"}},
+    "rollback_plan": {"type": "string", "minLength": 80},
+    "control_report_path": {"const": "ai/control-report.md"},
+    "gate_change": {"type": "boolean"},
+    "approved_context_changes": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+  }
+}
