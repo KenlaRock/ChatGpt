@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""NullForge AI Gate v0.2.1.
+"""NullForge AI Gate v0.2.1 PATCH-2.
 
 Uses repository policy from a trusted base branch in CI. The validator never executes
 commands from the session proof.
@@ -23,7 +23,10 @@ REPORT_HEADINGS = [
     "What absolutely must not be changed", "Latest stable / green version",
     "Approved scope", "Risk class", "Required tests", "Rollback plan",
 ]
-PLACEHOLDER_RE = re.compile(r"<!--|\bTODO\b|\bTBD\b|replace(?:-me| this| with)|0000000", re.I)
+PLACEHOLDER_RE = re.compile(
+    r"<!--|\bTODO\b|\bTBD\b|replace(?:-me| this| with)|(?<![A-Za-z0-9])0{7}(?![A-Za-z0-9])",
+    re.I,
+)
 MAX_FUTURE_CLOCK_SKEW = timedelta(minutes=5)
 MAX_PROOF_AGE = timedelta(days=30)
 
@@ -87,6 +90,10 @@ def subtree_match(path: str, pattern: str) -> bool:
 
 
 def policy_match(path: str, pattern: str) -> bool:
+    # Python fnmatch treats '/' as an ordinary character, so '*' may cross path
+    # separators. This function is intentionally used only for fail-closed policy
+    # matches (forbidden/protected/gate paths), where over-matching is safer. It
+    # must never be reused to grant allowed scope; allow rules use subtree_match.
     pattern = clean_repo_path(pattern)
     if pattern.endswith("/**"):
         prefix = pattern[:-3].rstrip("/")
