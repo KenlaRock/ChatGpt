@@ -1,0 +1,22 @@
+{
+  "schema_version": "0.2.1",
+  "task_id": "TASK-0000",
+  "branch": "task/replace-me",
+  "base_commit": "0000000000000000000000000000000000000000",
+  "agent": {"name": "AI Agent", "model_or_runtime": "replace-me", "operator": "Ken"},
+  "created_at": "2026-07-11T00:00:00Z",
+  "mandatory_files": ["COPY_EXACT_LIST_FROM_AI_GATE_CONFIG"],
+  "mandatory_file_hashes": {"COPY_EACH_MANDATORY_PATH": "sha256:REPLACE_WITH_64_LOWERCASE_HEX"},
+  "project_state_summary": "Replace with at least 100 characters describing the current public repository state, scientific constraints and latest stable baseline.",
+  "current_task_summary": "Replace with at least 50 characters describing the exact requested change and intended outcome.",
+  "must_not_change": ["Replace with explicit protected scientific, security and public-boundary constraints."],
+  "latest_green_version": "main@FULL_40_HEX_COMMIT",
+  "allowed_paths": ["replace/exact/path.py"],
+  "additional_forbidden_paths": [],
+  "risk_class": "R2_LOGIC",
+  "required_test_ids": ["COPY_EXACT_PROFILE_FROM_AI_GATE_CONFIG"],
+  "rollback_plan": "Replace with an exact rollback procedure of at least 80 characters, including the commit or PR revert path and state restoration steps.",
+  "control_report_path": "ai/control-report.md",
+  "gate_change": false,
+  "approved_context_changes": []
+}
