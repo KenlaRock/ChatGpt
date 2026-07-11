@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — AI Gate v0.2.1 PATCH-1 bootstrap candidate
+## Unreleased — AI Gate v0.2.1 PATCH-2 bootstrap candidate
 
 - Add trusted-base AI gate workflow, schema, proof and control-report contracts.
 - Add adversarial self-tests and fixed risk-class test profiles.
@@ -12,6 +12,9 @@
 - Verify compliant live PR #115: AI Gate Bootstrap passed and Reference CI passed; close without merge after preserving the result.
 - Verify hostile live PR #116: AI Gate failed in preflight on undeclared scope while Reference CI passed; close without merge after preserving the result.
 - Remove the temporary bootstrap child-PR workflow after the positive and hostile live tests completed.
+- Apply independent Fable5 review hardening: remove the bootstrap branch from the permanent workflow trigger, document fail-only `fnmatch` semantics, and narrow the seven-zero placeholder detector.
+- Add two placeholder regression tests: standalone `0000000` fails, while an embedded alphanumeric hash fragment containing seven zeros passes.
+- Expand the local adversarial suite to 23 cases.
 
 Remaining external activation work:
 
