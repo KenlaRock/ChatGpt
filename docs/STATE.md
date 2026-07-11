@@ -18,3 +18,5 @@ Open gates:
 Rollback:
 
 Close the bootstrap PR or revert its integration commits. Preserve QA logs and failed dry-run records as provenance.
+
+Live dry-run record: `task/ai-gate-live-good` is the compliant R0 acceptance case against the patched clock-skew-aware gate and is expected to pass AI Gate plus Reference CI.

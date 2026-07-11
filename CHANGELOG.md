@@ -7,3 +7,5 @@
 - Bind proofs to branch, merge-base, complete base hashes and exact scope.
 - Preserve the separate Reference CI as the Python/Rust scientific cross-oracle check.
 - Add explicit approval for rare R4 immutable-context changes.
+
+- Live-good dry run: add a scoped R0 documentation fixture to verify the patched bootstrap gate.

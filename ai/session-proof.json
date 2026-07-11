@@ -1,0 +1,58 @@
+{
+  "schema_version": "0.2.1",
+  "task_id": "GATE-LIVE-GOOD",
+  "branch": "task/ai-gate-live-good",
+  "base_commit": "d0b86686a551d87b1edcb970f67465599d5bffec",
+  "agent": {
+    "name": "ChatGPT",
+    "model_or_runtime": "GPT-5.6 Thinking / GitHub connector",
+    "operator": "Ken"
+  },
+  "created_at": "2026-07-11T18:55:00Z",
+  "mandatory_files": [
+    "AGENTS.md",
+    "README.md",
+    "ARCHITECTURE.md",
+    "SCIENTIFIC_INTEGRITY.md",
+    "PUBLICATION_BOUNDARY.md",
+    "CHANGELOG.md",
+    "docs/STATE.md",
+    "docs/governance/AI_GATE_RULESET.md",
+    "docs/governance/AI_GATE_CONFIG.json",
+    "schemas/ai-session-proof.schema.json"
+  ],
+  "mandatory_file_hashes": {
+    "AGENTS.md": "sha256:d545e5af6aba5b6f255609e5d67c068bf980e6139a510cff036867481710a7d8",
+    "README.md": "sha256:7033505fd35ba7fad1bc3b18a3266a2efab6482d0e93e3ac20fa26e0ba5353ba",
+    "ARCHITECTURE.md": "sha256:d1710e752dac3b992c39d0fb777f7993686bfd5835be433abad6b1b3127904fc",
+    "SCIENTIFIC_INTEGRITY.md": "sha256:0e5c9beabb486e761d4f3511dbde8cf726fe8af8365f24b24b87de821eb40bac",
+    "PUBLICATION_BOUNDARY.md": "sha256:c5e685a531565fd3bd60bbca3c7c5e32da42d00c6908b388688bb8951fb60ec0",
+    "CHANGELOG.md": "sha256:7717559ddcd6e3dd3a68d09c825339ff9524c7248fff46270a948cb6fc7a54fb",
+    "docs/STATE.md": "sha256:27931f677e7aea20cf6f96202385f6fad8bc766230f752dfde660eaa64aa558a",
+    "docs/governance/AI_GATE_RULESET.md": "sha256:de7986f8441f0830d461ea85ff654df5a9bb15dd59f2cd67348a92b5c1e5c9e4",
+    "docs/governance/AI_GATE_CONFIG.json": "sha256:31f10fe92713c5003f43fa0dc4e558e56f965406f1c89ddbab1e1e19b41499d7",
+    "schemas/ai-session-proof.schema.json": "sha256:f45d2f45e1289de9260e6c34e99998e90a67b06392f75cacd53379c3ff766068"
+  },
+  "project_state_summary": "NullForge Simulation Lab is a public, local-first and reproducible signal laboratory. The bootstrap branch adds an AI compliance gate while preserving Truth State, scientific evidence classes, the one-way public-information boundary, and the existing Reference CI authority for Python and Rust cross-oracle validation.",
+  "current_task_summary": "Add one harmless documentation fixture to prove that a correctly scoped R0 pull request with complete base hashes, state updates, and a substantive control report passes the patched live AI Gate workflow.",
+  "must_not_change": [
+    "Truth State and visualization-state separation",
+    "scientific evidence classification semantics",
+    "public repository information boundary",
+    "Reference CI cross-oracle authority",
+    "AI Gate configuration, validator, workflow, schema, or protected implementation paths"
+  ],
+  "latest_green_version": "gate/ai-gate-v0-2-1-bootstrap@d0b86686a551d87b1edcb970f67465599d5bffec",
+  "allowed_paths": [
+    "docs/AI_GATE_LIVE_GOOD.md"
+  ],
+  "additional_forbidden_paths": [],
+  "approved_context_changes": [],
+  "risk_class": "R0_DOC_ONLY",
+  "required_test_ids": [
+    "public_boundary"
+  ],
+  "rollback_plan": "Close the live-good pull request without merging, or revert its single commit and restore CHANGELOG.md and docs/STATE.md to the recorded patched bootstrap base while retaining the CI result as QA provenance.",
+  "control_report_path": "ai/control-report.md",
+  "gate_change": false
+}
