@@ -18,9 +18,10 @@
 - Merge PR #114 into `main` as commit `2f49d16153d2baca8b36cec6286b27e43262d081`, activating the permanent trusted-base AI Gate workflow.
 - Verify post-activation negative test PR #118: trusted preflight rejected undeclared root-level `dummy-file.md`, Reference CI passed independently, and the PR was closed without merge.
 - Reconcile `CHANGELOG.md` and `docs/STATE.md` with the active post-merge repository state through a normal gate-controlled documentation PR.
+- Preserve the intended human code-owner approval and stale-approval dismissal controls in the documented external ruleset checklist; note separately that independent approval is not currently available while Ken is the sole human maintainer.
 
 Remaining external enforcement work:
 
-- configure a protected-branch/ruleset for `main` requiring `AI Gate / ai-gate` and `Reference CI / reference`, blocking force-push and branch deletion, and defining the intended review policy;
+- configure a protected-branch/ruleset for `main` requiring `AI Gate / ai-gate`, `Reference CI / reference`, human code-owner approval, and stale-approval dismissal, while blocking force-push and branch deletion;
 - until that platform rule exists, treat any red or missing required check as a manual stop condition before merge;
-- current human-bypass exposure is operationally low because one human maintainer holds repository authority, but GitHub does not yet enforce that procedure mechanically.
+- current human-bypass exposure is operationally low because one human maintainer holds repository authority, but GitHub does not yet enforce the procedure mechanically and a second independent human approver is not presently available.
