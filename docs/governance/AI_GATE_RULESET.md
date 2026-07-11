@@ -1,4 +1,4 @@
-# NullForge AI Gate Ruleset v0.2.1
+# NullForge AI Gate Ruleset v0.2.1 PATCH-2
 
 ## Purpose
 
@@ -42,6 +42,8 @@ Allowed scope supports only:
 - a directory subtree ending in `/**`.
 
 Root-wide patterns such as `**`, `*` or `**/*` are forbidden. The proof may add forbidden paths but cannot weaken repository-global forbidden/protected rules.
+
+Policy patterns for forbidden, protected and gate files are deliberately fail-only. Python `fnmatch` treats `/` as an ordinary character, so `*` may cross directory separators and over-match. That behavior is acceptable only in a blocking direction. `policy_match` must never be reused to grant allowed scope; allow rules remain limited to exact paths and `directory/**` through `subtree_match`.
 
 ## Test model
 
