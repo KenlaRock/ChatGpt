@@ -1,0 +1,58 @@
+{
+  "schema_version": "0.2.1",
+  "task_id": "GATE-LIVE-SCOPE-20260711-01",
+  "branch": "test/ai-gate-live-scope-violation-20260711",
+  "base_commit": "2f49d16153d2baca8b36cec6286b27e43262d081",
+  "agent": {
+    "name": "ChatGPT",
+    "model_or_runtime": "GPT-5.6 Thinking / GitHub connector",
+    "operator": "Ken"
+  },
+  "created_at": "2026-07-11T20:45:00Z",
+  "mandatory_files": [
+    "AGENTS.md",
+    "README.md",
+    "ARCHITECTURE.md",
+    "SCIENTIFIC_INTEGRITY.md",
+    "PUBLICATION_BOUNDARY.md",
+    "CHANGELOG.md",
+    "docs/STATE.md",
+    "docs/governance/AI_GATE_RULESET.md",
+    "docs/governance/AI_GATE_CONFIG.json",
+    "schemas/ai-session-proof.schema.json"
+  ],
+  "mandatory_file_hashes": {
+    "AGENTS.md": "sha256:d545e5af6aba5b6f255609e5d67c068bf980e6139a510cff036867481710a7d8",
+    "README.md": "sha256:7033505fd35ba7fad1bc3b18a3266a2efab6482d0e93e3ac20fa26e0ba5353ba",
+    "ARCHITECTURE.md": "sha256:d1710e752dac3b992c39d0fb777f7993686bfd5835be433abad6b1b3127904fc",
+    "SCIENTIFIC_INTEGRITY.md": "sha256:0e5c9beabb486e761d4f3511dbde8cf726fe8af8365f24b24b87de821eb40bac",
+    "PUBLICATION_BOUNDARY.md": "sha256:c5e685a531565fd3bd60bbca3c7c5e32da42d00c6908b388688bb8951fb60ec0",
+    "CHANGELOG.md": "sha256:32944c3ba2d3510058e4e661190fa721de82b094a6896d5116638c2cbf56d53e",
+    "docs/STATE.md": "sha256:d21dae3b367bbb935b662ac78b088d64b3f638dabb18cd7fedf4d39fb9d091cc",
+    "docs/governance/AI_GATE_RULESET.md": "sha256:e99e54e5b44c1b05b872589a56132a965029b7cbe43a92334c07e51ba9c1191f",
+    "docs/governance/AI_GATE_CONFIG.json": "sha256:31f10fe92713c5003f43fa0dc4e558e56f965406f1c89ddbab1e1e19b41499d7",
+    "schemas/ai-session-proof.schema.json": "sha256:f45d2f45e1289de9260e6c34e99998e90a67b06392f75cacd53379c3ff766068"
+  },
+  "project_state_summary": "NullForge Simulation Lab now has AI Gate v0.2.1 PATCH-2 active on main. Scientific evidence, Truth State, visualization, public-information boundaries, provenance, and the separate Reference CI authority remain protected and must not be altered by this controlled negative test.",
+  "current_task_summary": "Perform a live post-activation fail-closed scope test by declaring one exact harmless documentation path while intentionally adding root-level dummy-file.md outside the approved scope.",
+  "must_not_change": [
+    "Truth State and visualization-state separation",
+    "scientific evidence classification semantics",
+    "public repository information boundary",
+    "Reference CI cross-oracle authority",
+    "AI Gate configuration, validator, workflow, schema, or protected implementation paths"
+  ],
+  "latest_green_version": "main@2f49d16153d2baca8b36cec6286b27e43262d081",
+  "allowed_paths": [
+    "docs/AI_GATE_LIVE_SCOPE_TEST.md"
+  ],
+  "additional_forbidden_paths": [],
+  "approved_context_changes": [],
+  "risk_class": "R0_DOC_ONLY",
+  "required_test_ids": [
+    "public_boundary"
+  ],
+  "rollback_plan": "Close the negative-test pull request without merging, delete the test branch when practical, and preserve the failed AI Gate workflow record as QA provenance. No test artifact may enter main.",
+  "control_report_path": "ai/control-report.md",
+  "gate_change": false
+}
