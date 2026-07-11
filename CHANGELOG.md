@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — AI Gate v0.2.1 PATCH-2 bootstrap candidate
+## Unreleased — AI Gate v0.2.1 PATCH-2 active baseline
 
 - Add trusted-base AI gate workflow, schema, proof and control-report contracts.
 - Add adversarial self-tests and fixed risk-class test profiles.
@@ -15,8 +15,13 @@
 - Apply independent Fable5 review hardening: remove the bootstrap branch from the permanent workflow trigger, document fail-only `fnmatch` semantics, and narrow the seven-zero placeholder detector.
 - Add two placeholder regression tests: standalone `0000000` fails, while an embedded alphanumeric hash fragment containing seven zeros passes.
 - Expand the local adversarial suite to 23 cases.
+- Merge PR #114 into `main` as commit `2f49d16153d2baca8b36cec6286b27e43262d081`, activating the permanent AI Gate workflow.
 
-Remaining external activation work:
+Remaining external enforcement work:
 
-- configure protected-branch/ruleset requirements for `AI Gate / ai-gate`, `Reference CI / reference`, and code-owner approval;
-- obtain literal human code-owner approval before merging the bootstrap PR.
+- configure protected-branch/ruleset requirements for `AI Gate / ai-gate`, `Reference CI / reference`, code-owner approval, stale-review dismissal, no force-push, and no branch deletion.
+
+## Live negative acceptance test — 2026-07-11
+
+- Open `gate/ai-gate-live-scope-violation-20260711` from `main@2f49d16153d2baca8b36cec6286b27e43262d081` with valid proof/control records but an intentionally undeclared root-level `dummy-file.md`.
+- Expected result: `AI Gate / ai-gate` fails in preflight on exact scope enforcement; the pull request is closed without merge and the failed run is preserved as provenance.
