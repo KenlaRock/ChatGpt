@@ -4,7 +4,6 @@ on:
   pull_request_target:
     branches:
       - main
-      - gate/ai-gate-v0-2-1-bootstrap
 
 permissions:
   contents: read
