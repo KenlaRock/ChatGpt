@@ -1,4 +1,4 @@
-# AI Gate v0.2.1 PATCH-1 Bootstrap Review
+# AI Gate v0.2.1 PATCH-2 Bootstrap Review
 
 ## Why this is a bootstrap
 
@@ -14,7 +14,7 @@ A workflow cannot independently trust itself in the same pull request that intro
 
 ## Local adversarial validation
 
-The final validator passed **21/21** isolated adversarial tests. Covered cases include empty hash maps, placeholder reports, branch/base mismatch, regenerated hashes, root-wide scope, nested secret paths, protected renames, test-profile mismatch, missing/failed test evidence, non-substantive state changes, R4 gate changes, explicit immutable-context approval, and bounded CI clock skew.
+The final validator passed **23/23** isolated adversarial tests. Covered cases include empty hash maps, placeholder reports, branch/base mismatch, regenerated hashes, root-wide scope, nested secret paths, protected renames, test-profile mismatch, missing/failed test evidence, non-substantive state changes, R4 gate changes, explicit immutable-context approval, bounded CI clock skew, standalone seven-zero placeholder rejection, and acceptance of legitimate alphanumeric hash fragments containing seven zeros.
 
 ## Live GitHub Actions validation
 
@@ -43,11 +43,15 @@ This asymmetric result is required: scientific/build health must not override mi
 
 ## Defect discovered during live testing
 
-The first positive Actions run exposed a real distributed-CI defect: `created_at` rejected any future timestamp with zero tolerance, even when runner and proof clocks differed only slightly. PATCH-1 permits at most five minutes of future skew and still rejects larger displacement. Regression tests cover both outcomes.
+The first positive Actions run exposed a real distributed-CI defect: `created_at` rejected any future timestamp with zero tolerance, even when runner and proof clocks differed only slightly. PATCH-1 permitted at most five minutes of future skew and still rejected larger displacement. Regression tests cover both outcomes.
+
+## Independent Fable5 hardening
+
+The 2026-07-11 Fable5 review adopted PATCH-1 and identified three non-blocking hardening notes. PATCH-2 implements all three before merge: the permanent workflow targets `main` only, `fnmatch` is documented as fail-only and forbidden for allow-scope logic, and the seven-zero placeholder detector now distinguishes standalone dummy tokens from legitimate embedded hash fragments. Two new regression tests cover the placeholder boundary.
 
 ## Bootstrap cleanup
 
-The temporary `pull_request` workflow used only for child-PR testing has been removed. The permanent workflow remains `pull_request_target`-based so post-bootstrap PRs are judged by trusted base-branch code.
+The temporary `pull_request` workflow used only for child-PR testing has been removed. The permanent `pull_request_target` workflow now targets `main` only, so post-bootstrap PRs are judged by trusted base-branch code without retaining a bootstrap-branch trigger.
 
 ## Remaining external limitation
 
