@@ -1,8 +1,8 @@
 # AI Gate Control Report
 
-Task ID: `STATE_CLEANUP_20260711`
-Branch: `gate/post-activation-state-cleanup-20260711`
-Base commit: `2f49d16153d2baca8b36cec6286b27e43262d081`
+Task ID: `FINALIZE_POST_MERGE_STATE_20260711`
+Branch: `gate/finalize-post-merge-state-20260711`
+Base commit: `343aed65dee1fe81ebb4dbc627288eaa61f7156d`
 
 ## Project purpose
 
@@ -10,7 +10,7 @@ NullForge maintains a reproducible, auditable repository where scientific author
 
 ## Current task
 
-Correct stale post-bootstrap wording in `CHANGELOG.md` and `docs/STATE.md` so the repository accurately records that AI Gate v0.2.1 PATCH-2 is active on `main`, that the negative live test succeeded, and that external branch enforcement remains unconfigured.
+Replace the remaining transient pre-merge wording in `CHANGELOG.md` and `docs/STATE.md` with durable post-merge language that records PR #119 as completed and remains accurate after this final documentation pull request is merged.
 
 ## Mandatory files read
 
@@ -18,15 +18,15 @@ All ten configured mandatory files were read or verified against the exact base 
 
 ## What absolutely must not be changed
 
-No workflow, validator, schema, gate configuration, test runner, protected implementation path, Reference CI authority, scientific baseline, publication boundary, secret, deployment target, or evidence-classification rule may change in this cleanup.
+No workflow, validator, schema, gate configuration, test runner, protected implementation path, Reference CI authority, scientific baseline, publication boundary, deployment target, or evidence-classification rule may change in this wording finalization.
 
 ## Latest stable / green version
 
-The cleanup starts from `main@2f49d16153d2baca8b36cec6286b27e43262d081`, the activation merge commit that placed AI Gate v0.2.1 PATCH-2 on the trusted main branch while preserving the separate Reference CI authority.
+The task starts from `main@343aed65dee1fe81ebb4dbc627288eaa61f7156d`, the merge commit for PR #119 that reconciled the repository state with the active AI Gate baseline.
 
 ## Approved scope
 
-The approved scope is limited to `CHANGELOG.md` and `docs/STATE.md`, plus the always-allowed proof and control-report artifacts. The update records completed activation, PR #118 negative-test evidence, and the remaining external ruleset gap.
+The approved scope is limited to `CHANGELOG.md` and `docs/STATE.md`, plus the always-allowed proof and control-report artifacts. The change removes transient branch and open-PR instructions while retaining the external ruleset and independent-review gaps.
 
 ## Risk class
 
@@ -38,8 +38,8 @@ The fixed `R0_DOC_ONLY` profile requires only `public_boundary`. AI Gate must st
 
 ## Rollback plan
 
-Close the pull request without merging if any statement is inaccurate. If an error is found after merge, revert the documentation commit and restore the previous state files while leaving the active gate implementation and activation commit unchanged.
+Close the pull request without merging if the durable wording is inaccurate. If an error is found after merge, revert only the documentation commit while preserving the active gate implementation, activation history, and scientific authority.
 
 ## Agent assertion
 
-This change is intentionally narrow, evidence-based, and documentation-only. It must not expand beyond the two state files, and it is not eligible for merge unless the configured AI Gate and Reference CI procedures complete successfully.
+This change is intentionally narrow, evidence-based, timeless in wording, and documentation-only. It must not expand beyond the two state files, and it is not eligible for merge unless the configured AI Gate and Reference CI procedures complete successfully.

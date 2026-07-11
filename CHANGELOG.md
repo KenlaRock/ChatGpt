@@ -17,8 +17,9 @@
 - Expand the local adversarial suite to 23 cases.
 - Merge PR #114 into `main` as commit `2f49d16153d2baca8b36cec6286b27e43262d081`, activating the permanent trusted-base AI Gate workflow.
 - Verify post-activation negative test PR #118: trusted preflight rejected undeclared root-level `dummy-file.md`, Reference CI passed independently, and the PR was closed without merge.
-- Reconcile `CHANGELOG.md` and `docs/STATE.md` with the active post-merge repository state through a normal gate-controlled documentation PR.
+- Merge PR #119 into `main` as commit `343aed65dee1fe81ebb4dbc627288eaa61f7156d`, reconciling `CHANGELOG.md` and `docs/STATE.md` with the active post-merge repository state.
 - Preserve the intended human code-owner approval and stale-approval dismissal controls in the documented external ruleset checklist; note separately that independent approval is not currently available while Ken is the sole human maintainer.
+- Finalize the state wording so repository documentation contains durable post-merge facts rather than transient branch or open-PR instructions.
 
 Remaining external enforcement work:
 
