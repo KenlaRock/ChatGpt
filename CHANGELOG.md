@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — AI Gate v0.2.1 PATCH-2 bootstrap candidate
+## Unreleased — AI Gate v0.2.1 PATCH-2 active baseline
 
 - Add trusted-base AI gate workflow, schema, proof and control-report contracts.
 - Add adversarial self-tests and fixed risk-class test profiles.
@@ -15,8 +15,12 @@
 - Apply independent Fable5 review hardening: remove the bootstrap branch from the permanent workflow trigger, document fail-only `fnmatch` semantics, and narrow the seven-zero placeholder detector.
 - Add two placeholder regression tests: standalone `0000000` fails, while an embedded alphanumeric hash fragment containing seven zeros passes.
 - Expand the local adversarial suite to 23 cases.
+- Merge PR #114 into `main` as commit `2f49d16153d2baca8b36cec6286b27e43262d081`, activating the permanent trusted-base AI Gate workflow.
+- Verify post-activation negative test PR #118: trusted preflight rejected undeclared root-level `dummy-file.md`, Reference CI passed independently, and the PR was closed without merge.
+- Reconcile `CHANGELOG.md` and `docs/STATE.md` with the active post-merge repository state through a normal gate-controlled documentation PR.
 
-Remaining external activation work:
+Remaining external enforcement work:
 
-- configure protected-branch/ruleset requirements for `AI Gate / ai-gate`, `Reference CI / reference`, and code-owner approval;
-- obtain literal human code-owner approval before merging the bootstrap PR.
+- configure a protected-branch/ruleset for `main` requiring `AI Gate / ai-gate` and `Reference CI / reference`, blocking force-push and branch deletion, and defining the intended review policy;
+- until that platform rule exists, treat any red or missing required check as a manual stop condition before merge;
+- current human-bypass exposure is operationally low because one human maintainer holds repository authority, but GitHub does not yet enforce that procedure mechanically.
