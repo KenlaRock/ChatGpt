@@ -21,6 +21,7 @@
 - Preserve the intended human code-owner approval and stale-approval dismissal controls in the documented external ruleset checklist; note separately that independent approval is not currently available while Ken is the sole human maintainer.
 - Finalize the state wording so repository documentation contains durable post-merge facts rather than transient branch or open-PR instructions.
 - Add a sanitized collaboration-provenance policy that separates stable actor identity from model/runtime identity, classifies generative secondary commentary, and preserves the internal-to-public publication boundary.
+- Clarify that review and QA are task roles rather than lower contributor ranks, support equal co-builder attribution for multi-role collaborators, and require like-for-like model/runtime tiers when benchmark parity informs an internal role decision.
 
 Remaining external enforcement work:
 
