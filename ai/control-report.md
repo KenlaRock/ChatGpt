@@ -1,118 +1,49 @@
 # AI Gate Control Report
 
-Task ID: `SPARSE_HIT_DETECTOR_V0_1_20260712`  
-Branch: `research/sparse-hit-detector-v0-1-20260712`  
-Base commit: `0c100a6399a2fb1d07653cd6c4eff9e12e23957a`
+Task ID: `HARMONIC_RECOVERY_EVIDENCE_001`  
+Branch: `docs/harmonic-recovery-evidence-20260712`  
+Base commit: `e967f68e3635887cb6f0a99081662e487064c7d3`
 
 ## Project purpose
 
-NullForge separates exploratory DSP hypotheses from canonical measured evidence. A useful detector must expose its feature contract, parameter set, failure classes and limitations rather than converting low-frequency transients into confident instrument labels.
+NullForge keeps signal truth, derived measurements, interventions and presentation separate. Public records must state scope, evidence class, limitations and failed attempts.
 
 ## Current task
 
-Publish sparse-hit detector candidate v0.1 using only deterministic synthetic fixtures. The candidate proposes broadband sparse transients, rejects sustained bass-like attacks, fails ambiguous edit boundaries closed, hashes its configuration and labels every output `HYPOTHESIS`.
+Publish a sanitized summary of the synthetic `EXP-HARMONIC-RECOVERY-001` RUN-0001 through RUN-0004 series and its additive-polarity addendum.
 
-## Mandatory files read
+## Mandatory context
 
-All ten files configured by `docs/governance/AI_GATE_CONFIG.json` were read or verified against `main@0c100a6399a2fb1d07653cd6c4eff9e12e23957a`. Current base hashes were recorded before editing. The scientific-integrity policy and repository architecture were treated as binding: the detector cannot alter canonical scenarios, reference outputs or previously verified DSP scope.
-
-## What absolutely must not be changed
-
-This task must not modify AI Gate, Reference CI, protected schemas, scenarios, reference runners, Rust core, deployment, Preview Lab behavior or external rules. It must not include private audio, FTC source material, copied commercial recordings or claims of real-instrument validation. It must not promote confidence as probability or `SPARSE_HIT` as instrument identity.
-
-## Latest stable / green version
-
-The branch starts from `main@0c100a6399a2fb1d07653cd6c4eff9e12e23957a`, the merge commit for PR #127 and the current green Preview Lab restoration baseline.
+The ten mandatory files configured by `docs/governance/AI_GATE_CONFIG.json` were read at the declared base commit. Their SHA-256 values are recorded in `ai/session-proof.json`.
 
 ## Approved scope
 
-The task is limited to:
+The substantive paths are `docs/HARMONIC_RECOVERY_SYNTHETIC_EVIDENCE.md`, `research/harmonic_recovery_synthetic_evidence.json`, `CHANGELOG.md` and `docs/STATE.md`. Gate, CI, schemas, scenarios, reference outputs, Rust code, deployment and Preview Lab behavior remain unchanged.
 
-- `research/sparse_hit_detector.py`;
-- `tests/test_sparse_hit_detector.py`;
-- `docs/SPARSE_HIT_DETECTOR_CANDIDATE.md`;
-- substantive `CHANGELOG.md` and `docs/STATE.md` updates.
+## Evidence summary
 
-The required proof and control report are always-allowed task artifacts. No protected path may enter the diff.
+RUN-0001 uses an exact finite reference bank. RUN-0002 uses declared mathematical waveform models without the exact source WAV bank. RUN-0003 tests unseen continuous frequencies and phase/time modulo period. RUN-0004 tests unknown event boundaries, overlaps, repeated bursts and deterministic white noise. Automated pass states remain bounded synthetic QA, not human promotion.
 
-## Candidate design
+## Failure preservation
 
-The proposal stage calculates positive spectral flux in four declared frequency regions and compares total flux against a rolling robust baseline. A refractory interval suppresses multiple proposals from one decay.
+The public record retains RUN-0003 PF-001 and rejected RUN-0004 V1/V2 methods. The failures exposed runtime limits, gated spectral sidelobes and close-frequency beat fragmentation. Later success does not erase those records.
 
-For each proposal, the detector records:
+## Publication review
 
-- integer sample index and seconds derived from the declared sample rate;
-- low, low-mid, upper-mid and high attack-power shares;
-- number of active bands;
-- attack spectral flatness;
-- 80–160 ms persistence relative to the first 30 ms;
-- transparent heuristic confidence;
-- class, detector version, parameter hash and evidence class.
+The proposed files contain only synthetic definitions, bounded metrics and public repository paths. They contain no internal workspace references or non-public audio.
 
-The class boundary is explicit:
+## Scientific risks
 
-- `SPARSE_HIT` requires broadband attack evidence, sufficient flatness and limited persistence;
-- `BASS_ATTACK` requires low/low-mid dominance, spectral concentration and persistence;
-- `UNRESOLVED_TRANSIENT` preserves ambiguous proposals;
-- `NO_EVENT` rejects insufficient attack energy.
+The experiment uses declared waveform families, frequency ranges and deterministic conditions. Procedural computational blinding is not an independent human trial. White-noise success does not imply colored, impulsive or time-varying-noise robustness.
 
-## Synthetic fixture evidence
+## Risk class and tests
 
-Seven deterministic local tests passed before publication:
-
-1. sparse kick with broadband click → `SPARSE_HIT` near the inserted sample;
-2. cinematic low hit with broadband crack → `SPARSE_HIT` with at least three active bands;
-3. sustained bass pluck → `BASS_ATTACK`;
-4. low synth stab → not `SPARSE_HIT`;
-5. edit boundary → `UNRESOLVED_TRANSIENT`;
-6. parameter mutation → different parameter hash;
-7. identical stereo input → supported and classified consistently.
-
-These fixtures demonstrate only the implemented contract on those synthetic signals. They do not establish population precision, recall or real-source validity.
-
-## Publication-boundary review
-
-The implementation, fixtures and documentation are entirely synthetic and public. They contain no Drive/Notion links, internal IDs, source audio, private project mappings, credentials or raw conversations. The candidate creates no network, filesystem-discovery or model dependency.
-
-## Scientific risks and mitigations
-
-- **Fixture overfitting:** thresholds may fit the initial examples. Mitigation: label as candidate, publish thresholds, preserve failures and require a broader matrix before promotion.
-- **False instrument identity:** flatness and persistence are not percussion-specific. Mitigation: `SPARSE_HIT` is a signal hypothesis, not a drum label.
-- **Mono reduction:** channel-specific evidence may be lost. Mitigation: document limitation and retain stereo support only as deterministic reduction, not spatial inference.
-- **Confidence misuse:** heuristic confidence is not calibrated probability. Mitigation: state this explicitly and retain the feature vector.
-- **Threshold drift:** later tuning could silently alter behavior. Mitigation: deterministic parameter hash and versioned candidate status.
-
-## Risk class
-
-`R3_DSP_OR_SCIENCE` is required because the task introduces signal-analysis logic and scientific classification language, even though it does not touch protected reference or scenario paths.
-
-## Required tests
-
-The fixed R3 profile requires:
-
-- `unit_tests`;
-- `reference_experiment`;
-- `public_boundary`.
-
-The reference experiment must remain unchanged and pass independently, proving that the candidate did not contaminate canonical outputs. Reference CI must be green on the exact PR head. AI Gate must validate branch/base binding, hashes, exact scope, state updates and report content.
-
-## Promotion boundary
-
-Real-source use remains blocked until all of the following are recorded:
-
-- exact input and parameter digests;
-- a broader synthetic and public-domain fixture matrix;
-- false-positive and false-negative reporting;
-- human listening adjudication of candidate windows;
-- explicit treatment of unresolved identity;
-- a reviewed decision about whether the candidate is useful as an exploratory prior.
-
-A later pass cannot erase failures from v0.1.
+Risk class is `R3_DSP_OR_SCIENCE`. Required tests are `unit_tests`, `reference_experiment` and `public_boundary`. A red or missing required status is a stop condition.
 
 ## Rollback plan
 
-Close without merge if fixture behavior, determinism, scope, labeling or required tests fail. After merge, revert the implementation, tests, candidate document and state/changelog entries together. Preserve canonical experiments, Reference CI, prior measurements and failure provenance.
+Close without merge if scope, boundary checks, measurement traceability or failure preservation fail. After merge, revert the evidence document, JSON summary, changelog and state section together while preserving the underlying experiment history.
 
 ## Agent assertion
 
-This change turns a vague detector idea into a reproducible and falsifiable candidate. It deliberately stops short of claiming that any real production layer has been identified.
+This change records what passed, what failed and what remains unknown without broadening the verified DSP scope.
