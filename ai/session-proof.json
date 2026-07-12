@@ -1,14 +1,14 @@
 {
   "schema_version": "0.2.1",
-  "task_id": "SPARSE_HIT_DETECTOR_V0_1_20260712",
-  "branch": "research/sparse-hit-detector-v0-1-20260712",
-  "base_commit": "0c100a6399a2fb1d07653cd6c4eff9e12e23957a",
+  "task_id": "HARMONIC_RECOVERY_EVIDENCE_001",
+  "branch": "docs/harmonic-recovery-evidence-20260712",
+  "base_commit": "e967f68e3635887cb6f0a99081662e487064c7d3",
   "agent": {
     "name": "ChatGPT",
     "model_or_runtime": "GPT-5.6 Thinking / GitHub connector",
-    "operator": "human_project_arbiter"
+    "operator": "Ken Kängström"
   },
-  "created_at": "2026-07-12T05:09:00Z",
+  "created_at": "2026-07-12T20:48:00Z",
   "mandatory_files": [
     "AGENTS.md",
     "README.md",
@@ -27,27 +27,25 @@
     "ARCHITECTURE.md": "sha256:d1710e752dac3b992c39d0fb777f7993686bfd5835be433abad6b1b3127904fc",
     "SCIENTIFIC_INTEGRITY.md": "sha256:0e5c9beabb486e761d4f3511dbde8cf726fe8af8365f24b24b87de821eb40bac",
     "PUBLICATION_BOUNDARY.md": "sha256:c5e685a531565fd3bd60bbca3c7c5e32da42d00c6908b388688bb8951fb60ec0",
-    "CHANGELOG.md": "sha256:d96bd3a9f305a15cdc7e5178272eff16f420e108ae8db44c505be7516f47f430",
-    "docs/STATE.md": "sha256:5a7267426f41da60a6ead17f3ec16e726d5482a551edcb84198377cb881cda52",
+    "CHANGELOG.md": "sha256:bab40056e0517807e8f5395af52e74391cd01057f80576454c25886d3afb5fd7",
+    "docs/STATE.md": "sha256:279bc798482f510054c3e245c60b8edaf6eba4244ec75eb23bd578223e94c2d2",
     "docs/governance/AI_GATE_RULESET.md": "sha256:e99e54e5b44c1b05b872589a56132a965029b7cbe43a92334c07e51ba9c1191f",
     "docs/governance/AI_GATE_CONFIG.json": "sha256:31f10fe92713c5003f43fa0dc4e558e56f965406f1c89ddbab1e1e19b41499d7",
     "schemas/ai-session-proof.schema.json": "sha256:f45d2f45e1289de9260e6c34e99998e90a67b06392f75cacd53379c3ff766068"
   },
-  "project_state_summary": "NullForge has AI Gate v0.2.1 PATCH-2 active, Reference CI as scientific authority, browser and visualization contracts, a restored Preview Lab runtime and an internal backlog item for a fail-closed sparse-hit detector.",
-  "current_task_summary": "Publish a deterministic synthetic-only sparse-hit detector candidate with transparent features, parameter hashing, fail-closed classifications, seven fixture tests and explicit hypothesis-level evidence boundaries.",
+  "project_state_summary": "NullForge has an active trusted-base AI Gate and Reference CI remains the scientific authority. Public experiment records must be synthetic, sanitized, reproducible, fail-closed and clearly separated from later human review decisions.",
+  "current_task_summary": "Publish a sanitized record of the EXP-HARMONIC-RECOVERY-001 RUN-0001 through RUN-0004 synthetic evidence chain and its preserved failed attempts.",
   "must_not_change": [
-    "AI Gate workflow, validator, configuration, schema, test runner or external ruleset state",
-    "Reference CI authority, canonical scenarios, reference outputs, Rust core or previously verified DSP scope",
-    "private source audio, internal workspace material, unpublished claims or copyrighted fixtures",
-    "Preview Lab runtime behavior, deployment configuration, browser/WASM parity claims or visualization validity"
+    "AI Gate, Reference CI, canonical scenarios, reference outputs or Rust implementation",
+    "internal workspace references, non-public audio or sealed internal run packages",
+    "automated synthetic results into claims beyond their declared scope"
   ],
-  "latest_green_version": "main@0c100a6399a2fb1d07653cd6c4eff9e12e23957a",
+  "latest_green_version": "main@e967f68e3635887cb6f0a99081662e487064c7d3",
   "allowed_paths": [
     "CHANGELOG.md",
     "docs/STATE.md",
-    "docs/SPARSE_HIT_DETECTOR_CANDIDATE.md",
-    "research/sparse_hit_detector.py",
-    "tests/test_sparse_hit_detector.py"
+    "docs/HARMONIC_RECOVERY_SYNTHETIC_EVIDENCE.md",
+    "research/harmonic_recovery_synthetic_evidence.json"
   ],
   "additional_forbidden_paths": [],
   "approved_context_changes": [],
@@ -57,7 +55,7 @@
     "reference_experiment",
     "public_boundary"
   ],
-  "rollback_plan": "Close the pull request without merge if synthetic fixtures are nondeterministic, bass or edit-boundary fixtures become sparse hits, outputs lose hypothesis labeling, protected files enter the diff or required tests fail. After merge, revert the detector, its test suite, candidate document and corresponding state/changelog entries together while preserving canonical experiments and all historical failures.",
+  "rollback_plan": "Close the pull request without merge if scope, reproducibility, failure preservation or public-boundary checks fail. After merge, revert the evidence document, machine-readable summary, changelog entry and state section together while retaining the internal run artifacts and failed-attempt provenance.",
   "control_report_path": "ai/control-report.md",
   "gate_change": false
 }
