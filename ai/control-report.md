@@ -1,49 +1,65 @@
 # AI Gate Control Report
 
-Task ID: `COLLAB_PROVENANCE_20260712`
-Branch: `docs/collaboration-provenance-20260712`
-Base commit: `54917cc263990420fd30a66d48a6a03531d0f453`
+Task ID: `BROWSER_VIS_CONTRACTS_20260712`  
+Branch: `docs/browser-visual-contracts-20260712`  
+Base commit: `5130e38435447c6511091a4e086eb2de2fb34d47`
 
 ## Project purpose
 
-NullForge maintains a reproducible and auditable public repository while keeping raw collaboration, private workspace identifiers, unpublished sources and unresolved internal material inside the protected internal zone. AI-assisted work must remain attributable without allowing contributor prestige or model output to substitute for scientific evidence.
+NullForge maintains a reproducible public DSP laboratory in which canonical numeric evidence is separated from interaction, intervention and presentation. Browser audio and visualization are useful observation surfaces, but neither may become scientific authority through appearance, audibility or implementation convenience.
 
 ## Current task
 
-Add a public, sanitized collaboration-provenance document that separates stable project actor identity from model and runtime identity, defines source classes for collaborator reviews, model candidates and generative secondary commentary, and documents how useful ideas are promoted through explicit verification and decision trails.
+Define two preimplementation contracts: one for comparing a future Rust/WASM browser renderer with the Python reference and Rust native candidate, and one for mapping state into Three.js or another visualization renderer without inventing physical meaning or allowing presentation to write back into Truth State.
 
 ## Mandatory files read
 
-All ten files configured by `docs/governance/AI_GATE_CONFIG.json` were read or verified against the exact base commit. The immutable files were confirmed unchanged from the prior green baseline, and the current `CHANGELOG.md` and `docs/STATE.md` hashes were captured from `main@54917cc263990420fd30a66d48a6a03531d0f453`.
+All ten files configured by `docs/governance/AI_GATE_CONFIG.json` were read or verified against `main@5130e38435447c6511091a4e086eb2de2fb34d47`. Current base hashes were recorded before editing. Architecture and scientific-integrity rules confirm integer sample index as time authority, offline rendering as evidence authority and visualization as a read-only presentation domain.
 
 ## What absolutely must not be changed
 
-This documentation task must not alter AI Gate code, workflows, schemas, test profiles, Reference CI authority, DSP logic, scientific measurements, evidence classes, deployment behavior, private workspace separation or the one-way publication boundary. It must not publish private Drive or Notion URLs, workspace IDs, access details, raw conversations or unpublished project material.
+This task must not alter AI Gate, Reference CI, DSP code, scenario data, schemas, browser code, deployment configuration, evidence classes, previously verified numerical scope or external GitHub ruleset state. It must not claim that Rust/WASM parity, Three.js geometry, mobile rendering or auditory correctness has already passed. It must not publish internal Drive or Notion material.
 
 ## Latest stable / green version
 
-The branch starts from `main@54917cc263990420fd30a66d48a6a03531d0f453`, the merge commit for PR #120 and the current durable post-activation documentation baseline.
+The branch starts from `main@5130e38435447c6511091a4e086eb2de2fb34d47`, the merge commit for PR #121 and the current documented baseline.
 
 ## Approved scope
 
-The approved prose-only scope is limited to the new `docs/COLLABORATION_PROVENANCE.md` file plus substantive updates to `CHANGELOG.md` and `docs/STATE.md`. The always-allowed `ai/session-proof.json` and `ai/control-report.md` artifacts are updated to bind this task to the base commit and declared scope.
+The prose-only scope is limited to:
+
+- `docs/BROWSER_WASM_PARITY_PROTOCOL.md`;
+- `docs/VISUALIZATION_SEMANTICS_CONTRACT.md`;
+- substantive `CHANGELOG.md` and `docs/STATE.md` updates.
+
+The always-required `ai/session-proof.json` and `ai/control-report.md` bind the task to the base and exact scope.
+
+## Technical conclusions
+
+- Browser scheduling, output-device behavior, animation frames and subjective auditory QA are observations, not canonical evidence.
+- Integer sample index and frozen inputs remain the basis for comparisons.
+- Tolerances must be versioned outside the implementation under test and may not be widened after a failure.
+- Result states fail closed when identity, support or required metrics are missing.
+- A renderer requires an explicit mapping registry for source field, unit, coordinate space, transform, exaggeration and invalid-data behavior.
+- Camera, color, geometry and interpolation are presentation semantics and cannot write to Truth State.
+- No active Three.js implementation was identified on the base; the honest status is preimplementation, not validated.
 
 ## Publication-boundary review
 
-The public document contains a generic contribution schema and public platform reference only. It does not include internal page links, Drive file or folder IDs, Notion workspace identifiers, private roster records, credentials, unpublished sources or copied chat transcripts. Internal actor rosters and collaboration ledgers remain outside GitHub.
+The documents contain only public architecture, generic test contracts and repository commit context. They contain no private workspace URLs, internal document IDs, source audio, internal collaborator roster, credentials, raw conversations or unpublished project mappings.
 
 ## Risk class
 
-`R0_DOC_ONLY` is appropriate because the change adds prose documentation and state records only. It does not change executable behavior, schemas, governance controls, scientific logic, evidence outputs, protected implementation paths or deployment configuration.
+`R0_DOC_ONLY` is appropriate because the task adds policy/protocol prose and repository-state records only. It does not modify executable behavior, schemas, test profiles, protected governance code, scientific outputs or deployment configuration.
 
 ## Required tests
 
-The fixed `R0_DOC_ONLY` profile requires `public_boundary`. AI Gate must additionally validate branch identity, base hashes, mandatory files, exact allowed paths, substantive state updates, the control report and final commit evidence before the pull request is eligible for merge.
+The fixed `R0_DOC_ONLY` profile requires `public_boundary`. AI Gate must also validate exact branch/base binding, mandatory hashes, allowed paths, substantive state/changelog updates, control-report content and final commit evidence. Reference CI remains independently required by repository procedure even though this task changes no DSP code.
 
 ## Rollback plan
 
-Close the pull request without merge if the attribution model exposes internal information, creates authority confusion or conflicts with the existing publication boundary. If an error is discovered after merge, revert only the collaboration-provenance document and its corresponding changelog/state entries while preserving AI Gate, Reference CI and scientific-history commits.
+Close without merge if either contract weakens scientific authority, confuses presentation with measurement, or implies unperformed validation. After merge, revert only the two contracts and corresponding state/changelog entries. Preserve AI Gate, Reference CI, existing scenarios, measurements and publication history.
 
 ## Agent assertion
 
-This change intentionally creates a narrow public provenance contract rather than mirroring the internal Collaboration Lab. Attribution records where an idea came from; evidence classification and human approval determine whether it becomes part of NullForge's canonical public state.
+This task intentionally removes ambiguity before implementation. It does not present protocol design as measured success. Rust/WASM parity and visualization validity remain open until implementations and machine-readable evidence satisfy the contracts.

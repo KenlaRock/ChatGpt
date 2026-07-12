@@ -22,6 +22,9 @@
 - Finalize the state wording so repository documentation contains durable post-merge facts rather than transient branch or open-PR instructions.
 - Add a sanitized collaboration-provenance policy that separates stable actor identity from model/runtime identity, classifies generative secondary commentary, and preserves the internal-to-public publication boundary.
 - Clarify that review and QA are task roles rather than lower contributor ranks, support equal co-builder attribution for multi-role collaborators, and require like-for-like model/runtime tiers when benchmark parity informs an internal role decision.
+- Add a preimplementation browser-to-Rust/WASM parity protocol that keeps Reference CI authoritative, requires sample-addressed run identity, defines fail-closed result states and separates device/browser observations from deterministic evidence.
+- Add a visualization-semantics contract that requires versioned source-to-display mappings, explicit coordinate spaces and exaggeration metadata, visible invalid-data states, accessibility fallbacks and a read-only renderer boundary.
+- Record that no active Three.js implementation was identified on `main`; visualization status remains preimplementation rather than validated.
 
 Remaining external enforcement work:
 
