@@ -20,6 +20,7 @@
 - Merge PR #119 into `main` as commit `343aed65dee1fe81ebb4dbc627288eaa61f7156d`, reconciling `CHANGELOG.md` and `docs/STATE.md` with the active post-merge repository state.
 - Preserve the intended human code-owner approval and stale-approval dismissal controls in the documented external ruleset checklist; note separately that independent approval is not currently available while Ken is the sole human maintainer.
 - Finalize the state wording so repository documentation contains durable post-merge facts rather than transient branch or open-PR instructions.
+- Add a sanitized collaboration-provenance policy that separates stable actor identity from model/runtime identity, classifies generative secondary commentary, and preserves the internal-to-public publication boundary.
 
 Remaining external enforcement work:
 
