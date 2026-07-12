@@ -1,14 +1,14 @@
 {
   "schema_version": "0.2.1",
-  "task_id": "RESTORE_PREVIEW_LAB_V0_1_20260712",
-  "branch": "ui/restore-preview-lab-v0-1-20260712",
-  "base_commit": "713697d4eaa8f54896b62dd1eff3a10e01331b9f",
+  "task_id": "SPARSE_HIT_DETECTOR_V0_1_20260712",
+  "branch": "research/sparse-hit-detector-v0-1-20260712",
+  "base_commit": "0c100a6399a2fb1d07653cd6c4eff9e12e23957a",
   "agent": {
     "name": "ChatGPT",
     "model_or_runtime": "GPT-5.6 Thinking / GitHub connector",
     "operator": "human_project_arbiter"
   },
-  "created_at": "2026-07-12T04:58:00Z",
+  "created_at": "2026-07-12T05:09:00Z",
   "mandatory_files": [
     "AGENTS.md",
     "README.md",
@@ -27,40 +27,37 @@
     "ARCHITECTURE.md": "sha256:d1710e752dac3b992c39d0fb777f7993686bfd5835be433abad6b1b3127904fc",
     "SCIENTIFIC_INTEGRITY.md": "sha256:0e5c9beabb486e761d4f3511dbde8cf726fe8af8365f24b24b87de821eb40bac",
     "PUBLICATION_BOUNDARY.md": "sha256:c5e685a531565fd3bd60bbca3c7c5e32da42d00c6908b388688bb8951fb60ec0",
-    "CHANGELOG.md": "sha256:5a962967d6562d1206989683ac3b223554cd50186322ef10f350c0af3a24af78",
-    "docs/STATE.md": "sha256:9572d12bf4985d92e32a1528c4175795c83f03d4c86ead66e720d8ca82cf68cc",
+    "CHANGELOG.md": "sha256:d96bd3a9f305a15cdc7e5178272eff16f420e108ae8db44c505be7516f47f430",
+    "docs/STATE.md": "sha256:5a7267426f41da60a6ead17f3ec16e726d5482a551edcb84198377cb881cda52",
     "docs/governance/AI_GATE_RULESET.md": "sha256:e99e54e5b44c1b05b872589a56132a965029b7cbe43a92334c07e51ba9c1191f",
     "docs/governance/AI_GATE_CONFIG.json": "sha256:31f10fe92713c5003f43fa0dc4e558e56f965406f1c89ddbab1e1e19b41499d7",
     "schemas/ai-session-proof.schema.json": "sha256:f45d2f45e1289de9260e6c34e99998e90a67b06392f75cacd53379c3ff766068"
   },
-  "project_state_summary": "NullForge has AI Gate v0.2.1 PATCH-2 active, Reference CI as scientific authority, explicit browser/WASM and visualization contracts, and a Preview Lab v0.1 runtime previously validated in a closed mirror PR but absent from current main.",
-  "current_task_summary": "Restore the exact previously validated Preview Lab v0.1 browser runtime blobs to a safe-UI branch, add current structural regression tests and preserve the preview-only evidence boundary without restoring protected schemas or workflows.",
+  "project_state_summary": "NullForge has AI Gate v0.2.1 PATCH-2 active, Reference CI as scientific authority, browser and visualization contracts, a restored Preview Lab runtime and an internal backlog item for a fail-closed sparse-hit detector.",
+  "current_task_summary": "Publish a deterministic synthetic-only sparse-hit detector candidate with transparent features, parameter hashing, fail-closed classifications, seven fixture tests and explicit hypothesis-level evidence boundaries.",
   "must_not_change": [
     "AI Gate workflow, validator, configuration, schema, test runner or external ruleset state",
-    "Reference CI authority, DSP core, scientific baselines, protected schemas or evidence classes",
-    "browser/WASM parity claims, auditory QA status, mobile QA status or Three.js validation status",
-    "deployment configuration, Netlify behavior, private workspace separation or unpublished source material"
+    "Reference CI authority, canonical scenarios, reference outputs, Rust core or previously verified DSP scope",
+    "private source audio, internal workspace material, unpublished claims or copyrighted fixtures",
+    "Preview Lab runtime behavior, deployment configuration, browser/WASM parity claims or visualization validity"
   ],
-  "latest_green_version": "main@713697d4eaa8f54896b62dd1eff3a10e01331b9f",
+  "latest_green_version": "main@0c100a6399a2fb1d07653cd6c4eff9e12e23957a",
   "allowed_paths": [
     "CHANGELOG.md",
     "docs/STATE.md",
-    "tests/test_preview_lab_files.py",
-    "web/README.md",
-    "web/app.js",
-    "web/examples/preview-session.example.json",
-    "web/index.html",
-    "web/session-contract.js",
-    "web/styles.css"
+    "docs/SPARSE_HIT_DETECTOR_CANDIDATE.md",
+    "research/sparse_hit_detector.py",
+    "tests/test_sparse_hit_detector.py"
   ],
   "additional_forbidden_paths": [],
   "approved_context_changes": [],
-  "risk_class": "R1_SAFE_UI",
+  "risk_class": "R3_DSP_OR_SCIENCE",
   "required_test_ids": [
     "unit_tests",
+    "reference_experiment",
     "public_boundary"
   ],
-  "rollback_plan": "Close the pull request without merge if the restored blobs differ from the validated PR #113 source, if preview-only labeling is weakened, if protected files enter the diff or if current unit/public-boundary tests fail. After merge, revert only the Preview Lab runtime, its regression test and corresponding state/changelog entries while preserving historical PR #113 validation records and scientific authority.",
+  "rollback_plan": "Close the pull request without merge if synthetic fixtures are nondeterministic, bass or edit-boundary fixtures become sparse hits, outputs lose hypothesis labeling, protected files enter the diff or required tests fail. After merge, revert the detector, its test suite, candidate document and corresponding state/changelog entries together while preserving canonical experiments and all historical failures.",
   "control_report_path": "ai/control-report.md",
   "gate_change": false
 }

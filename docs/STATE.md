@@ -54,8 +54,18 @@ Scientific authority remains unchanged: canonical offline evidence and the Pytho
 - The restored surface includes the static HTML/CSS/JavaScript runtime, example session and local run instructions.
 - Current regression tests verify file presence, asset wiring, preview-only evidence labels, JSON parseability and sample-addressed session-contract structure.
 - The restoration deliberately excludes the mirror PR's protected schemas, validators and workflow edits so this change remains `R1_SAFE_UI`.
-- Historical mirror status remains `STRUCTURE_AND_EXCHANGE_CI_VERIFIED`; the current restoration must pass its own AI Gate and Reference CI before merge.
+- Historical mirror status remains `STRUCTURE_AND_EXCHANGE_CI_VERIFIED`; the current restoration passed its own Reference CI before merge through PR #127.
 - Auditory QA, Android/mobile interaction QA, browser timing determinism, Rust/WASM parity and Three.js validation remain open. Restoring the runtime does not promote any of those claims.
+
+## Sparse-hit detector candidate
+
+- `research/sparse_hit_detector.py` defines candidate v0.1 for synthetic-only sparse transient research.
+- The candidate uses robust spectral-flux onset proposals, four-band attack power, attack spectral flatness, an 80–160 ms persistence ratio and a refractory interval.
+- Classes are `SPARSE_HIT`, `BASS_ATTACK`, `UNRESOLVED_TRANSIENT` and `NO_EVENT`; ambiguity fails closed rather than becoming a plausible instrument label.
+- Every result retains integer sample index, derived seconds, feature values, confidence, detector version, parameter hash and evidence class `HYPOTHESIS`.
+- `tests/test_sparse_hit_detector.py` contains seven deterministic synthetic checks for two hit fixtures, bass rejection, synth rejection, edit-boundary rejection, stereo input and parameter-hash changes.
+- Local development execution passed all seven candidate tests before publication. Repository unit tests, reference experiment and public-boundary checks remain required on the exact PR head.
+- No FTC audio, private source material, precision/recall claim or real-instrument authority is included. Human listening and broader fixture validation remain mandatory before promotion.
 
 ## Remaining external platform enforcement
 
@@ -66,8 +76,8 @@ Scientific authority remains unchanged: canonical offline evidence and the Pytho
 
 ## Documentation state
 
-The activation history, live-test evidence, operating procedure, collaboration-provenance policy, browser/WASM parity protocol, visualization-semantics contract, restored Preview Lab runtime and remaining external-control gaps are recorded using durable wording. No gate implementation, protected schema, scientific baseline, deployment behavior or evidence-classification rule is changed by the safe-UI restoration.
+The activation history, live-test evidence, operating procedure, collaboration-provenance policy, browser/WASM parity protocol, visualization-semantics contract, restored Preview Lab runtime, sparse-hit candidate and remaining external-control gaps are recorded using durable wording. The detector remains a hypothesis and does not alter canonical scenarios, reference outputs or verified DSP scope.
 
 ## Rollback
 
-If a factual error is discovered, revert only the relevant documentation or Preview Lab restoration commit. Preserve the active gate implementation, activation commit, live-test provenance, Reference CI scientific authority and publication boundary. Reverting the runtime must not delete historical validation records or promote an unverified browser claim.
+If a factual or implementation error is discovered, revert the sparse-hit candidate, its tests and documentation together. Preserve the active gate implementation, activation commit, live-test provenance, Reference CI scientific authority, Preview Lab history and publication boundary. A failed candidate must not be rewritten as validated evidence.
