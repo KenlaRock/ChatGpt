@@ -33,8 +33,10 @@ Scientific authority remains unchanged: canonical offline evidence and the Pytho
 
 - `docs/COLLABORATION_PROVENANCE.md` defines a public, sanitized attribution model for human contributors, AI collaborators, model candidates, automated tools and generative platform features.
 - Stable project actor identity is separated from platform, model and runtime identity so runtime changes do not silently rewrite contribution history.
+- Contribution roles are task labels rather than organizational rank: a collaborator may be an equal co-builder while also performing review, QA, documentation or research work.
+- Like-for-like benchmark comparisons may support internal role-parity decisions only when model versions and reasoning tiers are explicitly matched; benchmark parity remains contextual and does not replace task-specific verification.
 - Generative secondary commentary is treated as exploratory and non-authoritative; useful points may be adopted only through an explicit decision and verification trail.
-- The public document contains no private Drive or Notion links, workspace identifiers, access details or raw collaboration transcripts.
+- The public document contains no private Drive or Notion links, workspace identifiers, access details, internal actor roster or raw collaboration transcripts.
 - Collaboration provenance does not change scientific authority, evidence classes, release state or the one-way publication boundary.
 
 ## Remaining external platform enforcement
