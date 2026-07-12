@@ -27,6 +27,8 @@
 - Record that no active Three.js implementation was identified on `main`; visualization status remains preimplementation rather than validated.
 - Restore the exact Preview Lab v0.1 runtime blobs previously validated in closed mirror PR #113, add current structural regression tests and retain the explicit `PREVIEW / NOT TRUTH ENGINE` evidence boundary.
 - Keep schema/workflow restoration outside this safe-UI scope; auditory, mobile and deterministic-browser validation remain open gates.
+- Add sparse-hit detector candidate v0.1 with robust onset proposals, broadband/flatness/persistence features, fail-closed classifications, versioned parameters and machine-readable candidate reports.
+- Add seven deterministic synthetic fixture tests covering sparse hits, bass rejection, low-synth rejection, edit-boundary handling, stereo input and parameter-hash mutation; all outputs remain `HYPOTHESIS` pending human/source validation.
 
 Remaining external enforcement work:
 
