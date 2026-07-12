@@ -67,6 +67,18 @@ Scientific authority remains unchanged: canonical offline evidence and the Pytho
 - Local development execution passed all seven candidate tests before publication. Repository unit tests, reference experiment and public-boundary checks remain required on the exact PR head.
 - No FTC audio, private source material, precision/recall claim or real-instrument authority is included. Human listening and broader fixture validation remain mandatory before promotion.
 
+## Isolated audio-deconstruction experiment trio
+
+- `research/experiments/EXP-HARMONIC-RECOVERY-001/` contains a standalone synthetic harmonic-recovery pipeline, JSON recipe and report contract. It estimates F0, fits an additive harmonic model, reports partial-amplitude error, null depth and harmonic residual ratio, and keeps reconstruction score separate from parameter-recovery score.
+- `research/experiments/EXP-LOWBAND-COLLISION-001/` contains a standalone kick/bass collision pipeline with kick-only, bass-only, coincident and ±20 ms offset fixtures. It reports precision, recall, F1, timing error, false positives and unresolved candidates.
+- `research/experiments/EXP-STEREO-TOMOGRAPHY-001/` contains a standalone spatial-decomposition pipeline with Mid/Side closure, center/side correlation, polarity-aware delay estimation and decorrelated-field classification.
+- Each experiment has its own `pipeline.py`, `recipe.json`, README, generated baseline report and dedicated regression test file. No experiment imports the others or shares mutable state.
+- Ten new local regression tests passed before publication. The clean harmonic fixture reached approximately −63.30 dB null depth with sub-cent F0 error; the noisy fixture remained a reconstruction pass; the soft-clipped fixture correctly stayed `REVIEW` for reconstruction.
+- The low-band matrix reached aggregate precision 1.0, recall 0.667 and F1 0.8. The exactly coincident kick/bass fixture is intentionally `UNRESOLVED_TRANSIENT` rather than forced into a kick claim.
+- Stereo reconstruction closure remained below −286 dB in the synthetic fixtures and the 17-sample Haas offset was recovered exactly.
+- All three reports remain `HYPOTHESIS`. Synthetic PASS means only that the declared fixture matrix passed its candidate gate; it does not establish real-source accuracy, instrument identity or production-process recovery.
+- Two development failures are retained in the control report: analysis-edge fades initially dominated the harmonic residual, and an initial delay estimator used algebraically identical Mid/Side residuals. Both failures produced code corrections before the candidate baseline was generated.
+
 ## Remaining external platform enforcement
 
 - GitHub protected-branch/ruleset enforcement is not yet configured for `main`.
@@ -76,7 +88,7 @@ Scientific authority remains unchanged: canonical offline evidence and the Pytho
 
 ## Documentation state
 
-The activation history, live-test evidence, operating procedure, collaboration-provenance policy, browser/WASM parity protocol, visualization-semantics contract, restored Preview Lab runtime, sparse-hit candidate and remaining external-control gaps are recorded using durable wording. The detector remains a hypothesis and does not alter canonical scenarios, reference outputs or verified DSP scope.
+The activation history, live-test evidence, operating procedure, collaboration-provenance policy, browser/WASM parity protocol, visualization-semantics contract, restored Preview Lab runtime, sparse-hit candidate, isolated deconstruction experiment trio and remaining external-control gaps are recorded using durable wording. All new experiment outputs remain hypotheses and do not alter canonical scenarios, reference outputs or verified DSP scope.
 
 ## Rollback
 

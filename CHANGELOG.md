@@ -29,6 +29,10 @@
 - Keep schema/workflow restoration outside this safe-UI scope; auditory, mobile and deterministic-browser validation remain open gates.
 - Add sparse-hit detector candidate v0.1 with robust onset proposals, broadband/flatness/persistence features, fail-closed classifications, versioned parameters and machine-readable candidate reports.
 - Add seven deterministic synthetic fixture tests covering sparse hits, bass rejection, low-synth rejection, edit-boundary handling, stereo input and parameter-hash mutation; all outputs remain `HYPOTHESIS` pending human/source validation.
+- Add three isolated audio-deconstruction experiment candidates with independent fixtures, pipelines, JSON recipes, generated reports and regression tests: `EXP-HARMONIC-RECOVERY-001`, `EXP-LOWBAND-COLLISION-001` and `EXP-STEREO-TOMOGRAPHY-001`.
+- Preserve separate scientific gates: harmonic reconstruction versus parameter recovery, kick/bass event precision-recall with bass-only negative controls, and stereo component closure/delay recovery before instrument semantics.
+- Record initial development failures instead of erasing them: edge fades contaminated the harmonic null metric, and a first stereo delay calculation compared algebraically identical Mid/Side signals; both implementations were corrected before the published candidate run.
+- Local candidate execution passed ten new deterministic tests. Generated baseline reports remain `HYPOTHESIS`; the low-band coincident kick/bass case deliberately remains unresolved rather than being mislabeled.
 
 Remaining external enforcement work:
 

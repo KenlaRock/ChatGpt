@@ -1,0 +1,69 @@
+{
+  "claim_boundary": "Synthetic fixtures only; reconstruction is scored separately from parameter recovery.",
+  "evidence_class": "HYPOTHESIS",
+  "experiment_id": "EXP-HARMONIC-RECOVERY-001",
+  "overall_status": "PASS",
+  "pipeline_version": "0.1.0-candidate",
+  "results": [
+    {
+      "estimated_f0_hz": 109.99987387257521,
+      "estimated_partial_amplitudes": [
+        1.0,
+        0.4999991381620671,
+        0.3299986069534706,
+        0.24999816258881893,
+        0.19999882347658404,
+        0.1599974836910499
+      ],
+      "evidence_class": "HYPOTHESIS",
+      "f0_error_cents": -0.0019850565228543052,
+      "fixture_id": "clean_harmonic_body",
+      "harmonic_residual_ratio": 0.9991078127603531,
+      "null_depth_db": -63.30358458304347,
+      "parameter_recovery_score": "PASS",
+      "partial_amplitude_mae": 1.2975213349077548e-06,
+      "pipeline_version": "0.1.0-candidate",
+      "reconstruction_score": "PASS"
+    },
+    {
+      "estimated_f0_hz": 109.99983284296356,
+      "estimated_partial_amplitudes": [
+        1.0,
+        0.49981413551278214,
+        0.329949115420851,
+        0.24984066393466203,
+        0.19990318911747343,
+        0.16009757524756477
+      ],
+      "evidence_class": "HYPOTHESIS",
+      "f0_error_cents": -0.002630801571864858,
+      "fixture_id": "noisy_harmonic_body",
+      "harmonic_residual_ratio": 0.0009208225448896758,
+      "null_depth_db": -29.285122322024492,
+      "parameter_recovery_score": "PASS",
+      "partial_amplitude_mae": 9.841187696603415e-05,
+      "pipeline_version": "0.1.0-candidate",
+      "reconstruction_score": "PASS"
+    },
+    {
+      "estimated_f0_hz": 109.99987384795809,
+      "estimated_partial_amplitudes": [
+        1.0,
+        0.4179885302200444,
+        0.2680327062248893,
+        0.20147501411344626,
+        0.15095823858330962,
+        0.1983889494311702
+      ],
+      "evidence_class": "HYPOTHESIS",
+      "f0_error_cents": -0.001985443959602831,
+      "fixture_id": "soft_clipped_body",
+      "harmonic_residual_ratio": 1.6257084882543157e-05,
+      "null_depth_db": -21.584697194055877,
+      "parameter_recovery_score": "PASS",
+      "partial_amplitude_mae": 0.04665574338158011,
+      "pipeline_version": "0.1.0-candidate",
+      "reconstruction_score": "REVIEW"
+    }
+  ]
+}

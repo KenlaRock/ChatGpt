@@ -1,0 +1,10 @@
+{
+  "schema_version": "0.1.0",
+  "experiment_id": "EXP-HARMONIC-RECOVERY-001",
+  "pipeline": "pipeline.py",
+  "evidence_class": "HYPOTHESIS",
+  "input_policy": "synthetic_ground_truth_hidden_from_analysis_stage",
+  "output": "artifacts/EXP-HARMONIC-RECOVERY-001/report.json",
+  "on_fail": "abort",
+  "required_command": "python research/experiments/EXP-HARMONIC-RECOVERY-001/pipeline.py --output artifacts/EXP-HARMONIC-RECOVERY-001/report.json"
+}

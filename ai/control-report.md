@@ -1,90 +1,114 @@
 # AI Gate Control Report
 
-Task ID: `SPARSE_HIT_DETECTOR_V0_1_20260712`  
-Branch: `research/sparse-hit-detector-v0-1-20260712`  
-Base commit: `0c100a6399a2fb1d07653cd6c4eff9e12e23957a`
+Task ID: `AUDIO_DECONSTRUCTION_EXPERIMENT_TRIO_20260712`  
+Branch: `research/audio-deconstruction-experiment-trio-20260712`  
+Base commit: `e967f68e3635887cb6f0a99081662e487064c7d3`
 
 ## Project purpose
 
-NullForge separates exploratory DSP hypotheses from canonical measured evidence. A useful detector must expose its feature contract, parameter set, failure classes and limitations rather than converting low-frequency transients into confident instrument labels.
+NullForge seeks reproducible evidence about what source information can be recovered from audio. This task must convert three research proposals into independently executable, falsifiable candidates without merging their evidence, fixtures or failure states.
 
 ## Current task
 
-Publish sparse-hit detector candidate v0.1 using only deterministic synthetic fixtures. The candidate proposes broadband sparse transients, rejects sustained bass-like attacks, fails ambiguous edit boundaries closed, hashes its configuration and labels every output `HYPOTHESIS`.
+Publish three isolated experiment packages:
+
+1. `EXP-HARMONIC-RECOVERY-001` — blind F0 and harmonic-body recovery;
+2. `EXP-LOWBAND-COLLISION-001` — kick/bass collision discrimination;
+3. `EXP-STEREO-TOMOGRAPHY-001` — spatial decomposition and delay recovery.
+
+Each package owns its pipeline, synthetic fixture generator, recipe, output report and tests. A result from one experiment cannot promote or rescue another.
 
 ## Mandatory files read
 
-All ten files configured by `docs/governance/AI_GATE_CONFIG.json` were read or verified against `main@0c100a6399a2fb1d07653cd6c4eff9e12e23957a`. Current base hashes were recorded before editing. The scientific-integrity policy and repository architecture were treated as binding: the detector cannot alter canonical scenarios, reference outputs or previously verified DSP scope.
+All ten mandatory files configured by `docs/governance/AI_GATE_CONFIG.json` were read or verified against `main@e967f68e3635887cb6f0a99081662e487064c7d3`. The scientific-integrity rules were treated as binding: the analysis stage receives observed signal only, evaluator ground truth remains separate, reconstruction and parameter recovery are scored independently, and failures remain in provenance.
 
 ## What absolutely must not be changed
 
-This task must not modify AI Gate, Reference CI, protected schemas, scenarios, reference runners, Rust core, deployment, Preview Lab behavior or external rules. It must not include private audio, FTC source material, copied commercial recordings or claims of real-instrument validation. It must not promote confidence as probability or `SPARSE_HIT` as instrument identity.
+This task must not modify AI Gate, Reference CI, protected schemas, canonical scenarios, reference outputs, Rust core, Preview Lab runtime, deployment, external rules, private source audio or internal platform identifiers. It must not claim real-source accuracy, plugin identity or validated instrument separation.
 
 ## Latest stable / green version
 
-The branch starts from `main@0c100a6399a2fb1d07653cd6c4eff9e12e23957a`, the merge commit for PR #127 and the current green Preview Lab restoration baseline.
+The branch starts from `main@e967f68e3635887cb6f0a99081662e487064c7d3`, the merge commit for sparse-hit candidate PR #129.
 
 ## Approved scope
 
 The task is limited to:
 
-- `research/sparse_hit_detector.py`;
-- `tests/test_sparse_hit_detector.py`;
-- `docs/SPARSE_HIT_DETECTOR_CANDIDATE.md`;
+- `research/experiments/EXP-HARMONIC-RECOVERY-001/**`;
+- `research/experiments/EXP-LOWBAND-COLLISION-001/**`;
+- `research/experiments/EXP-STEREO-TOMOGRAPHY-001/**`;
+- three dedicated `tests/test_exp_*.py` files;
+- three generated synthetic baseline reports under `artifacts/`;
+- `docs/AUDIO_DECONSTRUCTION_EXPERIMENT_TRIO.md`;
 - substantive `CHANGELOG.md` and `docs/STATE.md` updates.
 
-The required proof and control report are always-allowed task artifacts. No protected path may enter the diff.
+The proof and this report are always-allowed task artifacts.
 
-## Candidate design
+## Pipeline isolation
 
-The proposal stage calculates positive spectral flux in four declared frequency regions and compares total flux against a rolling robust baseline. A refractory interval suppresses multiple proposals from one decay.
+- No experiment imports another experiment.
+- No experiment writes shared mutable state.
+- Each experiment has a unique ID, recipe, output path and result schema.
+- Each experiment can pass, fail, be reverted or be superseded without changing another experiment's evidence class.
 
-For each proposal, the detector records:
+## Candidate results
 
-- integer sample index and seconds derived from the declared sample rate;
-- low, low-mid, upper-mid and high attack-power shares;
-- number of active bands;
-- attack spectral flatness;
-- 80–160 ms persistence relative to the first 30 ms;
-- transparent heuristic confidence;
-- class, detector version, parameter hash and evidence class.
+### EXP-HARMONIC-RECOVERY-001
 
-The class boundary is explicit:
+- Clean harmonic body: estimated F0 `109.9998739 Hz`, error `−0.00199 cent`, partial MAE `1.30e-6`, null depth `−63.30 dB`.
+- Noisy harmonic body: null depth `−29.29 dB`, residual classified primarily inter-harmonic, reconstruction and parameter gates pass.
+- Soft-clipped body: parameter gate passes but reconstruction remains `REVIEW` at `−21.58 dB`, correctly separating equivalent parameter estimation from incomplete signal reconstruction.
 
-- `SPARSE_HIT` requires broadband attack evidence, sufficient flatness and limited persistence;
-- `BASS_ATTACK` requires low/low-mid dominance, spectral concentration and persistence;
-- `UNRESOLVED_TRANSIENT` preserves ambiguous proposals;
-- `NO_EVENT` rejects insufficient attack energy.
+### EXP-LOWBAND-COLLISION-001
 
-## Synthetic fixture evidence
+- Aggregate synthetic precision `1.0`, recall `0.667`, F1 `0.8`.
+- Kick-only and ±20 ms offset cases pass.
+- Bass-only creates zero false kick candidates.
+- Exact kick/bass coincidence produces unresolved candidates and two false negatives rather than false instrument certainty.
 
-Seven deterministic local tests passed before publication:
+### EXP-STEREO-TOMOGRAPHY-001
 
-1. sparse kick with broadband click → `SPARSE_HIT` near the inserted sample;
-2. cinematic low hit with broadband crack → `SPARSE_HIT` with at least three active bands;
-3. sustained bass pluck → `BASS_ATTACK`;
-4. low synth stab → not `SPARSE_HIT`;
-5. edit boundary → `UNRESOLVED_TRANSIENT`;
-6. parameter mutation → different parameter hash;
-7. identical stereo input → supported and classified consistently.
+- Mid/Side roundtrip closure is below `−286 dB` in all baseline fixtures.
+- Zero-delay center and side components correlate at approximately `1.0` with truth.
+- A 17-sample right-channel delay is recovered exactly as a `−17` sample alignment.
+- Decorrelated material is classified as `DECORRELATED_FIELD`, not assigned an instrument identity.
 
-These fixtures demonstrate only the implemented contract on those synthetic signals. They do not establish population precision, recall or real-source validity.
+All results retain evidence class `HYPOTHESIS`.
+
+## Preserved failed attempts
+
+Two failures occurred during implementation and are retained because they changed the method:
+
+1. The first harmonic fixture used 10 ms edge fades while the fitting model omitted the envelope. The residual was dominated by deterministic edge mismatch and the clean null stalled around `−23.15 dB`. Correction: the baseline fixture now measures an unwindowed stationary signal; future edge-window experiments must either model the envelope or score only the declared interior.
+2. The first stereo delay estimator compared `L−Mid` against `−(R−Mid)`. These expressions are algebraically identical, so the estimator always preferred zero delay. Correction: isolate the declared side-frequency band directly from L and polarity-corrected R, then estimate lag by FFT correlation.
+
+These are `FAILED_ATTEMPT` records inside this control report, not hidden prehistory.
+
+## Tests run locally
+
+`python -m unittest discover -s tests -v` against the three new test files passed 10/10 checks:
+
+- three harmonic-recovery checks;
+- three low-band collision checks;
+- four stereo-tomography checks.
+
+The exact PR head must still pass full repository unit tests, Reference CI reference experiment and public-boundary validation.
 
 ## Publication-boundary review
 
-The implementation, fixtures and documentation are entirely synthetic and public. They contain no Drive/Notion links, internal IDs, source audio, private project mappings, credentials or raw conversations. The candidate creates no network, filesystem-discovery or model dependency.
+All new audio is generated in memory from deterministic mathematical fixtures. No commercial recording, FTC source, Drive/Notion URL, workspace ID, credential, private actor roster or raw conversation is included.
 
-## Scientific risks and mitigations
+## Scientific risks
 
-- **Fixture overfitting:** thresholds may fit the initial examples. Mitigation: label as candidate, publish thresholds, preserve failures and require a broader matrix before promotion.
-- **False instrument identity:** flatness and persistence are not percussion-specific. Mitigation: `SPARSE_HIT` is a signal hypothesis, not a drum label.
-- **Mono reduction:** channel-specific evidence may be lost. Mitigation: document limitation and retain stereo support only as deterministic reduction, not spatial inference.
-- **Confidence misuse:** heuristic confidence is not calibrated probability. Mitigation: state this explicitly and retain the feature vector.
-- **Threshold drift:** later tuning could silently alter behavior. Mitigation: deterministic parameter hash and versioned candidate status.
+- Thresholds may overfit the small fixture matrices.
+- Harmonic fitting assumes stationary monophonic content and does not yet recover drift.
+- Low-band recall drops to zero for exact kick/bass coincidence; this is an explicit unresolved region.
+- Stereo tomography relies on a declared diagnostic frequency split for delay estimation and does not prove general source separation.
+- Generated reports are baseline observations, not promoted facts about real music.
 
 ## Risk class
 
-`R3_DSP_OR_SCIENCE` is required because the task introduces signal-analysis logic and scientific classification language, even though it does not touch protected reference or scenario paths.
+`R3_DSP_OR_SCIENCE` is required because this task adds DSP logic, evaluation metrics and scientific classification language while leaving protected canonical evidence paths unchanged.
 
 ## Required tests
 
@@ -94,25 +118,23 @@ The fixed R3 profile requires:
 - `reference_experiment`;
 - `public_boundary`.
 
-The reference experiment must remain unchanged and pass independently, proving that the candidate did not contaminate canonical outputs. Reference CI must be green on the exact PR head. AI Gate must validate branch/base binding, hashes, exact scope, state updates and report content.
+A later successful test cannot override a failed preflight, scope mismatch or publication-boundary failure.
 
 ## Promotion boundary
 
-Real-source use remains blocked until all of the following are recorded:
+Promotion beyond synthetic candidate status requires separate experiment-specific evidence:
 
-- exact input and parameter digests;
-- a broader synthetic and public-domain fixture matrix;
-- false-positive and false-negative reporting;
-- human listening adjudication of candidate windows;
-- explicit treatment of unresolved identity;
-- a reviewed decision about whether the candidate is useful as an exploratory prior.
-
-A later pass cannot erase failures from v0.1.
+- a broader hidden fixture matrix;
+- exact input and parameter hashes;
+- real stems or public-domain sources where applicable;
+- precision/recall or recovery-error reporting on held-out material;
+- human listening adjudication;
+- explicit documentation of unresolved regions and model-created artifacts.
 
 ## Rollback plan
 
-Close without merge if fixture behavior, determinism, scope, labeling or required tests fail. After merge, revert the implementation, tests, candidate document and state/changelog entries together. Preserve canonical experiments, Reference CI, prior measurements and failure provenance.
+If any pipeline, report or test is incorrect, revert that experiment folder, its dedicated test and report, then update the trio document, state and changelog additively. Do not rewrite another experiment's status. Preserve this report's failed-attempt record, canonical reference experiments, AI Gate and prior sparse-hit provenance.
 
 ## Agent assertion
 
-This change turns a vague detector idea into a reproducible and falsifiable candidate. It deliberately stops short of claiming that any real production layer has been identified.
+This task turns three proposals into runnable and falsifiable candidates. It does not claim that the candidates have solved source separation; it establishes three clean places where the project can learn without contaminating one experiment with another.

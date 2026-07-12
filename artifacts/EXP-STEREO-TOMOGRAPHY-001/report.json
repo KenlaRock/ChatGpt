@@ -1,0 +1,42 @@
+{
+  "claim_boundary": "Spatial components are classified before any instrument semantics are assigned.",
+  "evidence_class": "HYPOTHESIS",
+  "experiment_id": "EXP-STEREO-TOMOGRAPHY-001",
+  "overall_status": "PASS",
+  "pipeline_version": "0.1.0-candidate",
+  "results": [
+    {
+      "center_correlation": 1.0,
+      "classification": "SIDE_LEVEL_OR_POLARITY_DIFFERENTIAL",
+      "delay_error_samples": 0,
+      "estimated_delay_samples": 0,
+      "evidence_class": "HYPOTHESIS",
+      "fixture_id": "center_plus_side",
+      "lr_correlation": 0.22922546252769535,
+      "reconstruction_error_db": -288.5357025937556,
+      "side_correlation": 1.0000000000000002
+    },
+    {
+      "center_correlation": 0.9761917594475056,
+      "classification": "SIDE_TIME_DIFFERENTIAL",
+      "delay_error_samples": 0,
+      "estimated_delay_samples": -17,
+      "evidence_class": "HYPOTHESIS",
+      "fixture_id": "haas_17_samples",
+      "lr_correlation": 0.28991553543450743,
+      "reconstruction_error_db": -288.4882442138748,
+      "side_correlation": 0.9598233830066667
+    },
+    {
+      "center_correlation": 0.9619246322632268,
+      "classification": "DECORRELATED_FIELD",
+      "delay_error_samples": 0,
+      "estimated_delay_samples": 0,
+      "evidence_class": "HYPOTHESIS",
+      "fixture_id": "decorrelated_field",
+      "lr_correlation": 0.2079213404188262,
+      "reconstruction_error_db": -286.253812770258,
+      "side_correlation": 0.9410757378169577
+    }
+  ]
+}
