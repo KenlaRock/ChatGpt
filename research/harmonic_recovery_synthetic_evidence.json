@@ -1,0 +1,83 @@
+{
+  "schema_version": "0.1.0",
+  "experiment_id": "EXP-HARMONIC-RECOVERY-001",
+  "status": "AUTOMATED_SYNTHETIC_QA_CANDIDATE",
+  "human_promotion": "PENDING",
+  "date": "2026-07-12",
+  "evidence_boundary": [
+    "synthetic only",
+    "procedural computational blinding where declared",
+    "not general component recovery",
+    "real-source validation not performed"
+  ],
+  "runs": {
+    "run_0001": {
+      "fixtures": 7,
+      "automated_gate": "PASS",
+      "reference_bank_rank": "12/12",
+      "max_coefficient_error": 4.68e-09,
+      "null_depth_db_range": [
+        -136.03,
+        -128.9
+      ],
+      "boundary": "exact reference-WAV bank constrained"
+    },
+    "run_0001_f08": {
+      "automated_gate": "PASS",
+      "construction": "three positive layers; two delayed by T/2",
+      "negative_gain_used": false,
+      "subtraction_used": false,
+      "additive_null_depth_db": -117.91,
+      "boundary": "steady-state identity; finite boundaries excluded"
+    },
+    "run_0002": {
+      "fixtures": 8,
+      "automated_gate": "PASS",
+      "exact_source_wav_bank_accessed": false,
+      "max_f0_error_hz": 4.2692941519817396e-06,
+      "max_coefficient_error": 2.515767564548188e-07,
+      "worst_null_depth_db": -70.39102505538051,
+      "boundary": "analytical family priors and 240–420 Hz range"
+    },
+    "run_0003": {
+      "fixtures": 7,
+      "components": 13,
+      "automated_gate": "PASS",
+      "max_f0_error_hz": 3.0794353733654134e-09,
+      "max_amplitude_error": 2.6056997254331193e-09,
+      "max_phase_error_degrees": 1.7370084970380617e-06,
+      "max_delay_error_samples_mod_period": 8.041711566754226e-07,
+      "worst_null_depth_db": -125.0248375636607,
+      "boundary": "procedural computational blinding; delay observable modulo period"
+    },
+    "run_0004": {
+      "fixtures": 6,
+      "carriers": 11,
+      "events": 13,
+      "automated_gate": "PASS",
+      "snr_range_db": [
+        10,
+        30
+      ],
+      "shortest_event_s": 0.18,
+      "closest_f0_spacing_hz": 2.96,
+      "max_f0_error_hz": 0.019339525519455947,
+      "max_amplitude_error": 0.004774599537342258,
+      "max_start_error_ms": 72.66666666666666,
+      "max_stop_error_ms": 72.00000000000006,
+      "max_snr_error_db": 2.0514843962754554,
+      "boundary": "known analytical families; deterministic white Gaussian noise; procedural computational blinding"
+    }
+  },
+  "preserved_failures": [
+    "RUN-0003-PF-001",
+    "RUN-0004-BLIND-V1",
+    "RUN-0004-BLIND-V2"
+  ],
+  "next_gate": [
+    "colored noise",
+    "impulsive noise",
+    "time-varying noise",
+    "within-event f0 drift"
+  ]
+}

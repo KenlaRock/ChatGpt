@@ -29,6 +29,8 @@
 - Keep schema/workflow restoration outside this safe-UI scope; auditory, mobile and deterministic-browser validation remain open gates.
 - Add sparse-hit detector candidate v0.1 with robust onset proposals, broadband/flatness/persistence features, fail-closed classifications, versioned parameters and machine-readable candidate reports.
 - Add seven deterministic synthetic fixture tests covering sparse hits, bass rejection, low-synth rejection, edit-boundary handling, stereo input and parameter-hash mutation; all outputs remain `HYPOTHESIS` pending human/source validation.
+- Add a sanitized `EXP-HARMONIC-RECOVERY-001` synthetic evidence series covering exact reference-bank attribution, analytical recovery without exact source WAVs, unseen-frequency phase/time recovery, and nonstationary event segmentation under deterministic noise.
+- Preserve the RUN-0003 timeout and rejected RUN-0004 V1/V2 blind methods; automated run gates remain bounded synthetic evidence with human promotion pending.
 
 Remaining external enforcement work:
 
