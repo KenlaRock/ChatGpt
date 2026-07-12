@@ -48,6 +48,15 @@ Scientific authority remains unchanged: canonical offline evidence and the Pytho
 - No active Three.js implementation was identified on the repository baseline used for the contract. Geometry, viewport and renderer-semantic validation therefore remain unpassed and are correctly labeled `PREIMPLEMENTATION_CONTRACT`.
 - These documents define gates for future implementation; they do not themselves establish Rust/WASM parity, browser determinism, auditory correctness or visualization validity.
 
+## Preview Lab runtime restoration
+
+- Preview Lab v0.1 runtime files are restored from the exact blobs previously validated in closed mirror PR #113 at commit `74260dbdd3449c3f07b637a260b2cb991a0880bb`.
+- The restored surface includes the static HTML/CSS/JavaScript runtime, example session and local run instructions.
+- Current regression tests verify file presence, asset wiring, preview-only evidence labels, JSON parseability and sample-addressed session-contract structure.
+- The restoration deliberately excludes the mirror PR's protected schemas, validators and workflow edits so this change remains `R1_SAFE_UI`.
+- Historical mirror status remains `STRUCTURE_AND_EXCHANGE_CI_VERIFIED`; the current restoration must pass its own AI Gate and Reference CI before merge.
+- Auditory QA, Android/mobile interaction QA, browser timing determinism, Rust/WASM parity and Three.js validation remain open. Restoring the runtime does not promote any of those claims.
+
 ## Remaining external platform enforcement
 
 - GitHub protected-branch/ruleset enforcement is not yet configured for `main`.
@@ -57,8 +66,8 @@ Scientific authority remains unchanged: canonical offline evidence and the Pytho
 
 ## Documentation state
 
-The activation history, live-test evidence, operating procedure, collaboration-provenance policy, browser/WASM parity protocol, visualization-semantics contract and remaining external-control gaps are recorded using durable wording. No gate implementation, protected path, scientific baseline, deployment behavior or evidence-classification rule is changed by these documentation additions.
+The activation history, live-test evidence, operating procedure, collaboration-provenance policy, browser/WASM parity protocol, visualization-semantics contract, restored Preview Lab runtime and remaining external-control gaps are recorded using durable wording. No gate implementation, protected schema, scientific baseline, deployment behavior or evidence-classification rule is changed by the safe-UI restoration.
 
 ## Rollback
 
-If a factual error is discovered, revert only the relevant documentation commit. Preserve the active gate implementation, activation commit, live-test provenance, Reference CI scientific authority and publication boundary. Reverting a protocol must not promote an unverified browser or visualization claim.
+If a factual error is discovered, revert only the relevant documentation or Preview Lab restoration commit. Preserve the active gate implementation, activation commit, live-test provenance, Reference CI scientific authority and publication boundary. Reverting the runtime must not delete historical validation records or promote an unverified browser claim.
