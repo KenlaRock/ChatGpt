@@ -43,7 +43,7 @@ Scientific authority remains unchanged: canonical offline evidence and the Pytho
 
 - GitHub protected-branch/ruleset enforcement is not yet configured for `main`.
 - The desired platform rule should require `AI Gate / ai-gate`, `Reference CI / reference`, human code-owner approval, and stale-approval dismissal, while also blocking force-push and branch deletion.
-- Current human-bypass exposure is operationally low because Ken is the only human maintainer with repository authority. Independent code-owner approval cannot presently be supplied by a second human, so that requirement remains an explicitly documented external control gap rather than being silently removed.
+- Current human-bypass exposure is operationally low because a single human maintainer holds repository authority. Independent code-owner approval cannot presently be supplied by a second human, so that requirement remains an explicitly documented external control gap rather than being silently removed.
 - If another maintainer, code owner, automation token, or external integration receives write authority, configure the branch ruleset and independent review requirement before relying on that new access path.
 
 ## Documentation state
