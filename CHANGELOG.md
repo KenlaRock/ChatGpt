@@ -25,6 +25,8 @@
 - Add a preimplementation browser-to-Rust/WASM parity protocol that keeps Reference CI authoritative, requires sample-addressed run identity, defines fail-closed result states and separates device/browser observations from deterministic evidence.
 - Add a visualization-semantics contract that requires versioned source-to-display mappings, explicit coordinate spaces and exaggeration metadata, visible invalid-data states, accessibility fallbacks and a read-only renderer boundary.
 - Record that no active Three.js implementation was identified on `main`; visualization status remains preimplementation rather than validated.
+- Restore the exact Preview Lab v0.1 runtime blobs previously validated in closed mirror PR #113, add current structural regression tests and retain the explicit `PREVIEW / NOT TRUTH ENGINE` evidence boundary.
+- Keep schema/workflow restoration outside this safe-UI scope; auditory, mobile and deterministic-browser validation remain open gates.
 
 Remaining external enforcement work:
 
