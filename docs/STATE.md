@@ -39,6 +39,15 @@ Scientific authority remains unchanged: canonical offline evidence and the Pytho
 - The public document contains no private Drive or Notion links, workspace identifiers, access details, internal actor roster or raw collaboration transcripts.
 - Collaboration provenance does not change scientific authority, evidence classes, release state or the one-way publication boundary.
 
+## Browser parity and visualization contracts
+
+- `docs/BROWSER_WASM_PARITY_PROTOCOL.md` defines the preimplementation comparison contract for Python reference, Rust native, Rust/WASM and browser presentation paths.
+- Reference CI remains scientific authority; browser scheduling, Web Audio output-device behavior and human auditory QA remain separate observations unless independently measured and promoted.
+- Parity runs require complete runtime identity, integer-sample addressing, frozen inputs, declared tolerances, repeatability checks and fail-closed result classification.
+- `docs/VISUALIZATION_SEMANTICS_CONTRACT.md` defines a read-only renderer boundary, versioned source-to-display mappings, coordinate-space declarations, explicit exaggeration metadata and visible invalid-data states.
+- No active Three.js implementation was identified on the repository baseline used for the contract. Geometry, viewport and renderer-semantic validation therefore remain unpassed and are correctly labeled `PREIMPLEMENTATION_CONTRACT`.
+- These documents define gates for future implementation; they do not themselves establish Rust/WASM parity, browser determinism, auditory correctness or visualization validity.
+
 ## Remaining external platform enforcement
 
 - GitHub protected-branch/ruleset enforcement is not yet configured for `main`.
@@ -48,8 +57,8 @@ Scientific authority remains unchanged: canonical offline evidence and the Pytho
 
 ## Documentation state
 
-The activation history, live-test evidence, operating procedure, collaboration-provenance policy and remaining external-control gaps are recorded using durable wording. No gate implementation, protected path, scientific baseline, deployment behavior or evidence-classification rule is changed by the collaboration documentation.
+The activation history, live-test evidence, operating procedure, collaboration-provenance policy, browser/WASM parity protocol, visualization-semantics contract and remaining external-control gaps are recorded using durable wording. No gate implementation, protected path, scientific baseline, deployment behavior or evidence-classification rule is changed by these documentation additions.
 
 ## Rollback
 
-If a factual error is discovered, revert only the relevant documentation commit. Preserve the active gate implementation, activation commit, live-test provenance, Reference CI scientific authority and publication boundary.
+If a factual error is discovered, revert only the relevant documentation commit. Preserve the active gate implementation, activation commit, live-test provenance, Reference CI scientific authority and publication boundary. Reverting a protocol must not promote an unverified browser or visualization claim.
