@@ -14,9 +14,20 @@ Contributor identity and runtime identity are separate fields.
 - `actor_type` describes whether the contributor is human, AI collaborator, model under test, automated tool or external reviewer.
 - `platform` records the service or execution environment.
 - `model_or_runtime` records the specific model, version or toolchain used for that contribution.
-- `role` records the function performed, such as owner, implementation, review, QA, research support or test candidate.
+- `role` records the function performed, such as owner, co-builder, implementation, review, QA, research support or test candidate.
 
 A model or runtime change must not silently create a new project identity, and a stable project identity must not imply that every later runtime has identical behavior.
+
+## Role symmetry and multi-role contributors
+
+A contribution role describes work performed; it is not an organizational rank.
+
+- `reviewer` or `QA` must not be interpreted as a secondary status when the same collaborator also performs architecture, implementation, documentation or research.
+- A collaborator with sustained first-class implementation responsibility should be recorded as `co_builder` in addition to any review or QA roles.
+- Equal co-builder status is determined by project contribution, responsibility and like-for-like capability assessment, not by platform branding.
+- Benchmark comparisons may support a role-parity decision only when model versions and reasoning tiers are explicitly matched. Benchmark parity is contextual metadata, not scientific authority and not a substitute for task-specific verification.
+
+Public documentation may state this role model without publishing the internal actor roster or private collaboration details.
 
 ## Recommended contribution record
 
@@ -26,8 +37,9 @@ actor_type: ai_collaborator
 platform: example-platform
 model_or_runtime: example-runtime-version
 role:
+  - co_builder
+  - implementation
   - review
-  - implementation_support
 task_id: EXAMPLE_TASK_001
 date: 2026-07-12
 source_feature: direct_assistant_session
@@ -48,6 +60,8 @@ Work produced during an explicitly scoped project task. It still requires the no
 ### Authored collaborator review
 
 A retained review artifact with an identifiable reviewer, declared scope, date, limitations and freshness status. Review findings may be accepted, modified, deferred or rejected.
+
+The review label describes the artifact and task performed. It does not imply that its author is external, secondary or lower-status; an equal co-builder may also author reviews.
 
 ### Model candidate or multimodal test source
 
@@ -102,4 +116,5 @@ Before an internal contribution is promoted to the public repository:
 - feedback source is not authority;
 - collaboration records are not release state;
 - a generated summary is not a substitute for its underlying sources;
+- a review role is not evidence of secondary contributor status;
 - public documentation must not link back into private collaboration workspaces.
