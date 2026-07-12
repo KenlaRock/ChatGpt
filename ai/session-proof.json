@@ -1,14 +1,14 @@
 {
   "schema_version": "0.2.1",
-  "task_id": "FINALIZE_POST_MERGE_STATE_20260711",
-  "branch": "gate/finalize-post-merge-state-20260711",
-  "base_commit": "343aed65dee1fe81ebb4dbc627288eaa61f7156d",
+  "task_id": "COLLAB_PROVENANCE_20260712",
+  "branch": "docs/collaboration-provenance-20260712",
+  "base_commit": "54917cc263990420fd30a66d48a6a03531d0f453",
   "agent": {
-    "name": "ChatGPT",
+    "name": "Sara",
     "model_or_runtime": "GPT-5.6 Thinking / GitHub connector",
     "operator": "Ken"
   },
-  "created_at": "2026-07-11T21:56:00Z",
+  "created_at": "2026-07-12T03:44:00Z",
   "mandatory_files": [
     "AGENTS.md",
     "README.md",
@@ -27,24 +27,25 @@
     "ARCHITECTURE.md": "sha256:d1710e752dac3b992c39d0fb777f7993686bfd5835be433abad6b1b3127904fc",
     "SCIENTIFIC_INTEGRITY.md": "sha256:0e5c9beabb486e761d4f3511dbde8cf726fe8af8365f24b24b87de821eb40bac",
     "PUBLICATION_BOUNDARY.md": "sha256:c5e685a531565fd3bd60bbca3c7c5e32da42d00c6908b388688bb8951fb60ec0",
-    "CHANGELOG.md": "sha256:54897685b291677417f6a72420f77bbf1f36e61636d6660924989f79a09ff78b",
-    "docs/STATE.md": "sha256:a4696b64c167481d69b24373da060cb635f499c579fdcf97e8b8fb5375867607",
+    "CHANGELOG.md": "sha256:e494deaae32d05dba47ee4ed2aba774f1d744b9d36e04f228fea09fe00ae29ed",
+    "docs/STATE.md": "sha256:7c4f211ae474237b781fd374cac8aacaf94d8c77d99e0408acd28e0e8df6ad58",
     "docs/governance/AI_GATE_RULESET.md": "sha256:e99e54e5b44c1b05b872589a56132a965029b7cbe43a92334c07e51ba9c1191f",
     "docs/governance/AI_GATE_CONFIG.json": "sha256:31f10fe92713c5003f43fa0dc4e558e56f965406f1c89ddbab1e1e19b41499d7",
     "schemas/ai-session-proof.schema.json": "sha256:f45d2f45e1289de9260e6c34e99998e90a67b06392f75cacd53379c3ff766068"
   },
-  "project_state_summary": "NullForge has AI Gate v0.2.1 PATCH-2 active on main, and PR #119 has merged the repository-state reconciliation. This final documentation-only pass removes transient open-PR wording without changing gate behavior, scientific authority, protected implementation, or deployment behavior.",
-  "current_task_summary": "Replace the remaining pre-merge wording in CHANGELOG.md and docs/STATE.md with durable post-merge language that remains accurate after this pull request is merged.",
+  "project_state_summary": "NullForge has AI Gate v0.2.1 PATCH-2 active on main with trusted-base validation and Reference CI as the separate scientific authority. Internal collaboration now spans human and AI contributors across Notion, Google Drive and GitHub, while the one-way publication boundary remains mandatory.",
+  "current_task_summary": "Add a sanitized public collaboration-provenance document, record it in repository state and changelog, and keep private workspace URLs, identifiers, roster details and raw transcripts out of GitHub.",
   "must_not_change": [
     "AI Gate workflow, validator, configuration, schema, or test runner",
-    "Reference CI scientific authority and Python/Rust cross-oracle behavior",
-    "Truth State, visualization-state separation, or evidence classification semantics",
-    "public repository information boundary or protected implementation paths"
+    "Reference CI authority, DSP behavior, scientific baselines, or evidence-classification semantics",
+    "public information boundary, private workspace separation, or protected implementation paths",
+    "deployment configuration, Netlify behavior, or canonical release state"
   ],
-  "latest_green_version": "main@343aed65dee1fe81ebb4dbc627288eaa61f7156d",
+  "latest_green_version": "main@54917cc263990420fd30a66d48a6a03531d0f453",
   "allowed_paths": [
     "CHANGELOG.md",
-    "docs/STATE.md"
+    "docs/STATE.md",
+    "docs/COLLABORATION_PROVENANCE.md"
   ],
   "additional_forbidden_paths": [],
   "approved_context_changes": [],
@@ -52,7 +53,7 @@
   "required_test_ids": [
     "public_boundary"
   ],
-  "rollback_plan": "Close this pull request without merge if the durable wording is inaccurate. After merge, revert only the documentation commit if a factual error is discovered, while retaining the active gate implementation and prior activation history.",
+  "rollback_plan": "Close the pull request without merge if the attribution model exposes internal information or misstates project authority. After merge, revert only the collaboration documentation and its state/changelog entries while preserving AI Gate, Reference CI, scientific evidence and publication-boundary history.",
   "control_report_path": "ai/control-report.md",
   "gate_change": false
 }
