@@ -67,6 +67,18 @@ Scientific authority remains unchanged: canonical offline evidence and the Pytho
 - Local development execution passed all seven candidate tests before publication. Repository unit tests, reference experiment and public-boundary checks remain required on the exact PR head.
 - No FTC audio, private source material, precision/recall claim or real-instrument authority is included. Human listening and broader fixture validation remain mandatory before promotion.
 
+## Harmonic-recovery synthetic evidence series
+
+- `docs/HARMONIC_RECOVERY_SYNTHETIC_EVIDENCE.md` records the sanitized `EXP-HARMONIC-RECOVERY-001` RUN-0001 through RUN-0004 evidence chain; `research/harmonic_recovery_synthetic_evidence.json` carries the same bounded result matrix in machine-readable form.
+- RUN-0001 demonstrates exact finite reference-bank attribution and preserves a duplicate-identical-source case whose source count is not identifiable from the mixture.
+- The F08 addendum demonstrates negative steady-state sine polarity using only positive additive layers and half-period time delays; finite file boundaries are excluded from the exact identity claim.
+- RUN-0002 removes the exact source-WAV bank but retains declared analytical waveform and frequency priors.
+- RUN-0003 uses previously unseen continuous fundamentals and recovers family, amplitude and phase/time modulo period under procedural computational blinding.
+- RUN-0004 recovers unknown event boundaries, overlapping carriers and repeated short bursts under deterministic white Gaussian noise from 30 dB to 10 dB target SNR; its closest simultaneous pair is 2.96 Hz apart.
+- The RUN-0003 timeout and rejected RUN-0004 V1/V2 predictions remain `FAILED_ATTEMPT` provenance. Gating sidelobes and close-frequency beat fragmentation are documented method hazards, not erased by the final passing method.
+- All reported gates are automated synthetic QA. They do not establish general component recovery, arbitrary real-audio validity, colored/impulsive-noise robustness or human scientific promotion.
+- The next falsification gate is colored, impulsive and time-varying noise plus within-event frequency drift.
+
 ## Remaining external platform enforcement
 
 - GitHub protected-branch/ruleset enforcement is not yet configured for `main`.
@@ -76,8 +88,8 @@ Scientific authority remains unchanged: canonical offline evidence and the Pytho
 
 ## Documentation state
 
-The activation history, live-test evidence, operating procedure, collaboration-provenance policy, browser/WASM parity protocol, visualization-semantics contract, restored Preview Lab runtime, sparse-hit candidate and remaining external-control gaps are recorded using durable wording. The detector remains a hypothesis and does not alter canonical scenarios, reference outputs or verified DSP scope.
+The activation history, live-test evidence, operating procedure, collaboration-provenance policy, browser/WASM parity protocol, visualization-semantics contract, restored Preview Lab runtime, sparse-hit candidate, harmonic-recovery synthetic evidence series and remaining external-control gaps are recorded using durable wording. The public harmonic-recovery record remains a bounded synthetic candidate and does not alter canonical scenarios, reference outputs or verified DSP scope.
 
 ## Rollback
 
-If a factual or implementation error is discovered, revert the sparse-hit candidate, its tests and documentation together. Preserve the active gate implementation, activation commit, live-test provenance, Reference CI scientific authority, Preview Lab history and publication boundary. A failed candidate must not be rewritten as validated evidence.
+If a factual or implementation error is discovered, revert the relevant candidate documentation and machine-readable summary together with their state and changelog entries. Preserve the active gate implementation, activation commit, live-test provenance, Reference CI scientific authority, Preview Lab history, publication boundary and failed-attempt records.
