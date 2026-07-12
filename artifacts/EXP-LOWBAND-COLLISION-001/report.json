@@ -1,0 +1,87 @@
+{
+  "aggregate": {
+    "f1": 0.8,
+    "false_negatives": 2,
+    "false_positives": 0,
+    "precision": 1.0,
+    "recall": 0.6666666666666666,
+    "true_positives": 4
+  },
+  "claim_boundary": "Synthetic low-band collisions only; KICK_CANDIDATE is not instrument authority.",
+  "evidence_class": "HYPOTHESIS",
+  "experiment_id": "EXP-LOWBAND-COLLISION-001",
+  "overall_status": "PASS",
+  "pipeline_version": "0.1.0-candidate",
+  "results": [
+    {
+      "f1": 1.0,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "fixture_id": "kick_only",
+      "median_timing_error_ms": 9.0,
+      "precision": 1.0,
+      "predicted_kick_samples": [
+        11520,
+        34176
+      ],
+      "recall": 1.0,
+      "true_kick_samples": [
+        12000,
+        34560
+      ],
+      "true_positives": 2,
+      "unresolved_samples": []
+    },
+    {
+      "f1": 1.0,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "fixture_id": "bass_only",
+      "median_timing_error_ms": null,
+      "precision": 1.0,
+      "predicted_kick_samples": [],
+      "recall": 1.0,
+      "true_kick_samples": [],
+      "true_positives": 0,
+      "unresolved_samples": []
+    },
+    {
+      "f1": 0.0,
+      "false_negatives": 2,
+      "false_positives": 0,
+      "fixture_id": "coincident",
+      "median_timing_error_ms": null,
+      "precision": 0.0,
+      "predicted_kick_samples": [],
+      "recall": 0.0,
+      "true_kick_samples": [
+        12000,
+        34560
+      ],
+      "true_positives": 0,
+      "unresolved_samples": [
+        11520,
+        34176
+      ]
+    },
+    {
+      "f1": 1.0,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "fixture_id": "offset_20ms",
+      "median_timing_error_ms": 4.333333333333333,
+      "precision": 1.0,
+      "predicted_kick_samples": [
+        12032,
+        34176
+      ],
+      "recall": 1.0,
+      "true_kick_samples": [
+        12000,
+        34560
+      ],
+      "true_positives": 2,
+      "unresolved_samples": []
+    }
+  ]
+}
