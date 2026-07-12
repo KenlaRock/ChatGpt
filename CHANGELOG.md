@@ -18,8 +18,10 @@
 - Merge PR #114 into `main` as commit `2f49d16153d2baca8b36cec6286b27e43262d081`, activating the permanent trusted-base AI Gate workflow.
 - Verify post-activation negative test PR #118: trusted preflight rejected undeclared root-level `dummy-file.md`, Reference CI passed independently, and the PR was closed without merge.
 - Merge PR #119 into `main` as commit `343aed65dee1fe81ebb4dbc627288eaa61f7156d`, reconciling `CHANGELOG.md` and `docs/STATE.md` with the active post-merge repository state.
-- Preserve the intended human code-owner approval and stale-approval dismissal controls in the documented external ruleset checklist; note separately that independent approval is not currently available while Ken is the sole human maintainer.
+- Preserve the intended human code-owner approval and stale-approval dismissal controls in the documented external ruleset checklist; note separately that independent approval is not currently available while a single human maintainer holds repository authority.
 - Finalize the state wording so repository documentation contains durable post-merge facts rather than transient branch or open-PR instructions.
+- Add a sanitized collaboration-provenance policy that separates stable actor identity from model/runtime identity, classifies generative secondary commentary, and preserves the internal-to-public publication boundary.
+- Clarify that review and QA are task roles rather than lower contributor ranks, support equal co-builder attribution for multi-role collaborators, and require like-for-like model/runtime tiers when benchmark parity informs an internal role decision.
 
 Remaining external enforcement work:
 
