@@ -29,6 +29,14 @@ Scientific authority remains unchanged: canonical offline evidence and the Pytho
 - The fixed risk profile determines the required test set, and later tests cannot rescue a failed preflight authorization check.
 - A red or missing `AI Gate / ai-gate` or `Reference CI / reference` result is treated as a manual stop condition before merge.
 
+## Collaboration provenance documentation
+
+- `docs/COLLABORATION_PROVENANCE.md` defines a public, sanitized attribution model for human contributors, AI collaborators, model candidates, automated tools and generative platform features.
+- Stable project actor identity is separated from platform, model and runtime identity so runtime changes do not silently rewrite contribution history.
+- Generative secondary commentary is treated as exploratory and non-authoritative; useful points may be adopted only through an explicit decision and verification trail.
+- The public document contains no private Drive or Notion links, workspace identifiers, access details or raw collaboration transcripts.
+- Collaboration provenance does not change scientific authority, evidence classes, release state or the one-way publication boundary.
+
 ## Remaining external platform enforcement
 
 - GitHub protected-branch/ruleset enforcement is not yet configured for `main`.
@@ -38,8 +46,8 @@ Scientific authority remains unchanged: canonical offline evidence and the Pytho
 
 ## Documentation state
 
-The activation history, live-test evidence, operating procedure, and remaining external-control gaps are recorded using durable post-merge wording. No gate implementation, protected path, scientific baseline, or deployment behavior was changed by the documentation reconciliation.
+The activation history, live-test evidence, operating procedure, collaboration-provenance policy and remaining external-control gaps are recorded using durable wording. No gate implementation, protected path, scientific baseline, deployment behavior or evidence-classification rule is changed by the collaboration documentation.
 
 ## Rollback
 
-If a factual error is discovered, revert only the relevant documentation commit. Preserve the active gate implementation, activation commit, live-test provenance, and Reference CI scientific authority.
+If a factual error is discovered, revert only the relevant documentation commit. Preserve the active gate implementation, activation commit, live-test provenance, Reference CI scientific authority and publication boundary.
