@@ -4,9 +4,9 @@
   "branch": "docs/collaboration-provenance-20260712",
   "base_commit": "54917cc263990420fd30a66d48a6a03531d0f453",
   "agent": {
-    "name": "Sara",
+    "name": "ChatGPT",
     "model_or_runtime": "GPT-5.6 Thinking / GitHub connector",
-    "operator": "Ken"
+    "operator": "human_project_arbiter"
   },
   "created_at": "2026-07-12T03:44:00Z",
   "mandatory_files": [
